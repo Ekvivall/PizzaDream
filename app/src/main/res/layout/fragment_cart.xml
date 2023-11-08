@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.cart.CartFragment">
+
+   <androidx.recyclerview.widget.RecyclerView
+       android:id="@+id/recycler_cart"
+       android:visibility="gone"
+       android:layout_marginBottom="60dp"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"/>
+    <LinearLayout
+        android:id="@+id/empty_cart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_shopping_cart_128"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/empty_cart"
+            android:fontFamily="@font/montserrat_bold"
+            android:textAlignment="center"
+            android:layout_margin="8dp"
+            android:textColor="@color/black"
+            android:textSize="35sp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/go_to_menu"
+            android:fontFamily="@font/montserrat"
+            android:textColor="@color/black"
+            android:textAlignment="center"
+            android:textSize="15sp"/>
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_go_to_menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/background_button_red_white"
+            android:text="@string/btn_go_to_menu"
+            android:textColor="@color/red"
+            android:layout_margin="8dp"
+            app:rippleColor="@color/ripple_effect"
+            android:padding="6dp"
+            android:textSize="21sp" />
+    </LinearLayout>
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        app:cardBackgroundColor="@color/red">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp">
+            <TextView
+                android:id="@+id/txt_total_price"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Всього: 0 грн."
+                android:fontFamily="@font/montserrat_bold"
+                android:textColor="@color/white"
+                android:textSize="22sp"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_order"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_button_red_white"
+                android:text="@string/place_order"
+                android:padding="6dp"
+                android:textColor="@color/black"
+                app:rippleColor="@color/light_grey"
+                android:textSize="19sp" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+</RelativeLayout>

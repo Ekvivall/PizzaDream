@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="bg">#ebdbc9</color>
+    <color name="red">#ec2929</color>
+    <color name="ripple_effect">#f1e3e3</color>
+    <color name="light_grey">#d2d2d2</color>
+    <color name="grey">#CACACA</color>
+    <color name="green">#10b865</color>
+</resources>

@@ -1,0 +1,58 @@
+<resources>
+    <string name="app_name">Pizza Dream</string>
+    <string name="google_sign_in">Увійти через Google</string>
+    <string name="email_sign_in">Увійти</string>
+    <string name="sign_in_text">Вхід</string>
+    <string name="register_text">Реєстрація</string>
+    <string name="continue_text">Далі</string>
+    <string name="first_name">Ім\'я</string>
+    <string name="last_name">Прізвище</string>
+    <string name="email">Електронна адреса</string>
+    <string name="password">Пароль</string>
+    <string name="forgot_password">Забули пароль</string>
+    <string name="dont_have_account">Не маєте облікового запису? Зареєструватися</string>
+    <string name="or">або</string>
+    <string name="logo">Pizza\n Dream</string>
+    <string name="register_btn">Зареєструватись</string>
+    <string name="have_account">Вже маєте обліковий запис? Увійти</string>
+    <string name="cansel">Скасувати</string>
+    <string name="send">Надіслати</string>
+    <string name="add_to_cart">В кошик</string>
+    <string name="categories">Категорії</string>
+    <string name="best_deals">Хіти продажів</string>
+    <string name="show_comment">Показати коментарі</string>
+    <string name="size">Розмір:</string>
+    <string name="addon">Додати складники</string>
+    <string name="empty_cart">Ваш кошик порожній</string>
+    <string name="go_to_menu">Щоб зробити замовлення перейдіть до меню</string>
+    <string name="btn_go_to_menu">Перейти в меню</string>
+    <string name="place_order">Замовити</string>
+    <string name="addon_cart">Ви дозамовили:</string>
+    <string name="clear_cart">Очистити кошик</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Меню</string>
+    <string name="menu_cart">Кошик</string>
+    <string name="menu_food_detail"></string>
+    <string name="menu_food_list">Food List</string>
+    <string name="cart">Кошик</string>
+    <string name="sign_out">Вихід</string>
+    <string name="menu_place_order">Оформлення замовлення</string>
+    <string name="start_order">Оформити замовлення</string>
+    <string name="personal_data">Особисті дані</string>
+    <string name="phone">Телефон</string>
+    <string name="about_delivery">Інформація про доставку</string>
+    <string name="home_address">Доставка</string>
+    <string name="self_service">Самовиніс</string>
+    <string name="address">Адреса</string>
+    <string name="about_payment">Інформація про оплату</string>
+
+</resources>
