@@ -75,7 +75,7 @@
                             android:textSize="18sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <com.vicmikhailau.maskededittext.MaskedEditText
+                    <!--com.vicmikhailau.maskededittext.MaskedEditText
                         android:id="@+id/edt_phone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -91,14 +91,15 @@
                         android:textColor="@android:color/black"
                         android:textSize="18sp"
                         app:mask="## ### ## ##"
-                        app:prefixText="+380" />
-                    <!--com.google.android.material.textfield.TextInputLayout
+                        app:prefixText="+380" /-->
+                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/til_phone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:boxBackgroundColor="@color/white"
                         app:boxStrokeColor="@color/black"
                         app:prefixText="+380"
+                        app:prefixTextColor="@color/black"
                         app:hintTextColor="@color/black">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -107,9 +108,9 @@
                             android:layout_height="wrap_content"
                             android:hint="@string/phone"
                             android:inputType="phone"
-                            android:minHeight="48dp"
+                            android:maxLength="12"
                             android:textSize="18sp" />
-                    </com.google.android.material.textfield.TextInputLayout-->
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/til_email"
@@ -174,7 +175,6 @@
                     <RadioGroup
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
                         android:orientation="horizontal">
 
                         <RadioButton
@@ -266,25 +266,23 @@
                     <RadioGroup
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
-                        <!--RadioButton
-                            android:id="@+id/rdi_"
-                            android:layout_width="wrap_content"
+                        android:orientation="vertical">
+                        <RadioButton
+                            android:id="@+id/rdi_cod"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginRight="8dp"
                             android:checked="true"
                             android:fontFamily="@font/montserrat"
-                            android:text="@string/home_address"
-                            android:textSize="18sp" /-->
+                            android:text="@string/cod"
+                            android:textSize="18sp" />
 
-                        <!--RadioButton
-                            android:id="@+id/rdi"
-                            android:layout_width="wrap_content"
+                        <RadioButton
+                            android:id="@+id/rdi_online_payment"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginLeft="8dp"
                             android:fontFamily="@font/montserrat"
-                            android:text="@string/self_service"
-                            android:textSize="18sp" /-->
+                            android:text="@string/online_payment"
+                            android:textSize="18sp" />
                     </RadioGroup>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

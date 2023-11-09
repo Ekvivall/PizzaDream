@@ -40,6 +40,8 @@ object Common {
         txtUser?.setText(builder, TextView.BufferType.SPANNABLE)
     }
 
+    var userSelectedAddress: String =""
+    val ADDON_ADDRESS_REF: String = "Addresses"
     var addonCategorySelected: AddonCategoryModel? = null
     val USER_REFERENCE: String = "Users"
     val CATEGORY_REF: String = "Categories"

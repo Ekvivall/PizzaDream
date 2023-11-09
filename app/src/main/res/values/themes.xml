@@ -8,6 +8,7 @@
 
     <style name="Theme.PizzaDream" parent="Base.Theme.PizzaDream">
         <item name="colorAccent">@color/red</item>
+        <item name="colorPrimary">@color/red</item>
     </style>
 
 

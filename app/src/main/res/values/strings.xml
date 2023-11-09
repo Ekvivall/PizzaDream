@@ -54,5 +54,7 @@
     <string name="self_service">Самовиніс</string>
     <string name="address">Адреса</string>
     <string name="about_payment">Інформація про оплату</string>
+    <string name="cod">Готівка при отриманні</string>
+    <string name="online_payment">Онлайн оплата</string>
 
 </resources>

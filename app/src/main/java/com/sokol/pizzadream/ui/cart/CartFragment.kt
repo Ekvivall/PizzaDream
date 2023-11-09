@@ -26,6 +26,7 @@ import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.CountCartEvent
 import com.sokol.pizzadream.EventBus.HideFABCart
 import com.sokol.pizzadream.EventBus.MenuClick
+import com.sokol.pizzadream.EventBus.PlaceOrderClick
 import com.sokol.pizzadream.EventBus.RemoveItemsInCart
 import com.sokol.pizzadream.EventBus.UpdateItemsInCart
 import com.sokol.pizzadream.R
@@ -68,7 +69,7 @@ class CartFragment : Fragment() {
                 recyclerCart.visibility = View.VISIBLE
                 btnOrder.isEnabled = true
                 layoutEmptyCart.visibility = View.GONE
-                if (adapter == null) {
+                if (recyclerCart.adapter == null) {
                     adapter = CartAdapter(it, requireContext())
                     recyclerCart.adapter = adapter
                     recyclerCart.layoutManager?.onRestoreInstanceState(recyclerViewState)
@@ -99,7 +100,7 @@ class CartFragment : Fragment() {
             EventBus.getDefault().postSticky(MenuClick(true))
         }
         btnOrder.setOnClickListener {
-
+            EventBus.getDefault().postSticky(PlaceOrderClick(true))
         }
     }
 

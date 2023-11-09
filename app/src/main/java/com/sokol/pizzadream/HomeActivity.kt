@@ -23,6 +23,7 @@ import com.sokol.pizzadream.EventBus.CountCartEvent
 import com.sokol.pizzadream.EventBus.FoodItemClick
 import com.sokol.pizzadream.EventBus.HideFABCart
 import com.sokol.pizzadream.EventBus.MenuClick
+import com.sokol.pizzadream.EventBus.PlaceOrderClick
 import com.sokol.pizzadream.databinding.ActivityHomeBinding
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -148,7 +149,12 @@ class HomeActivity : AppCompatActivity() {
             findNavController(R.id.nav_host_fragment_content_home).navigate(R.id.nav_home)
         }
     }
-
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onPlaceOrder(event: PlaceOrderClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment_content_home).navigate(R.id.nav_place_order)
+        }
+    }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onCountCartEvent(event: CountCartEvent) {
         if (event.isSuccess) {
