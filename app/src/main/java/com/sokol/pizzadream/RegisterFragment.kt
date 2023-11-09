@@ -34,47 +34,47 @@ class RegisterFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.btnRegister.setOnClickListener {
             var check = true
-            val til_first_name = binding.tilFirstName
-            til_first_name.error = null
-            val edt_first_name = binding.edtFirstName
-            val til_last_name = binding.tilLastName
-            til_last_name.error = null
-            val edt_last_name = binding.edtLastName
-            val til_email = binding.tilEmailReg
-            til_email.error = null
-            val edt_email = binding.edtEmail
-            val til_password = binding.tilPasswordReg
-            til_password.error = null
-            val edt_password = binding.edtPassword
-            if (TextUtils.isDigitsOnly(edt_first_name.text.toString())) {
-                til_first_name.error = "Введіть Ім\'я."
+            val tilFirstName = binding.tilFirstName
+            tilFirstName.error = null
+            val edtFirstName = binding.edtFirstName
+            val tilLastName = binding.tilLastName
+            tilLastName.error = null
+            val edtLastName = binding.edtLastName
+            val tilEmail = binding.tilEmailReg
+            tilEmail.error = null
+            val edtEmail = binding.edtEmail
+            val tilPassword = binding.tilPasswordReg
+            tilPassword.error = null
+            val edtPassword = binding.edtPassword
+            if (TextUtils.isDigitsOnly(edtFirstName.text.toString())) {
+                tilFirstName.error = "Введіть Ім\'я."
                 check = false
             }
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(edt_email.text.toString()).matches()) {
-                til_email.error = "Введіть коректну електронну адресу."
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(edtEmail.text.toString()).matches()) {
+                tilEmail.error = "Введіть коректну електронну адресу."
                 check = false
             }
             val passwordPattern = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=\\S+$).{6,}$".toRegex()
-            if (!passwordPattern.matches(edt_password.text.toString())) {
-                til_password.error =
+            if (!passwordPattern.matches(edtPassword.text.toString())) {
+                tilPassword.error =
                     "Пароль недостатньо надійний. Введіть принаймні 6 символів, включаючи букви, цифри."
                 check = false
             }
             if (check) {
                 val model = UserModel()
-                model.firstName = edt_first_name.text.toString()
-                model.lastName = edt_last_name.text.toString()
-                model.email = edt_email.text.toString()
+                model.firstName = edtFirstName.text.toString()
+                model.lastName = edtLastName.text.toString()
+                model.email = edtEmail.text.toString()
                 firebaseAuth.createUserWithEmailAndPassword(
-                    edt_email.text.toString(),
-                    edt_password.text.toString()
+                    edtEmail.text.toString(),
+                    edtPassword.text.toString()
                 ).addOnCompleteListener(requireActivity()) { task ->
                     if (task.isSuccessful) {
                         val user = firebaseAuth.currentUser
                         userInfoRef.child(user!!.uid)
                             .setValue(model)
                     } else {
-                        til_email.error = "Користувач з такою електронною адресою вже існує."
+                        tilEmail.error = "Користувач з такою електронною адресою вже існує."
                     }
                 }
 

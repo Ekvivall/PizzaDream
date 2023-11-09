@@ -30,29 +30,29 @@ class SignInFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.btnSignIn.setOnClickListener {
             var check = true
-            val til_email = binding.tilEmail
-            til_email.error = null
-            val edt_email = binding.edtEmail
-            val til_password = binding.tilPassword
-            til_password.error = null
-            val edt_password = binding.edtPassword
-            if (TextUtils.isDigitsOnly(edt_email.text.toString())) {
-                til_email.error = "Введіть Електронну адресу."
+            val tilEmail = binding.tilEmail
+            tilEmail.error = null
+            val edtEmail = binding.edtEmail
+            val tilPassword = binding.tilPassword
+            tilPassword.error = null
+            val edtPassword = binding.edtPassword
+            if (TextUtils.isDigitsOnly(edtEmail.text.toString())) {
+                tilEmail.error = "Введіть Електронну адресу."
                 check = false
             }
-            if (TextUtils.isDigitsOnly(edt_password.text.toString())) {
-                til_password.error = "Введіть Пароль."
+            if (TextUtils.isDigitsOnly(edtPassword.text.toString())) {
+                tilPassword.error = "Введіть Пароль."
                 check = false
             }
             if (check) {
                 firebaseAuth.signInWithEmailAndPassword(
-                    edt_email.text.toString(),
-                    edt_password.text.toString()
+                    edtEmail.text.toString(),
+                    edtPassword.text.toString()
                 )
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                         } else {
-                            til_email.error = "Введено неправильну Електронну адресу та/або пароль."
+                            tilEmail.error = "Введено неправильну Електронну адресу та/або пароль."
                         }
                     }
             }
