@@ -1,5 +1,6 @@
 package com.sokol.pizzadream.ui.cart
 
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
@@ -12,6 +13,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -100,7 +102,22 @@ class CartFragment : Fragment() {
             EventBus.getDefault().postSticky(MenuClick(true))
         }
         btnOrder.setOnClickListener {
+            Common.totalPrice = totalPrice.text.toString()
             EventBus.getDefault().postSticky(PlaceOrderClick(true))
+        }
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Якщо дозвід на доступ не наданий, запитує його
+            ActivityCompat.requestPermissions(
+                requireActivity(), arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ), Common.PERMISSIONS_REQUEST_LOCATION
+            )
         }
     }
 

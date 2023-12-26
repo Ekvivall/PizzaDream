@@ -1,7 +1,9 @@
 package com.sokol.pizzadream.ui.placeorder
 
-import android.R.attr.digits
-import android.R.attr.phoneNumber
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationListener
+import android.location.LocationManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -13,14 +15,18 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import android.widget.TextView
 import android.widget.Toast
-import androidx.core.text.isDigitsOnly
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.sokol.pizzadream.Common.Common
+import com.sokol.pizzadream.EventBus.HideFABCart
 import com.sokol.pizzadream.R
+import org.greenrobot.eventbus.EventBus
 
 
 class PlaceOrderFragment : Fragment() {
@@ -37,26 +43,36 @@ class PlaceOrderFragment : Fragment() {
     private lateinit var rdiCod: RadioButton
     private lateinit var rdiOnlinePayment: RadioButton
     private lateinit var btnOrder: Button
+    private lateinit var totalPrice: TextView
+    private lateinit var locationManager: LocationManager
+    private lateinit var locationListener: LocationListener
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+        EventBus.getDefault().postSticky(HideFABCart(true))
         val placeOrderViewModel = ViewModelProvider(this).get(PlaceOrderViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_place_order, container, false)
         initView(root)
+        //Ініціалізація списку адрес
         placeOrderViewModel.getAddressListMutableLiveData().observe(viewLifecycleOwner, Observer {
             for (address in it) {
                 val radioButton = RadioButton(context)
-                radioButton.setOnCheckedChangeListener { compoundButton, b ->
-                    if (b) {
+                radioButton.setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
                         Common.userSelectedAddress = address
                     }
                 }
-                val params = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                val params = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+                )
                 radioButton.layoutParams = params
                 radioButton.text = address
+                radioButton.textSize = 16f
                 radioButton.tag = address
                 radioGroupAddresses.addView(radioButton)
             }
+            // Встановлення першої адреси як вибрану, якщо список не порожній
             if (radioGroupAddresses.childCount > 0) {
                 val radioButton = radioGroupAddresses.getChildAt(0) as RadioButton
                 radioButton.isChecked = true
@@ -79,6 +95,8 @@ class PlaceOrderFragment : Fragment() {
         rdiCod = root.findViewById(R.id.rdi_cod)
         rdiOnlinePayment = root.findViewById(R.id.rdi_online_payment)
         btnOrder = root.findViewById(R.id.btn_order)
+        totalPrice = root.findViewById(R.id.txt_total_price)
+        totalPrice.text = Common.totalPrice
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
@@ -115,8 +133,8 @@ class PlaceOrderFragment : Fragment() {
         edtPhone.addTextChangedListener(textWatcher)
         edtName.setText(Common.currentUser!!.firstName)
         edtEmail.setText(Common.currentUser!!.email)
-        rdiHome.setOnCheckedChangeListener { compoundButton, b ->
-            if (b) {
+        rdiHome.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
                 edtAddress.visibility = View.VISIBLE
                 radioGroupAddresses.visibility = View.GONE
             } else {
@@ -125,7 +143,93 @@ class PlaceOrderFragment : Fragment() {
             }
         }
         btnOrder.setOnClickListener {
+            // Обробка кнопки замовлення
             Toast.makeText(requireContext(), "Implement late!", Toast.LENGTH_SHORT).show()
         }
+        // Ініціалізація LocationManager
+        locationManager =
+            requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        // Ініціалізація LocationListener
+        locationListener = LocationListener { location -> // Отримання розташування користувача
+            val latitude = location.latitude
+            val longitude = location.longitude
+            // Автоматичне заповнення поля адреси з розташуванням користувача
+            edtAddress.setText("Latitude: $latitude\\nLongitude: $longitude")
+        }
+        //Перевірка, чи є дозвіл на доступ до розташування
+       /* if (ActivityCompat.checkSelfPermission(
+                requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // Якщо дозвід на доступ не наданий, запитує його
+            ActivityCompat.requestPermissions(
+                requireActivity(), arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ), Common.PERMISSIONS_REQUEST_LOCATION
+            )
+        }*/ if (ActivityCompat.checkSelfPermission(
+                requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        )  {
+            // Якщо дозвіл на доступ наданий, отримання останнього відомого розташування і починаємо прослуховування змін розташування
+            val lastKnownLocation =
+                locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            if (lastKnownLocation != null) {
+                val latitude = lastKnownLocation.latitude
+                val longitude = lastKnownLocation.longitude
+                edtAddress.setText("Latitude: $latitude\\nLongitude: $longitude")
+            }
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                Common.MIN_TIME_BETWEEN_UPDATES,
+                Common.MIN_DISTANCE_CHANGE_FOR_UPDATES,
+                locationListener
+            )
+        }
+    }
+
+//    override fun onRequestPermissionsResult(
+//        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
+//    ) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+//        if (requestCode == Common.PERMISSIONS_REQUEST_LOCATION) {
+//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                // Дозвіл на доступ наданий
+//                if (ActivityCompat.checkSelfPermission(
+//                        requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
+//                    ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+//                        requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION
+//                    ) == PackageManager.PERMISSION_GRANTED
+//                ) {
+//                    // Отримання останнього відомого розташування і починаємо прослуховування змін розташування
+//                    val lastKnownLocation =
+//                        locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+//                    if (lastKnownLocation != null) {
+//                        val latitude = lastKnownLocation.latitude
+//                        val longitude = lastKnownLocation.longitude
+//                        edtAddress.setText("Latitude: $latitude\\nLongitude: $longitude")
+//                    }
+//                    locationManager.requestLocationUpdates(
+//                        LocationManager.GPS_PROVIDER,
+//                        Common.MIN_TIME_BETWEEN_UPDATES,
+//                        Common.MIN_DISTANCE_CHANGE_FOR_UPDATES,
+//                        locationListener
+//                    )
+//                }
+//            } else {
+//                Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT)
+//                    .show()
+//            }
+//        }
+//    }
+
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().postSticky(HideFABCart(false))
     }
 }
