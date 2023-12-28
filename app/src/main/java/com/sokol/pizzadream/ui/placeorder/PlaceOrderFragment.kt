@@ -2,6 +2,8 @@ package com.sokol.pizzadream.ui.placeorder
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
@@ -26,7 +28,9 @@ import com.google.android.material.textfield.TextInputLayout
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.EventBus.HideFABCart
 import com.sokol.pizzadream.R
+import io.reactivex.Single
 import org.greenrobot.eventbus.EventBus
+import java.util.Locale
 
 
 class PlaceOrderFragment : Fragment() {
@@ -154,23 +158,17 @@ class PlaceOrderFragment : Fragment() {
             val latitude = location.latitude
             val longitude = location.longitude
             // Автоматичне заповнення поля адреси з розташуванням користувача
-            edtAddress.setText("Latitude: $latitude\\nLongitude: $longitude")
+            val geocoder = Geocoder(requireContext(), Locale.getDefault())
+            val addresses: List<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
+            if (!addresses.isNullOrEmpty()) {
+                val address: Address = addresses[0]
+                val addressText = address.getAddressLine(0)
+                edtAddress.setText(addressText)
+            } else {
+                edtAddress.setText("Address not found")
+            }
         }
-        //Перевірка, чи є дозвіл на доступ до розташування
-       /* if (ActivityCompat.checkSelfPermission(
-                requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // Якщо дозвід на доступ не наданий, запитує його
-            ActivityCompat.requestPermissions(
-                requireActivity(), arrayOf(
-                    android.Manifest.permission.ACCESS_FINE_LOCATION,
-                    android.Manifest.permission.ACCESS_COARSE_LOCATION
-                ), Common.PERMISSIONS_REQUEST_LOCATION
-            )
-        }*/ if (ActivityCompat.checkSelfPermission(
+        if (ActivityCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION
@@ -182,7 +180,15 @@ class PlaceOrderFragment : Fragment() {
             if (lastKnownLocation != null) {
                 val latitude = lastKnownLocation.latitude
                 val longitude = lastKnownLocation.longitude
-                edtAddress.setText("Latitude: $latitude\\nLongitude: $longitude")
+                val geocoder = Geocoder(requireContext(), Locale.getDefault())
+                val addresses: List<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
+                if (!addresses.isNullOrEmpty()) {
+                    val address: Address = addresses[0]
+                    val addressText = address.getAddressLine(0)
+                    edtAddress.setText(addressText)
+                } else {
+                    edtAddress.setText("Address not found")
+                }
             }
             locationManager.requestLocationUpdates(
                 LocationManager.GPS_PROVIDER,
