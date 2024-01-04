@@ -117,7 +117,7 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
                 StringBuilder("").append(Common.formatPrice(items[position].foodPrice * items[position].foodQuantity))
                     .toString()
             EventBus.getDefault().postSticky(UpdateItemsInCart(items[position]))
-            //EventBus.getDefault().postSticky(CountCartEvent(true))
+            EventBus.getDefault().postSticky(CountCartEvent(true))
         }
         holder.foodDecrease.setOnClickListener {
             if (items[position].foodQuantity > 1) {
@@ -127,7 +127,7 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
                     StringBuilder("").append(Common.formatPrice(items[position].foodPrice * items[position].foodQuantity))
                         .toString()
                 EventBus.getDefault().postSticky(UpdateItemsInCart(items[position]))
-                //EventBus.getDefault().postSticky(CountCartEvent(true))
+                EventBus.getDefault().postSticky(CountCartEvent(true))
             }
         }
         holder.foodRemove.setOnClickListener {
@@ -144,7 +144,7 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
                         items = items.filterIndexed { index, _ -> index != position }
                         notifyDataSetChanged()
                         EventBus.getDefault().postSticky(RemoveItemsInCart(position))
-                        //EventBus.getDefault().postSticky(CountCartEvent(true))
+                        EventBus.getDefault().postSticky(CountCartEvent(true))
                     }
 
                 })

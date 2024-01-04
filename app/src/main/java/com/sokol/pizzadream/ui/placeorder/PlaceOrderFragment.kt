@@ -19,16 +19,26 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.database.FirebaseDatabase
 import com.sokol.pizzadream.Common.Common
+import com.sokol.pizzadream.Database.CartDatabase
+import com.sokol.pizzadream.Database.Repositories.CartInterface
+import com.sokol.pizzadream.Database.Repositories.CartRepository
+import com.sokol.pizzadream.EventBus.CountCartEvent
 import com.sokol.pizzadream.EventBus.HideFABCart
+import com.sokol.pizzadream.EventBus.MenuClick
+import com.sokol.pizzadream.Model.OrderModel
 import com.sokol.pizzadream.R
-import io.reactivex.Single
+import io.reactivex.SingleObserver
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import org.greenrobot.eventbus.EventBus
 import java.util.Locale
 
@@ -37,6 +47,7 @@ class PlaceOrderFragment : Fragment() {
     private lateinit var edtName: EditText
     private lateinit var tilName: TextInputLayout
     private lateinit var edtPhone: EditText
+    private lateinit var tilPhone: TextInputLayout
     private lateinit var edtEmail: EditText
     private lateinit var tilEmail: TextInputLayout
     private lateinit var edtAddress: EditText
@@ -50,10 +61,13 @@ class PlaceOrderFragment : Fragment() {
     private lateinit var totalPrice: TextView
     private lateinit var locationManager: LocationManager
     private lateinit var locationListener: LocationListener
+    private lateinit var cart: CartInterface
+    private var compositeDisposable: CompositeDisposable = CompositeDisposable()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+        cart = CartRepository(CartDatabase.getInstance(requireContext()).getCartDAO())
         EventBus.getDefault().postSticky(HideFABCart(true))
         val placeOrderViewModel = ViewModelProvider(this).get(PlaceOrderViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_place_order, container, false)
@@ -89,6 +103,7 @@ class PlaceOrderFragment : Fragment() {
         edtName = root.findViewById(R.id.edt_name)
         tilName = root.findViewById(R.id.til_name)
         edtPhone = root.findViewById(R.id.edt_phone)
+        tilPhone = root.findViewById(R.id.til_phone)
         edtEmail = root.findViewById(R.id.edt_email)
         tilEmail = root.findViewById(R.id.til_email)
         edtAddress = root.findViewById(R.id.edt_address)
@@ -148,7 +163,46 @@ class PlaceOrderFragment : Fragment() {
         }
         btnOrder.setOnClickListener {
             // Обробка кнопки замовлення
-            Toast.makeText(requireContext(), "Implement late!", Toast.LENGTH_SHORT).show()
+            val name = edtName.text.toString().trim()
+            val phone = "+380 " + edtPhone.text.toString().trim()
+            val email = edtEmail.text.toString().trim()
+            val address = if (rdiHome.isChecked) {
+                edtAddress.text.toString().trim()
+            } else {
+                val selectedRadioButton =
+                    radioGroupAddresses.findViewById<RadioButton>(radioGroupAddresses.checkedRadioButtonId)
+                selectedRadioButton?.text?.toString()?.trim() ?: ""
+            }
+            tilName.error = null
+            tilPhone.error = null
+            tilAddress.error = null
+            tilEmail.error = null
+            if (name.isEmpty()) {
+                tilName.error = "Будь ласка, введіть своє ім'я"
+                return@setOnClickListener
+            }
+            if (phone.isEmpty()) {
+                tilPhone.error = "Будь ласка, введіть свій номер телефону"
+                return@setOnClickListener
+            } else if (phone.length < 12) {
+                tilPhone.error = "Будь ласка, введіть свій повний номер телефону"
+                return@setOnClickListener
+            }
+            if (email.isEmpty()) {
+                tilEmail.error = "Будь ласка, введіть свою електронну адресу"
+                return@setOnClickListener
+            }
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(edtEmail.text.toString()).matches()) {
+                tilEmail.error = "Введіть коректну електронну адресу."
+                return@setOnClickListener
+            }
+            if (address.isEmpty()) {
+                tilAddress.error = "Будь ласка, введіть свою адресу"
+                return@setOnClickListener
+            }
+            if (rdiCod.isChecked) {
+                paymentCOD(name, phone, email, address)
+            }
         }
         // Ініціалізація LocationManager
         locationManager =
@@ -173,10 +227,13 @@ class PlaceOrderFragment : Fragment() {
             ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                 requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
-        )  {
+        ) {
             // Якщо дозвіл на доступ наданий, отримання останнього відомого розташування і починаємо прослуховування змін розташування
-            val lastKnownLocation =
+            val lastKnownLocationGPS =
                 locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            val lastKnownLocationNetwork =
+                locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+            val lastKnownLocation = lastKnownLocationGPS ?: lastKnownLocationNetwork
             if (lastKnownLocation != null) {
                 val latitude = lastKnownLocation.latitude
                 val longitude = lastKnownLocation.longitude
@@ -197,6 +254,90 @@ class PlaceOrderFragment : Fragment() {
                 locationListener
             )
         }
+    }
+
+    private fun paymentCOD(name: String, phone: String, email: String, address: String) {
+        compositeDisposable.add(
+            cart.getAllCart(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe({ cartItem ->
+                    //Коли є всі cartItems, отримання загальної вартості
+                    cart.sumPrice(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(object : SingleObserver<Double> {
+                            override fun onSubscribe(d: Disposable) {
+                            }
+
+                            override fun onError(e: Throwable) {
+                                Toast.makeText(
+                                    requireContext(), "" + e.message, Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                            override fun onSuccess(t: Double) {
+                                val order = OrderModel()
+                                order.userId = Common.currentUser!!.uid
+                                order.customerName = name
+                                order.customerPhone = phone
+                                order.customerAddress = address
+                                order.customerEmail = email
+                                order.cartItems = cartItem
+                                val regex = Regex("\\d+(?=,\\d{2})")
+                                val price = totalPrice.text.toString().replace("\u00A0", "")
+                                val finalPrice = regex.find(price)?.value
+                                order.totalPrice = finalPrice!!.toDouble()
+                                order.isCod = true
+                                //Надсилання до бази даних
+                                FirebaseDatabase.getInstance().getReference(Common.ORDER_REF)
+                                    .child(Common.createOrderId()).setValue(order)
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(
+                                            requireContext(), "" + e.message, Toast.LENGTH_SHORT
+                                        ).show()
+                                    }.addOnCompleteListener { task ->
+                                        //Очищення кошика
+                                        if (task.isSuccessful) {
+                                            cart.cleanCart(Common.currentUser!!.uid!!)
+                                                .subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe(object : SingleObserver<Int> {
+                                                    override fun onSubscribe(d: Disposable) {
+
+                                                    }
+
+                                                    override fun onError(e: Throwable) {
+                                                        Toast.makeText(
+                                                            requireContext(),
+                                                            "" + e.message,
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    }
+
+                                                    override fun onSuccess(t: Int) {
+                                                        Toast.makeText(
+                                                            requireContext(),
+                                                            "Замовлення розміщено успішно",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                        EventBus.getDefault().postSticky(
+                                                            CountCartEvent(true)
+                                                        )
+                                                        EventBus.getDefault().postSticky(
+                                                            MenuClick(true)
+                                                        )
+                                                    }
+
+                                                })
+                                        }
+                                    }
+                            }
+
+                        })
+                }, { throwable ->
+                    Toast.makeText(
+                        requireContext(), "" + throwable.message, Toast.LENGTH_SHORT
+                    ).show()
+                })
+        )
     }
 
 //    override fun onRequestPermissionsResult(
@@ -236,6 +377,7 @@ class PlaceOrderFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
+        compositeDisposable.clear()
         EventBus.getDefault().postSticky(HideFABCart(false))
     }
 }

@@ -354,9 +354,6 @@ class FoodDetailFragment : Fragment() {
             }
         }
         calculateTotalPrice()
-//        if (Common.foodSelected?.id == "pizza_constructor") {
-//            addImageIngredient()
-//        }
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
@@ -379,7 +376,13 @@ class FoodDetailFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
+         Common.foodSelected?.userSelectedAddon = null
         if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (!EventBus.getDefault().isRegistered(this)) EventBus.getDefault().register(this)
     }
 }
 
