@@ -9,8 +9,11 @@ class OrderModel {
     var customerPhone:String?=null
     var customerEmail:String?=null
     var customerAddress:String?=null
+    var isDeliveryAddress:Boolean = false
     var isCod:Boolean = false
     var cartItems: List<CartItem>? = null
+    var isComment:Boolean = false
+    var status:String?=null
     //var lat: Double = 0.toDouble()
     //var lng: Double = 0.toDouble()
 }

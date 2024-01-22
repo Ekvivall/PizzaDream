@@ -29,8 +29,6 @@ import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Database.CartDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
-import com.sokol.pizzadream.EventBus.CountCartEvent
-import com.sokol.pizzadream.EventBus.HideFABCart
 import com.sokol.pizzadream.EventBus.MenuClick
 import com.sokol.pizzadream.Model.OrderModel
 import com.sokol.pizzadream.R
@@ -63,12 +61,13 @@ class PlaceOrderFragment : Fragment() {
     private lateinit var locationListener: LocationListener
     private lateinit var cart: CartInterface
     private var compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private var totalPriceWithDelivery = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         cart = CartRepository(CartDatabase.getInstance(requireContext()).getCartDAO())
-        EventBus.getDefault().postSticky(HideFABCart(true))
+        //EventBus.getDefault().postSticky(HideFABCart(true))
         val placeOrderViewModel = ViewModelProvider(this).get(PlaceOrderViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_place_order, container, false)
         initView(root)
@@ -115,7 +114,11 @@ class PlaceOrderFragment : Fragment() {
         rdiOnlinePayment = root.findViewById(R.id.rdi_online_payment)
         btnOrder = root.findViewById(R.id.btn_order)
         totalPrice = root.findViewById(R.id.txt_total_price)
-        totalPrice.text = Common.totalPrice
+        val regex = Regex("\\d+(?=,\\d{2})")
+        val price = Common.totalPrice.replace("\u00A0", "")
+        val finalPrice = regex.find(price)?.value
+        totalPriceWithDelivery = StringBuilder("Всього: ").append(Common.formatPrice(finalPrice!!.toDouble() + 60)).toString()
+        totalPrice.text = totalPriceWithDelivery
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
@@ -156,9 +159,11 @@ class PlaceOrderFragment : Fragment() {
             if (isChecked) {
                 edtAddress.visibility = View.VISIBLE
                 radioGroupAddresses.visibility = View.GONE
+                totalPrice.text = totalPriceWithDelivery
             } else {
                 edtAddress.visibility = View.GONE
                 radioGroupAddresses.visibility = View.VISIBLE
+                totalPrice.text = Common.totalPrice
             }
         }
         btnOrder.setOnClickListener {
@@ -166,12 +171,14 @@ class PlaceOrderFragment : Fragment() {
             val name = edtName.text.toString().trim()
             val phone = "+380 " + edtPhone.text.toString().trim()
             val email = edtEmail.text.toString().trim()
-            val address = if (rdiHome.isChecked) {
-                edtAddress.text.toString().trim()
+            var address = ""
+            if (rdiHome.isChecked) {
+                address = edtAddress.text.toString().trim()
+                Common.totalPrice = totalPrice.text.toString()
             } else {
                 val selectedRadioButton =
                     radioGroupAddresses.findViewById<RadioButton>(radioGroupAddresses.checkedRadioButtonId)
-                selectedRadioButton?.text?.toString()?.trim() ?: ""
+                address = selectedRadioButton?.text?.toString()?.trim() ?: ""
             }
             tilName.error = null
             tilPhone.error = null
@@ -212,7 +219,7 @@ class PlaceOrderFragment : Fragment() {
             val latitude = location.latitude
             val longitude = location.longitude
             // Автоматичне заповнення поля адреси з розташуванням користувача
-            val geocoder = Geocoder(requireContext(), Locale.getDefault())
+            val geocoder = Geocoder(root.context, Locale.getDefault())
             val addresses: List<Address>? = geocoder.getFromLocation(latitude, longitude, 1)
             if (!addresses.isNullOrEmpty()) {
                 val address: Address = addresses[0]
@@ -268,9 +275,11 @@ class PlaceOrderFragment : Fragment() {
                             }
 
                             override fun onError(e: Throwable) {
-                                Toast.makeText(
-                                    requireContext(), "" + e.message, Toast.LENGTH_SHORT
-                                ).show()
+                                if (!e.message!!.contains("Query returned empty")) {
+                                    Toast.makeText(
+                                        requireContext(), "" + e.message, Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
 
                             override fun onSuccess(t: Double) {
@@ -281,6 +290,9 @@ class PlaceOrderFragment : Fragment() {
                                 order.customerAddress = address
                                 order.customerEmail = email
                                 order.cartItems = cartItem
+                                order.isDeliveryAddress = rdiHome.isChecked
+                                order.isComment = false
+                                order.status = Common.STATUSES[0]
                                 val regex = Regex("\\d+(?=,\\d{2})")
                                 val price = totalPrice.text.toString().replace("\u00A0", "")
                                 val finalPrice = regex.find(price)?.value
@@ -318,9 +330,6 @@ class PlaceOrderFragment : Fragment() {
                                                             "Замовлення розміщено успішно",
                                                             Toast.LENGTH_SHORT
                                                         ).show()
-                                                        EventBus.getDefault().postSticky(
-                                                            CountCartEvent(true)
-                                                        )
                                                         EventBus.getDefault().postSticky(
                                                             MenuClick(true)
                                                         )
@@ -378,6 +387,6 @@ class PlaceOrderFragment : Fragment() {
     override fun onStop() {
         super.onStop()
         compositeDisposable.clear()
-        EventBus.getDefault().postSticky(HideFABCart(false))
+        //EventBus.getDefault().postSticky(HideFABCart(false))
     }
 }

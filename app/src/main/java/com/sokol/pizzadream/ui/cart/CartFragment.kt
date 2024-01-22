@@ -25,8 +25,6 @@ import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Database.CartDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
-import com.sokol.pizzadream.EventBus.CountCartEvent
-import com.sokol.pizzadream.EventBus.HideFABCart
 import com.sokol.pizzadream.EventBus.MenuClick
 import com.sokol.pizzadream.EventBus.PlaceOrderClick
 import com.sokol.pizzadream.EventBus.RemoveItemsInCart
@@ -57,7 +55,6 @@ class CartFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        EventBus.getDefault().postSticky(HideFABCart(true))
         cartViewModel = ViewModelProvider(this).get(CartViewModel::class.java)
         cartViewModel.initCartInterface(requireContext())
         val root: View = inflater.inflate(R.layout.fragment_cart, container, false)
@@ -127,8 +124,6 @@ class CartFragment : Fragment() {
         compositeDisposable.clear()
         if (EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().unregister(this)
-        EventBus.getDefault().postSticky(HideFABCart(false))
-        EventBus.getDefault().unregister(this)
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
@@ -211,7 +206,6 @@ class CartFragment : Fragment() {
                     }
 
                     override fun onSuccess(t: Int) {
-                        EventBus.getDefault().postSticky(CountCartEvent(true))
                         calculateTotalPrice()
                     }
 

@@ -33,7 +33,6 @@ import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.AddonCategoryClick
 import com.sokol.pizzadream.EventBus.AddonClick
-import com.sokol.pizzadream.EventBus.CountCartEvent
 import com.sokol.pizzadream.EventBus.UserAddonCountUpdate
 import com.sokol.pizzadream.Model.AddonModel
 import com.sokol.pizzadream.Model.FoodModel
@@ -202,7 +201,6 @@ class FoodDetailFragment : Fragment() {
                                             cartItem.foodName + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                        EventBus.getDefault().postSticky(CountCartEvent(true))
                                     }, { t: Throwable? ->
                                         Toast.makeText(
                                             context,
@@ -245,7 +243,6 @@ class FoodDetailFragment : Fragment() {
                                             cartItem.foodName + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                        EventBus.getDefault().postSticky(CountCartEvent(true))
                                     }
 
                                 })
@@ -258,7 +255,6 @@ class FoodDetailFragment : Fragment() {
                                             cartItem.foodName + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                        EventBus.getDefault().postSticky(CountCartEvent(true))
                                     }, { t: Throwable? ->
                                         Toast.makeText(
                                             context,

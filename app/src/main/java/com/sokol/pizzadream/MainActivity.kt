@@ -70,26 +70,6 @@ class MainActivity : AppCompatActivity() {
         )
         dialog.show()
         listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-//            Dexter.withContext(this@MainActivity)
-//                .withPermission(android.Manifest.permission.ACCESS_FINE_LOCATION)
-//                .withListener(object:PermissionListener{
-//                    override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
-//                        TODO("Not yet implemented")
-//                    }
-//
-//                    override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
-//                        Toast.makeText(this@MainActivity,"You must accept this permission to use app",
-//                            Toast.LENGTH_SHORT).show()
-//                    }
-//
-//                    override fun onPermissionRationaleShouldBeShown(
-//                        p0: PermissionRequest?,
-//                        p1: PermissionToken?
-//                    ) {
-//                        TODO("Not yet implemented")
-//                    }
-//
-//                }).check()
             val user = firebaseAuth.currentUser
             if (user != null) {/*val model = UserModel()
                 if(user.displayName.toString() != ""){

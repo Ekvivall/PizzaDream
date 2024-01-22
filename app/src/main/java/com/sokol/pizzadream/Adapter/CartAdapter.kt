@@ -17,7 +17,6 @@ import com.sokol.pizzadream.Database.CartDatabase
 import com.sokol.pizzadream.Database.Entities.CartItem
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
-import com.sokol.pizzadream.EventBus.CountCartEvent
 import com.sokol.pizzadream.EventBus.RemoveItemsInCart
 import com.sokol.pizzadream.EventBus.UpdateItemsInCart
 import com.sokol.pizzadream.Model.AddonModel
@@ -74,7 +73,6 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
         )
         Glide.with(context).load(items[position].foodImage).into(foodImg)
         holder.foodImgLayout.addView(foodImg)
-        //Glide.with(context).load(items[position].foodImage).into(holder.foodImg)
         holder.foodName.text = items[position].foodName.toString()
         holder.foodSize.text = items[position].foodSize
         val typeToken = object : TypeToken<List<AddonModel>>() {}.type
@@ -117,7 +115,6 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
                 StringBuilder("").append(Common.formatPrice(items[position].foodPrice * items[position].foodQuantity))
                     .toString()
             EventBus.getDefault().postSticky(UpdateItemsInCart(items[position]))
-            EventBus.getDefault().postSticky(CountCartEvent(true))
         }
         holder.foodDecrease.setOnClickListener {
             if (items[position].foodQuantity > 1) {
@@ -127,7 +124,6 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
                     StringBuilder("").append(Common.formatPrice(items[position].foodPrice * items[position].foodQuantity))
                         .toString()
                 EventBus.getDefault().postSticky(UpdateItemsInCart(items[position]))
-                EventBus.getDefault().postSticky(CountCartEvent(true))
             }
         }
         holder.foodRemove.setOnClickListener {
@@ -144,7 +140,6 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
                         items = items.filterIndexed { index, _ -> index != position }
                         notifyDataSetChanged()
                         EventBus.getDefault().postSticky(RemoveItemsInCart(position))
-                        EventBus.getDefault().postSticky(CountCartEvent(true))
                     }
 
                 })

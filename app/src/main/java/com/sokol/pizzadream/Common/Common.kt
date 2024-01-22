@@ -26,16 +26,6 @@ object Common {
         }
     }
 
-    fun setWelcomeString(s: String, uid: String?, txtUser: TextView?) {
-        val builder = SpannableStringBuilder()
-        builder.append(s)
-        val txtSpannable = SpannableString(uid)
-        val boldSpan = StyleSpan(Typeface.BOLD)
-        txtSpannable.setSpan(boldSpan, 0, uid!!.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-        builder.append(txtSpannable)
-        txtUser?.setText(builder, TextView.BufferType.SPANNABLE)
-    }
-
     fun createOrderId(): String {
         val characters = "ABCDEFGHIJKLMONPQRSTUVWXYZ"
         return StringBuilder().append(characters[Random().nextInt(characters.length)])
@@ -57,4 +47,12 @@ object Common {
     val PERMISSIONS_REQUEST_LOCATION = 100
     val MIN_TIME_BETWEEN_UPDATES: Long = 1000
     val MIN_DISTANCE_CHANGE_FOR_UPDATES: Float = 10f
+    var STATUSES: List<String> = listOf(
+        "Очікує підтвердження",
+        "Підготовка",
+        "Готовий до доставки",
+        "В дорозі",
+        "Доставлено",
+        "Скасовано"
+    )
 }

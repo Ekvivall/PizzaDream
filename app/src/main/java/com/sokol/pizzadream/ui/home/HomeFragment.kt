@@ -26,7 +26,6 @@ class HomeFragment : Fragment() {
     private lateinit var  categoryRecycler:RecyclerView
     private lateinit var  bestProductsRecycler:RecyclerView
     private lateinit var layoutAnimatorController:LayoutAnimationController
-    private lateinit var dialog: AlertDialog
     private var foodAdapter:FoodAdapter ?=null
 
     override fun onCreateView(
@@ -39,7 +38,6 @@ class HomeFragment : Fragment() {
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         initView(root)
         homeViewModel.categoryList.observe(viewLifecycleOwner, Observer {
-            dialog.dismiss()
             val listData = it
             val adapter = CategoryAdapter(listData, requireContext())
             categoryRecycler.adapter = adapter
@@ -59,8 +57,6 @@ class HomeFragment : Fragment() {
         super.onStop()
     }
     private fun initView(root: View) {
-        dialog = SpotsDialog.Builder().setContext(context).setCancelable(false).build()
-        dialog.show()
         layoutAnimatorController = AnimationUtils.loadLayoutAnimation(context, R.anim.layout_item_from_left)
         categoryRecycler = root.findViewById(R.id.category_recycler)
         categoryRecycler.setHasFixedSize(true)

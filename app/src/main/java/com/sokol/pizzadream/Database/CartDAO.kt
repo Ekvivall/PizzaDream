@@ -15,8 +15,6 @@ import io.reactivex.Single
 interface CartDAO {
     @Query("SELECT * FROM Cart WHERE uid=:uid")
     fun getAllCart(uid:String):Flowable<List<CartItem>>
-    @Query("SELECT SUM(foodQuantity) FROM Cart WHERE uid=:uid")
-    fun countItemInCart(uid:String): Single<Int>
     @Query("SELECT SUM(foodQuantity * foodPrice /*+ foodExtraPrice * foodQuantity*/) FROM Cart WHERE uid=:uid")
     fun sumPrice(uid:String): Single<Double>
     @Query("SELECT * FROM Cart WHERE foodId=:foodId AND uid=:uid")

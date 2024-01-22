@@ -11,9 +11,6 @@ class CartRepository(private val cartDAO: CartDAO): CartInterface {
         return cartDAO.getAllCart(uid)
     }
 
-    override fun countItemInCart(uid: String): Single<Int> {
-        return cartDAO.countItemInCart(uid)
-    }
 
     override fun sumPrice(uid: String): Single<Double> {
         return cartDAO.sumPrice(uid)

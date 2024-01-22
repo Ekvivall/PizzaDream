@@ -19,7 +19,6 @@ import com.sokol.pizzadream.Database.CartDatabase
 import com.sokol.pizzadream.Database.Entities.CartItem
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
-import com.sokol.pizzadream.EventBus.CountCartEvent
 import com.sokol.pizzadream.EventBus.FoodItemClick
 import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.R
@@ -125,7 +124,6 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe({
                                     Toast.makeText(context, cartItem.foodName+ " додано до кошика", Toast.LENGTH_SHORT).show()
-                                    EventBus.getDefault().postSticky(CountCartEvent(true))
                                 }, {
                                         t: Throwable? -> Toast.makeText(context, "Помилка додавання товару до кошика" +t!!.message, Toast.LENGTH_SHORT).show()
                                 }))
@@ -154,7 +152,6 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
 
                                     override fun onSuccess(t: Int) {
                                         Toast.makeText(context, cartItem.foodName+ " додано до кошика", Toast.LENGTH_SHORT).show()
-                                        EventBus.getDefault().postSticky(CountCartEvent(true))
                                     }
 
                                 })
@@ -165,7 +162,6 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe({
                                     Toast.makeText(context, cartItem.foodName+ " додано до кошика", Toast.LENGTH_SHORT).show()
-                                    EventBus.getDefault().postSticky(CountCartEvent(true))
                                 }, {
                                         t: Throwable? -> Toast.makeText(context, "Помилка додавання товару до кошика" +t!!.message, Toast.LENGTH_SHORT).show()
                                 }))
