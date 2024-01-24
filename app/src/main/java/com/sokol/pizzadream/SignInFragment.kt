@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.databinding.FragmentSignInBinding
 
 class SignInFragment : Fragment() {
@@ -29,32 +30,40 @@ class SignInFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.btnSignIn.setOnClickListener {
-            var check = true
-            val tilEmail = binding.tilEmail
-            tilEmail.error = null
-            val edtEmail = binding.edtEmail
-            val tilPassword = binding.tilPassword
-            tilPassword.error = null
-            val edtPassword = binding.edtPassword
-            if (TextUtils.isDigitsOnly(edtEmail.text.toString())) {
-                tilEmail.error = "Введіть Електронну адресу."
-                check = false
-            }
-            if (TextUtils.isDigitsOnly(edtPassword.text.toString())) {
-                tilPassword.error = "Введіть Пароль."
-                check = false
-            }
-            if (check) {
-                firebaseAuth.signInWithEmailAndPassword(
-                    edtEmail.text.toString(),
-                    edtPassword.text.toString()
-                )
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                        } else {
-                            tilEmail.error = "Введено неправильну Електронну адресу та/або пароль."
+            if(Common.isConnectedToInternet(requireContext())) {
+                var check = true
+                val tilEmail = binding.tilEmail
+                tilEmail.error = null
+                val edtEmail = binding.edtEmail
+                val tilPassword = binding.tilPassword
+                tilPassword.error = null
+                val edtPassword = binding.edtPassword
+                if (TextUtils.isDigitsOnly(edtEmail.text.toString())) {
+                    tilEmail.error = "Введіть Електронну адресу."
+                    check = false
+                }
+                if (TextUtils.isDigitsOnly(edtPassword.text.toString())) {
+                    tilPassword.error = "Введіть Пароль."
+                    check = false
+                }
+                if (check) {
+                    firebaseAuth.signInWithEmailAndPassword(
+                        edtEmail.text.toString(),
+                        edtPassword.text.toString()
+                    )
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+
+                            } else {
+                                tilEmail.error =
+                                    "Введено неправильну Електронну адресу та/або пароль."
+                            }
                         }
-                    }
+                }
+            }
+            else{
+                Toast.makeText(requireContext(), "Будь ласка, перевірте своє з'єднання!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
         }
         binding.tvForgotPassword.setOnClickListener {

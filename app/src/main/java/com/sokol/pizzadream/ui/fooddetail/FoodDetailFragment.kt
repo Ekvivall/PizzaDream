@@ -78,19 +78,25 @@ class FoodDetailFragment : Fragment() {
             displayInfo(it)
             actionBar?.title = it.name ?: getString(R.string.menu_food_detail)
         }
-        foodDetailViewModel.categoryList.observe(viewLifecycleOwner, Observer {
-            val listData = it
-            if (it.isEmpty()) {
-                root.findViewById<View>(R.id.view_before_addon).visibility = View.GONE
-                root.findViewById<TextView>(R.id.addon_text).visibility = View.GONE
-            } else {
-                val adapter = AddonCategoryAdapter(listData, requireContext())
-                categoryRecycler.adapter = adapter
-                Common.addonCategorySelected = it[0]
-                Common.foodSelected!!.userSelectedAddon = ArrayList()
-                EventBus.getDefault().postSticky(AddonCategoryClick(true, it[0]))
-            }
-        })
+        if (Common.isConnectedToInternet(requireContext())) {
+            foodDetailViewModel.categoryList.observe(viewLifecycleOwner, Observer {
+                val listData = it
+                if (it.isEmpty()) {
+                    root.findViewById<View>(R.id.view_before_addon).visibility = View.GONE
+                    root.findViewById<TextView>(R.id.addon_text).visibility = View.GONE
+                } else {
+                    val adapter = AddonCategoryAdapter(listData, requireContext())
+                    categoryRecycler.adapter = adapter
+                    Common.addonCategorySelected = it[0]
+                    Common.foodSelected!!.userSelectedAddon = ArrayList()
+                    EventBus.getDefault().postSticky(AddonCategoryClick(true, it[0]))
+                }
+            })
+        } else {
+            Toast.makeText(
+                requireContext(), "Будь ласка, перевірте своє з'єднання!", Toast.LENGTH_SHORT
+            ).show()
+        }
         return root
     }
 
@@ -174,8 +180,7 @@ class FoodDetailFragment : Fragment() {
             cartItem.foodImage = Common.foodSelected?.image
             cartItem.foodPrice = totalPrice
             cartItem.foodQuantity = foodQuantity.text.toString().toInt()
-            if (Common.foodSelected!!.userSelectedAddon != null) {
-                /*for (foodAddon in Common.foodSelected!!.userSelectedAddon!!) {
+            if (Common.foodSelected!!.userSelectedAddon != null) {/*for (foodAddon in Common.foodSelected!!.userSelectedAddon!!) {
                     if (foodAddon != Common.foodSelected!!.userSelectedAddon!![0]) cartItem.foodAddon += ", "
                     cartItem.foodAddon += foodAddon.name + " x" + foodAddon.userCount
                 }*/
@@ -372,7 +377,7 @@ class FoodDetailFragment : Fragment() {
 
     override fun onStop() {
         super.onStop()
-         Common.foodSelected?.userSelectedAddon = null
+        Common.foodSelected?.userSelectedAddon = null
         if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this)
     }
 

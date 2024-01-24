@@ -33,51 +33,64 @@ class RegisterFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.btnRegister.setOnClickListener {
-            var check = true
-            val tilFirstName = binding.tilFirstName
-            tilFirstName.error = null
-            val edtFirstName = binding.edtFirstName
-            val tilLastName = binding.tilLastName
-            tilLastName.error = null
-            val edtLastName = binding.edtLastName
-            val tilEmail = binding.tilEmailReg
-            tilEmail.error = null
-            val edtEmail = binding.edtEmail
-            val tilPassword = binding.tilPasswordReg
-            tilPassword.error = null
-            val edtPassword = binding.edtPassword
-            if (TextUtils.isDigitsOnly(edtFirstName.text.toString())) {
-                tilFirstName.error = "Введіть Ім\'я."
-                check = false
-            }
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(edtEmail.text.toString()).matches()) {
-                tilEmail.error = "Введіть коректну електронну адресу."
-                check = false
-            }
-            val passwordPattern = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=\\S+$).{6,}$".toRegex()
-            if (!passwordPattern.matches(edtPassword.text.toString())) {
-                tilPassword.error =
-                    "Пароль недостатньо надійний. Введіть принаймні 6 символів, включаючи букви, цифри."
-                check = false
-            }
-            if (check) {
-                val model = UserModel()
-                model.firstName = edtFirstName.text.toString()
-                model.lastName = edtLastName.text.toString()
-                model.email = edtEmail.text.toString()
-                firebaseAuth.createUserWithEmailAndPassword(
-                    edtEmail.text.toString(),
-                    edtPassword.text.toString()
-                ).addOnCompleteListener(requireActivity()) { task ->
-                    if (task.isSuccessful) {
-                        val user = firebaseAuth.currentUser
-                        userInfoRef.child(user!!.uid)
-                            .setValue(model)
-                    } else {
-                        tilEmail.error = "Користувач з такою електронною адресою вже існує."
-                    }
+            if (Common.isConnectedToInternet(requireContext())) {
+                var check = true
+                val tilFirstName = binding.tilFirstName
+                tilFirstName.error = null
+                val edtFirstName = binding.edtFirstName
+                val tilLastName = binding.tilLastName
+                tilLastName.error = null
+                val edtLastName = binding.edtLastName
+                val tilEmail = binding.tilEmailReg
+                tilEmail.error = null
+                val edtEmail = binding.edtEmail
+                val tilPassword = binding.tilPasswordReg
+                tilPassword.error = null
+                val edtPassword = binding.edtPassword
+                if (TextUtils.isDigitsOnly(edtFirstName.text.toString())) {
+                    tilFirstName.error = "Введіть Ім\'я."
+                    check = false
                 }
+                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(edtEmail.text.toString())
+                        .matches()
+                ) {
+                    tilEmail.error = "Введіть коректну електронну адресу."
+                    check = false
+                }
+                val passwordPattern = "^(?=.*[0-9])(?=.*[a-zA-Z])(?=\\S+$).{6,}$".toRegex()
+                if (!passwordPattern.matches(edtPassword.text.toString())) {
+                    tilPassword.error =
+                        "Пароль недостатньо надійний. Введіть принаймні 6 символів, включаючи букви, цифри."
+                    check = false
+                }
+                if (check) {
+                    val model = UserModel()
+                    model.firstName = edtFirstName.text.toString()
+                    model.lastName = edtLastName.text.toString()
+                    model.email = edtEmail.text.toString()
+                    model.role = "user"
+                    firebaseAuth.createUserWithEmailAndPassword(
+                        edtEmail.text.toString(),
+                        edtPassword.text.toString()
+                    ).addOnCompleteListener(requireActivity()) { task ->
+                        if (task.isSuccessful) {
+                            val user = firebaseAuth.currentUser
+                            model.uid = user!!.uid
+                            userInfoRef.child(user.uid)
+                                .setValue(model)
+                        } else {
+                            tilEmail.error = "Користувач з такою електронною адресою вже існує."
+                        }
+                    }
 
+                }
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "Будь ласка, перевірте своє з'єднання!",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
             }
         }
     }

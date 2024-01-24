@@ -57,5 +57,7 @@
     <string name="cod">Готівка при отриманні</string>
     <string name="online_payment">Онлайн оплата</string>
     <string name="menu_profile">Профіль</string>
+    <string name="menu_edit_profile">Редагувати профіль</string>
+    <string name="edit_avatar">Змінити аватар</string>
 
 </resources>

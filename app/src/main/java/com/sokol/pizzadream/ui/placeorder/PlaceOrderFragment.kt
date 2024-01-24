@@ -71,30 +71,38 @@ class PlaceOrderFragment : Fragment() {
         val placeOrderViewModel = ViewModelProvider(this).get(PlaceOrderViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_place_order, container, false)
         initView(root)
-        //Ініціалізація списку адрес
-        placeOrderViewModel.getAddressListMutableLiveData().observe(viewLifecycleOwner, Observer {
-            for (address in it) {
-                val radioButton = RadioButton(context)
-                radioButton.setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        Common.userSelectedAddress = address
+        if (Common.isConnectedToInternet(requireContext())) {
+            //Ініціалізація списку адрес
+            placeOrderViewModel.getAddressListMutableLiveData()
+                .observe(viewLifecycleOwner, Observer {
+                    for (address in it) {
+                        val radioButton = RadioButton(context)
+                        radioButton.setOnCheckedChangeListener { _, isChecked ->
+                            if (isChecked) {
+                                Common.userSelectedAddress = address
+                            }
+                        }
+                        val params = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        radioButton.layoutParams = params
+                        radioButton.text = address
+                        radioButton.textSize = 16f
+                        radioButton.tag = address
+                        radioGroupAddresses.addView(radioButton)
                     }
-                }
-                val params = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                radioButton.layoutParams = params
-                radioButton.text = address
-                radioButton.textSize = 16f
-                radioButton.tag = address
-                radioGroupAddresses.addView(radioButton)
-            }
-            // Встановлення першої адреси як вибрану, якщо список не порожній
-            if (radioGroupAddresses.childCount > 0) {
-                val radioButton = radioGroupAddresses.getChildAt(0) as RadioButton
-                radioButton.isChecked = true
-            }
-        })
+                    // Встановлення першої адреси як вибрану, якщо список не порожній
+                    if (radioGroupAddresses.childCount > 0) {
+                        val radioButton = radioGroupAddresses.getChildAt(0) as RadioButton
+                        radioButton.isChecked = true
+                    }
+                })
+        } else {
+            Toast.makeText(
+                requireContext(), "Будь ласка, перевірте своє з'єднання!", Toast.LENGTH_SHORT
+            ).show()
+        }
         return root
     }
 
@@ -117,7 +125,9 @@ class PlaceOrderFragment : Fragment() {
         val regex = Regex("\\d+(?=,\\d{2})")
         val price = Common.totalPrice.replace("\u00A0", "")
         val finalPrice = regex.find(price)?.value
-        totalPriceWithDelivery = StringBuilder("Всього: ").append(Common.formatPrice(finalPrice!!.toDouble() + 60)).toString()
+        totalPriceWithDelivery =
+            StringBuilder("Всього: ").append(Common.formatPrice(finalPrice!!.toDouble() + 60))
+                .toString()
         totalPrice.text = totalPriceWithDelivery
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -167,48 +177,56 @@ class PlaceOrderFragment : Fragment() {
             }
         }
         btnOrder.setOnClickListener {
-            // Обробка кнопки замовлення
-            val name = edtName.text.toString().trim()
-            val phone = "+380 " + edtPhone.text.toString().trim()
-            val email = edtEmail.text.toString().trim()
-            var address = ""
-            if (rdiHome.isChecked) {
-                address = edtAddress.text.toString().trim()
-                Common.totalPrice = totalPrice.text.toString()
+            if (Common.isConnectedToInternet(requireContext())) {
+                // Обробка кнопки замовлення
+                val name = edtName.text.toString().trim()
+                val phone = "+380 " + edtPhone.text.toString().trim()
+                val email = edtEmail.text.toString().trim()
+                var address = ""
+                if (rdiHome.isChecked) {
+                    address = edtAddress.text.toString().trim()
+                    Common.totalPrice = totalPrice.text.toString()
+                } else {
+                    val selectedRadioButton =
+                        radioGroupAddresses.findViewById<RadioButton>(radioGroupAddresses.checkedRadioButtonId)
+                    address = selectedRadioButton?.text?.toString()?.trim() ?: ""
+                }
+                tilName.error = null
+                tilPhone.error = null
+                tilAddress.error = null
+                tilEmail.error = null
+                if (name.isEmpty()) {
+                    tilName.error = "Будь ласка, введіть своє ім'я"
+                    return@setOnClickListener
+                }
+                if (phone.isEmpty()) {
+                    tilPhone.error = "Будь ласка, введіть свій номер телефону"
+                    return@setOnClickListener
+                } else if (phone.length < 12) {
+                    tilPhone.error = "Будь ласка, введіть свій повний номер телефону"
+                    return@setOnClickListener
+                }
+                if (email.isEmpty()) {
+                    tilEmail.error = "Будь ласка, введіть свою електронну адресу"
+                    return@setOnClickListener
+                }
+                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(edtEmail.text.toString())
+                        .matches()
+                ) {
+                    tilEmail.error = "Введіть коректну електронну адресу."
+                    return@setOnClickListener
+                }
+                if (address.isEmpty()) {
+                    tilAddress.error = "Будь ласка, введіть свою адресу"
+                    return@setOnClickListener
+                }
+                if (rdiCod.isChecked) {
+                    paymentCOD(name, phone, email, address)
+                }
             } else {
-                val selectedRadioButton =
-                    radioGroupAddresses.findViewById<RadioButton>(radioGroupAddresses.checkedRadioButtonId)
-                address = selectedRadioButton?.text?.toString()?.trim() ?: ""
-            }
-            tilName.error = null
-            tilPhone.error = null
-            tilAddress.error = null
-            tilEmail.error = null
-            if (name.isEmpty()) {
-                tilName.error = "Будь ласка, введіть своє ім'я"
-                return@setOnClickListener
-            }
-            if (phone.isEmpty()) {
-                tilPhone.error = "Будь ласка, введіть свій номер телефону"
-                return@setOnClickListener
-            } else if (phone.length < 12) {
-                tilPhone.error = "Будь ласка, введіть свій повний номер телефону"
-                return@setOnClickListener
-            }
-            if (email.isEmpty()) {
-                tilEmail.error = "Будь ласка, введіть свою електронну адресу"
-                return@setOnClickListener
-            }
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(edtEmail.text.toString()).matches()) {
-                tilEmail.error = "Введіть коректну електронну адресу."
-                return@setOnClickListener
-            }
-            if (address.isEmpty()) {
-                tilAddress.error = "Будь ласка, введіть свою адресу"
-                return@setOnClickListener
-            }
-            if (rdiCod.isChecked) {
-                paymentCOD(name, phone, email, address)
+                Toast.makeText(
+                    requireContext(), "Будь ласка, перевірте своє з'єднання!", Toast.LENGTH_SHORT
+                ).show()
             }
         }
         // Ініціалізація LocationManager

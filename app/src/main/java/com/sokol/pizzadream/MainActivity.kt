@@ -77,11 +77,6 @@ class MainActivity : AppCompatActivity() {
                     model.email = user.email.toString()
                     userInfoRef.child(user.uid).setValue(model)
                 }*/
-                val model = UserModel()
-                model.uid = user.uid
-                model.firstName = user.displayName.toString()
-                model.email = user.email.toString()
-                Common.currentUser = model
                 userInfoRef.child(user.uid)
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onCancelled(p0: DatabaseError) {
@@ -91,7 +86,17 @@ class MainActivity : AppCompatActivity() {
 
                         override fun onDataChange(p0: DataSnapshot) {
                             if (!p0.exists()) {
+                                val model = UserModel()
+                                model.uid = user.uid
+                                model.firstName = user.displayName.toString()
+                                model.email = user.email.toString()
+                                model.role = "user"
                                 userInfoRef.child(user.uid).setValue(model)
+                                Common.currentUser = model
+                            }
+                            else{
+                                val model = p0.getValue(UserModel::class.java)
+                                Common.currentUser = model
                             }
                         }
                     })

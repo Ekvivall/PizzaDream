@@ -17,7 +17,10 @@
         <item name="windowNoTitle">false</item>
         <item name="android:textColorPrimary">@android:color/white</item>
     </style>
+    <style name="CustomAlertDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:textColorPrimary">@android:color/black</item>
 
+    </style>
     <style name="Theme.PizzaDream.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.PizzaDream.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />

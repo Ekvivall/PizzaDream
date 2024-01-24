@@ -1,8 +1,10 @@
 package com.sokol.pizzadream
 
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
@@ -16,10 +18,12 @@ import com.sokol.pizzadream.Database.CartDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.CategoryClick
+import com.sokol.pizzadream.EventBus.EditProfileClick
 import com.sokol.pizzadream.EventBus.FoodItemClick
 import com.sokol.pizzadream.EventBus.LogOutClick
 import com.sokol.pizzadream.EventBus.MenuClick
 import com.sokol.pizzadream.EventBus.PlaceOrderClick
+import com.sokol.pizzadream.EventBus.ProfileClick
 import com.sokol.pizzadream.databinding.ActivityHomeBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -53,7 +57,7 @@ class HomeActivity : AppCompatActivity() {
     }
 
      private fun signOut() {
-         val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+         val builder = androidx.appcompat.app.AlertDialog.Builder(this, R.style.CustomAlertDialog)
          builder.setTitle("Вихід")
              .setMessage("Ви дійсно хочете вийти?")
              .setNegativeButton("Відміна") { dialogInterface, _ -> dialogInterface.dismiss() }
@@ -70,6 +74,10 @@ class HomeActivity : AppCompatActivity() {
              }
          val dialog = builder.create()
          dialog.show()
+         val positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+         positiveButton.setTextColor(ContextCompat.getColor(this, R.color.red))
+         val negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+         negativeButton.setTextColor(ContextCompat.getColor(this, R.color.black))
      }
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
@@ -111,6 +119,18 @@ class HomeActivity : AppCompatActivity() {
     fun onPlaceOrder(event: PlaceOrderClick) {
         if (event.isSuccess) {
             findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_place_order)
+        }
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onEditProfile(event: EditProfileClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_edit_profile)
+        }
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onProfile(event: ProfileClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_profile)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)

@@ -37,4 +37,9 @@
         android:name="com.sokol.pizzadream.ui.profile.ProfileFragment"
         android:label="@string/menu_profile"
         tools:layout="@layout/fragment_profile" />
+    <fragment
+        android:id="@+id/nav_edit_profile"
+        android:name="com.sokol.pizzadream.ui.editProfile.EditProfileFragment"
+        android:label="@string/menu_edit_profile"
+        tools:layout="@layout/fragment_profile" />
 </navigation>

@@ -1,6 +1,8 @@
 package com.sokol.pizzadream.Common
 
+import android.content.Context
 import android.graphics.Typeface
+import android.net.ConnectivityManager
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
@@ -55,4 +57,15 @@ object Common {
         "Доставлено",
         "Скасовано"
     )
+    fun isConnectedToInternet(context: Context): Boolean{
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkInfo = connectivityManager.activeNetworkInfo
+        if (networkInfo != null && networkInfo.isConnected) {
+            // Доступне підключення до Інтернету
+            return  true
+        }
+        // Немає підключення до Інтернету
+        return false
+    }
+
 }
