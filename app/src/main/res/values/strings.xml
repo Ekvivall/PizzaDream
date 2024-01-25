@@ -59,5 +59,7 @@
     <string name="menu_profile">Профіль</string>
     <string name="menu_edit_profile">Редагувати профіль</string>
     <string name="edit_avatar">Змінити аватар</string>
+    <string name="dont_have_info">Немає даних</string>
+    <string name="save">Зберегти</string>
 
 </resources>

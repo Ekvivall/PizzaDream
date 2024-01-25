@@ -165,6 +165,7 @@ class PlaceOrderFragment : Fragment() {
         edtPhone.addTextChangedListener(textWatcher)
         edtName.setText(Common.currentUser!!.firstName)
         edtEmail.setText(Common.currentUser!!.email)
+        edtPhone.setText(Common.currentUser?.phone!!.replace(" ", ""))
         rdiHome.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 edtAddress.visibility = View.VISIBLE
@@ -199,7 +200,7 @@ class PlaceOrderFragment : Fragment() {
                     tilName.error = "Будь ласка, введіть своє ім'я"
                     return@setOnClickListener
                 }
-                if (phone.isEmpty()) {
+                if (phone.length == 5) {
                     tilPhone.error = "Будь ласка, введіть свій номер телефону"
                     return@setOnClickListener
                 } else if (phone.length < 12) {
