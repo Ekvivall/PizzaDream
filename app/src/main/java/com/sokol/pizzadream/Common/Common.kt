@@ -35,6 +35,7 @@ object Common {
             .append(characters[Random().nextInt(characters.length)]).toString()
     }
 
+    val NEWS_REF: String = "News"
     val ORDER_REF: String = "Orders"
     var userSelectedAddress: String = ""
     val ADDON_ADDRESS_REF: String = "Addresses"

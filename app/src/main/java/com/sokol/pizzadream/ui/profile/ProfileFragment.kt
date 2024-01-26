@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.EventBus.EditProfileClick
 import com.sokol.pizzadream.EventBus.LogOutClick
+import com.sokol.pizzadream.EventBus.NewsClick
 import com.sokol.pizzadream.R
 import org.greenrobot.eventbus.EventBus
 
@@ -21,6 +22,7 @@ class ProfileFragment : Fragment() {
     private lateinit var profileEmail: TextView
     private lateinit var editProfileImg: ImageView
     private lateinit var logOut: TextView
+    private lateinit var news: TextView
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -40,6 +42,7 @@ class ProfileFragment : Fragment() {
             Glide.with(this).load(Common.currentUser!!.avatar).into(profileImage)
         }
         logOut = root.findViewById(R.id.logOutText)
+        news = root.findViewById(R.id.news)
         logOut.setOnClickListener {
             EventBus.getDefault().postSticky(LogOutClick(true))
         }
@@ -48,6 +51,9 @@ class ProfileFragment : Fragment() {
         }
         editProfileImg.setOnClickListener {
             goToEditProfile()
+        }
+        news.setOnClickListener{
+            EventBus.getDefault().postSticky(NewsClick(true))
         }
     }
 

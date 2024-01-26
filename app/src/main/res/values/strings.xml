@@ -61,5 +61,6 @@
     <string name="edit_avatar">Змінити аватар</string>
     <string name="dont_have_info">Немає даних</string>
     <string name="save">Зберегти</string>
+    <string name="news">Новини</string>
 
 </resources>

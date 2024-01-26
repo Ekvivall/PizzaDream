@@ -15,8 +15,11 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Model.UserModel
+import com.sokol.pizzadream.Remote.ICloudFunctions
 import dmax.dialog.SpotsDialog
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import java.util.Arrays
 
 class MainActivity : AppCompatActivity() {
@@ -31,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var database: FirebaseDatabase
     private lateinit var userInfoRef: DatabaseReference
     private lateinit var providers: List<AuthUI.IdpConfig>
+    private lateinit var cloudFunctions: ICloudFunctions
     override fun onStart() {
         super.onStart()
         var fragment: Fragment? = SignInFragment()
@@ -93,13 +97,18 @@ class MainActivity : AppCompatActivity() {
                                 model.role = "user"
                                 userInfoRef.child(user.uid).setValue(model)
                                 Common.currentUser = model
-                            }
-                            else{
+                            } else {
                                 val model = p0.getValue(UserModel::class.java)
                                 Common.currentUser = model
                             }
                         }
                     })
+               /* compositeDisposable.add(cloudFunctions.getToken().subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread()).subscribe { braintreeToken ->
+                        {
+
+                        }
+                    })*/
                 startActivity(Intent(this, HomeActivity::class.java))
                 finish()
             } else {

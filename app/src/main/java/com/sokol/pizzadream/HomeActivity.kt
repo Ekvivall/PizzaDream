@@ -22,6 +22,7 @@ import com.sokol.pizzadream.EventBus.EditProfileClick
 import com.sokol.pizzadream.EventBus.FoodItemClick
 import com.sokol.pizzadream.EventBus.LogOutClick
 import com.sokol.pizzadream.EventBus.MenuClick
+import com.sokol.pizzadream.EventBus.NewsClick
 import com.sokol.pizzadream.EventBus.PlaceOrderClick
 import com.sokol.pizzadream.EventBus.ProfileClick
 import com.sokol.pizzadream.databinding.ActivityHomeBinding
@@ -139,5 +140,10 @@ class HomeActivity : AppCompatActivity() {
             signOut()
         }
     }
-
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onNews(event: NewsClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_news)
+        }
+    }
 }
