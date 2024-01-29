@@ -11,6 +11,7 @@ import android.widget.TextView
 import com.sokol.pizzadream.Model.AddonCategoryModel
 import com.sokol.pizzadream.Model.CategoryModel
 import com.sokol.pizzadream.Model.FoodModel
+import com.sokol.pizzadream.Model.NewsModel
 import com.sokol.pizzadream.Model.UserModel
 import java.math.RoundingMode
 import java.text.DecimalFormat
@@ -35,6 +36,8 @@ object Common {
             .append(characters[Random().nextInt(characters.length)]).toString()
     }
 
+    var newsSelected: NewsModel? = null
+    var currentToken: String = ""
     val NEWS_REF: String = "News"
     val ORDER_REF: String = "Orders"
     var userSelectedAddress: String = ""

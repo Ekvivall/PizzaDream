@@ -22,7 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sokol.pizzadream.Adapter.CartAdapter
 import com.sokol.pizzadream.Common.Common
-import com.sokol.pizzadream.Database.CartDatabase
+import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.MenuClick
@@ -85,7 +85,7 @@ class CartFragment : Fragment() {
 
     private fun initView(root: View) {
         setHasOptionsMenu(true)
-        cart = CartRepository(CartDatabase.getInstance(requireContext()).getCartDAO())
+        cart = CartRepository(PizzaDatabase.getInstance(requireContext()).getCartDAO())
         recyclerCart = root.findViewById(R.id.recycler_cart)
         recyclerCart.setHasFixedSize(true)
         val layoutManager = LinearLayoutManager(context)

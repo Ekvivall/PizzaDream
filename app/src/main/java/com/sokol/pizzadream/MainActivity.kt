@@ -16,6 +16,7 @@ import com.google.firebase.database.ValueEventListener
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Model.UserModel
 import com.sokol.pizzadream.Remote.ICloudFunctions
+import com.sokol.pizzadream.Remote.RetrofitCloudClient
 import dmax.dialog.SpotsDialog
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -37,10 +38,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var cloudFunctions: ICloudFunctions
     override fun onStart() {
         super.onStart()
-        var fragment: Fragment? = SignInFragment()
+        val fragment: Fragment = SignInFragment()
         val fm = supportFragmentManager
         val ft = fm.beginTransaction()
-        ft.replace(R.id.fragment_place, fragment!!)
+        ft.replace(R.id.fragment_place, fragment)
         ft.commit()
         firebaseAuth.addAuthStateListener(listener)
     }
@@ -69,6 +70,7 @@ class MainActivity : AppCompatActivity() {
         userInfoRef = database.getReference(Common.USER_REFERENCE)
         firebaseAuth = FirebaseAuth.getInstance()
         dialog = SpotsDialog.Builder().setContext(this).setCancelable(false).build()
+        //cloudFunctions = RetrofitCloudClient.getInstance().create(ICloudFunctions::class.java)
         providers = Arrays.asList(
             AuthUI.IdpConfig.GoogleBuilder().build()
         )
@@ -96,6 +98,24 @@ class MainActivity : AppCompatActivity() {
                                 model.email = user.email.toString()
                                 model.role = "user"
                                 userInfoRef.child(user.uid).setValue(model)
+                                    .addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+                                            compositeDisposable.add(
+                                                cloudFunctions.getToken()
+                                                    .subscribeOn(Schedulers.io())
+                                                    .observeOn(AndroidSchedulers.mainThread())
+                                                    .subscribe({ braintreeToken ->
+                                                        Common.currentToken = braintreeToken.token
+                                                    }, { throwable ->
+                                                        Toast.makeText(
+                                                            this@MainActivity,
+                                                            throwable.message,
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    })
+                                            )
+                                        }
+                                    }
                                 Common.currentUser = model
                             } else {
                                 val model = p0.getValue(UserModel::class.java)
@@ -103,12 +123,16 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     })
-               /* compositeDisposable.add(cloudFunctions.getToken().subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread()).subscribe { braintreeToken ->
-                        {
-
-                        }
-                    })*/
+                /*compositeDisposable.add(
+                    cloudFunctions.getToken().subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread()).subscribe({ braintreeToken ->
+                            Common.currentToken = braintreeToken.token
+                        }, { throwable ->
+                            Toast.makeText(
+                                this, throwable.message, Toast.LENGTH_SHORT
+                            ).show()
+                        })
+                )*/
                 startActivity(Intent(this, HomeActivity::class.java))
                 finish()
             } else {

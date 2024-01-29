@@ -26,7 +26,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.database.FirebaseDatabase
 import com.sokol.pizzadream.Common.Common
-import com.sokol.pizzadream.Database.CartDatabase
+import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.MenuClick
@@ -66,7 +66,7 @@ class PlaceOrderFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        cart = CartRepository(CartDatabase.getInstance(requireContext()).getCartDAO())
+        cart = CartRepository(PizzaDatabase.getInstance(requireContext()).getCartDAO())
         //EventBus.getDefault().postSticky(HideFABCart(true))
         val placeOrderViewModel = ViewModelProvider(this).get(PlaceOrderViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_place_order, container, false)

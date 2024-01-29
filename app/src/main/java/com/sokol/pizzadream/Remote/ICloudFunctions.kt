@@ -1,6 +1,6 @@
 package com.sokol.pizzadream.Remote
 
-import android.database.Observable
+import io.reactivex.Observable
 import com.sokol.pizzadream.Model.BraintreeToken
 import com.sokol.pizzadream.Model.BraintreeTransaction
 import retrofit2.http.Field

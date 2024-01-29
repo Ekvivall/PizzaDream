@@ -27,10 +27,12 @@ import com.sokol.pizzadream.Adapter.AddonCategoryAdapter
 import com.sokol.pizzadream.Adapter.UserAddonAdapter
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Common.SpaceItemDecoration
-import com.sokol.pizzadream.Database.CartDatabase
+import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Entities.CartItem
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
+import com.sokol.pizzadream.Database.Repositories.FavoriteInterface
+import com.sokol.pizzadream.Database.Repositories.FavoriteRepository
 import com.sokol.pizzadream.EventBus.AddonCategoryClick
 import com.sokol.pizzadream.EventBus.AddonClick
 import com.sokol.pizzadream.EventBus.UserAddonCountUpdate
@@ -67,6 +69,8 @@ class FoodDetailFragment : Fragment() {
     private lateinit var radioGroupSize: RadioGroup
     private lateinit var cart: CartInterface
     private val compositeDisposable = CompositeDisposable()
+    private lateinit var favImage: ImageView
+    private lateinit var favorite: FavoriteInterface
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -134,7 +138,8 @@ class FoodDetailFragment : Fragment() {
     }
 
     private fun initView(root: View) {
-        cart = CartRepository(CartDatabase.getInstance(requireContext()).getCartDAO())
+        cart = CartRepository(PizzaDatabase.getInstance(requireContext()).getCartDAO())
+        favorite = FavoriteRepository(PizzaDatabase.getInstance(requireContext()).getFavoriteDAO())
         categoryRecycler = root.findViewById(R.id.addon_category_recycler)
         categoryRecycler.setHasFixedSize(true)
         categoryRecycler.layoutManager =
@@ -159,6 +164,7 @@ class FoodDetailFragment : Fragment() {
         ratingBar = root.findViewById(R.id.ratingBar)
         btnShowComment = root.findViewById(R.id.btnShowComment)
         radioGroupSize = root.findViewById(R.id.radio_group_size)
+        favImage = root.findViewById(R.id.food_fav)
         btnDecrease.setOnClickListener {
             val quantity = foodQuantity.text.toString().toInt()
             if (quantity > 1) {
@@ -170,6 +176,79 @@ class FoodDetailFragment : Fragment() {
             val quantity = foodQuantity.text.toString().toInt()
             foodQuantity.text = (quantity + 1).toString()
             calculateTotalPrice()
+        }
+        // Перевірка, чи елемент вже є в обраному
+        favorite.isFavorite(Common.foodSelected?.id.toString()).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
+                override fun onSubscribe(d: Disposable) {
+                }
+
+                override fun onError(e: Throwable) {
+                    Toast.makeText(requireContext(), "" + e.message!!, Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onSuccess(t: Int) {
+                    if (t > 0) {
+                        // Встановлення обраної іконки
+                        favImage.setImageResource(R.drawable.ic_favorite_24)
+                    }
+                }
+
+            })
+        // Встановлення слухача кліків для іконки Favorite
+        favImage.setOnClickListener {
+            favorite.isFavorite(Common.foodSelected?.id.toString()).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
+                    override fun onSubscribe(d: Disposable) {
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Toast.makeText(context, "" + e.message!!, Toast.LENGTH_SHORT).show()
+                    }
+
+                    override fun onSuccess(t: Int) {
+                        if (t > 0) {
+                            // Видалення елемента з обраного
+                            compositeDisposable.add(favorite.removeFromFavorites(Common.foodSelected?.id.toString())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread()).subscribe({
+                                    Toast.makeText(
+                                        requireContext(),
+                                        Common.foodSelected?.name + " видалено з обраних",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    favImage.setImageResource(R.drawable.ic_favorite_border_24)
+                                }, { err: Throwable? ->
+                                    Toast.makeText(
+                                        requireContext(),
+                                        "Помилка видалення товару з обраного" + err!!.message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                })
+                            )
+                        } else {
+                            // Додавання елемента до обраного
+                            compositeDisposable.add(favorite.addToFavorites(Common.foodSelected?.id.toString())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread()).subscribe({
+                                    Toast.makeText(
+                                        requireContext(),
+                                        Common.foodSelected?.name + " додано до обраного",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    favImage.setImageResource(R.drawable.ic_favorite_24)
+                                }, { err: Throwable? ->
+                                    Toast.makeText(
+                                        context,
+                                        "Помилка додавання товару до обраного" + err!!.message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                })
+                            )
+                        }
+                    }
+
+                })
         }
         btnCart.setOnClickListener {
             val cartItem = CartItem()

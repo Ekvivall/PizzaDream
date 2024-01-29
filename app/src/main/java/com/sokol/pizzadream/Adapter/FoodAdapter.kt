@@ -15,10 +15,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
-import com.sokol.pizzadream.Database.CartDatabase
 import com.sokol.pizzadream.Database.Entities.CartItem
+import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
+import com.sokol.pizzadream.Database.Repositories.FavoriteInterface
+import com.sokol.pizzadream.Database.Repositories.FavoriteRepository
 import com.sokol.pizzadream.EventBus.FoodItemClick
 import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.R
@@ -31,8 +33,12 @@ import org.greenrobot.eventbus.EventBus
 
 class FoodAdapter(val items: List<FoodModel>, val context: Context) :
     RecyclerView.Adapter<FoodAdapter.MyViewHolder>() {
-    private val compositeDisposable:CompositeDisposable = CompositeDisposable()
-    private val cartInterface:CartInterface = CartRepository(CartDatabase.getInstance(context).getCartDAO())
+    private val compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private val cartInterface: CartInterface =
+        CartRepository(PizzaDatabase.getInstance(context).getCartDAO())
+    private val favoriteInterface: FavoriteInterface =
+        FavoriteRepository(PizzaDatabase.getInstance(context).getFavoriteDAO())
+
     class MyViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         var foodName: TextView = view.findViewById(R.id.food_name)
         var foodImage: ImageView = view.findViewById(R.id.food_img)
@@ -41,6 +47,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
 
         var foodPrice: TextView = view.findViewById(R.id.food_price)
         var foodCart: Button = view.findViewById(R.id.btn_add_to_cart)
+        var favImage: ImageView = view.findViewById(R.id.food_fav)
         private var listener: IRecyclerItemClickListener? = null
         fun setListener(listener: IRecyclerItemClickListener) {
             this.listener = listener
@@ -54,8 +61,8 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.layout_product_item, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.layout_product_item, parent, false)
         return MyViewHolder(view)
     }
 
@@ -95,6 +102,83 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                 EventBus.getDefault().postSticky(FoodItemClick(true, items[pos]))
             }
         })
+        // Перевірка, чи елемент вже є в обраному
+        favoriteInterface.isFavorite(items[position].id.toString()).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
+                override fun onSubscribe(d: Disposable) {
+                }
+
+                override fun onError(e: Throwable) {
+                    Toast.makeText(context, "" + e.message!!, Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onSuccess(t: Int) {
+                    if (t > 0) {
+                        // Встановлення обраної іконки
+                        holder.favImage.setImageResource(R.drawable.ic_favorite_24)
+                    }
+                    else{
+                        holder.favImage.setImageResource(R.drawable.ic_favorite_border_24)
+                    }
+                }
+
+            })
+        // Встановлення слухача кліків для іконки Favorite
+        holder.favImage.setOnClickListener {
+            favoriteInterface.isFavorite(items[position].id.toString()).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
+                    override fun onSubscribe(d: Disposable) {
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Toast.makeText(context, "" + e.message!!, Toast.LENGTH_SHORT).show()
+                    }
+
+                    override fun onSuccess(t: Int) {
+                        if (t > 0) {
+                            // Видалення елемента з обраного
+                            compositeDisposable.add(favoriteInterface.removeFromFavorites(items[position].id.toString())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread()).subscribe({
+                                    Toast.makeText(
+                                        context,
+                                        items[position].name + " видалено з обраних",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    holder.favImage.setImageResource(R.drawable.ic_favorite_border_24)
+                                }, { err: Throwable? ->
+                                    Toast.makeText(
+                                        context,
+                                        "Помилка видалення товару з обраного" + err!!.message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                })
+                            )
+                        } else {
+                            // Додавання елемента до обраного
+                            compositeDisposable.add(favoriteInterface.addToFavorites(items[position].id.toString())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread()).subscribe({
+                                    Toast.makeText(
+                                        context,
+                                        items[position].name + " додано до обраного",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    holder.favImage.setImageResource(R.drawable.ic_favorite_24)
+                                }, { err: Throwable? ->
+                                    Toast.makeText(
+                                        context,
+                                        "Помилка додавання товару до обраного" + err!!.message,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                })
+                            )
+                        }
+                    }
+
+                })
+        }
+
         holder.foodCart.setOnClickListener {
             val cartItem = CartItem()
             cartItem.uid = Common.currentUser?.uid.toString()
@@ -107,72 +191,95 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
             //cartItem.foodExtraPrice = 0.0
             cartItem.foodAddon = ""
             cartItem.foodSize = items[position].userSelectedSize?.name.toString()
-            cartInterface.getItemWithAllOptionsInCart(cartItem.foodId,
-            cartItem.uid,
-            cartItem.foodSize,
-            cartItem.foodAddon)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : SingleObserver<CartItem>{
+            cartInterface.getItemWithAllOptionsInCart(
+                cartItem.foodId, cartItem.uid, cartItem.foodSize, cartItem.foodAddon
+            ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : SingleObserver<CartItem> {
                     override fun onSubscribe(d: Disposable) {
                     }
 
                     override fun onError(e: Throwable) {
-                        if(e.message?.contains("empty") == true){
-                            compositeDisposable.add(cartInterface.insertOrReplaceAll(cartItem)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe({
-                                    Toast.makeText(context, cartItem.foodName+ " додано до кошика", Toast.LENGTH_SHORT).show()
-                                }, {
-                                        t: Throwable? -> Toast.makeText(context, "Помилка додавання товару до кошика" +t!!.message, Toast.LENGTH_SHORT).show()
-                                }))
-                        }
-                        else
-                            Toast.makeText(context, "Помилка додавання товару в кошик" + e.message, Toast.LENGTH_SHORT).show()
+                        if (e.message?.contains("empty") == true) {
+                            compositeDisposable.add(
+                                cartInterface.insertOrReplaceAll(cartItem)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread()).subscribe({
+                                        Toast.makeText(
+                                            context,
+                                            cartItem.foodName + " додано до кошика",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }, { t: Throwable? ->
+                                        Toast.makeText(
+                                            context,
+                                            "Помилка додавання товару до кошика" + t!!.message,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    })
+                            )
+                        } else Toast.makeText(
+                            context,
+                            "Помилка додавання товару в кошик" + e.message,
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
 
                     override fun onSuccess(t: CartItem) {
-                        if(t.equals(cartItem)){
+                        if (t.equals(cartItem)) {
                             //t.foodExtraPrice = cartItem.foodExtraPrice
                             t.foodAddon = cartItem.foodAddon
                             t.foodSize = cartItem.foodSize
                             t.foodQuantity += cartItem.foodQuantity
-                            cartInterface.updateCart(t)
-                                .subscribeOn(Schedulers.io())
+                            cartInterface.updateCart(t).subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(object :SingleObserver<Int>{
+                                .subscribe(object : SingleObserver<Int> {
                                     override fun onSubscribe(d: Disposable) {
 
                                     }
 
                                     override fun onError(e: Throwable) {
-                                        Toast.makeText(context, "Помилка при оноленні кошика", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            "Помилка при оноленні кошика",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
 
                                     override fun onSuccess(t: Int) {
-                                        Toast.makeText(context, cartItem.foodName+ " додано до кошика", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            context,
+                                            cartItem.foodName + " додано до кошика",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
 
                                 })
-                        }
-                        else{
-                            compositeDisposable.add(cartInterface.insertOrReplaceAll(cartItem)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe({
-                                    Toast.makeText(context, cartItem.foodName+ " додано до кошика", Toast.LENGTH_SHORT).show()
-                                }, {
-                                        t: Throwable? -> Toast.makeText(context, "Помилка додавання товару до кошика" +t!!.message, Toast.LENGTH_SHORT).show()
-                                }))
+                        } else {
+                            compositeDisposable.add(
+                                cartInterface.insertOrReplaceAll(cartItem)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread()).subscribe({
+                                        Toast.makeText(
+                                            context,
+                                            cartItem.foodName + " додано до кошика",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }, { t: Throwable? ->
+                                        Toast.makeText(
+                                            context,
+                                            "Помилка додавання товару до кошика" + t!!.message,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    })
+                            )
                         }
                     }
 
                 })
         }
     }
-    fun onStop(){
-        if(compositeDisposable !=null)
-            compositeDisposable.clear()
+
+    fun onStop() {
+        if (compositeDisposable != null) compositeDisposable.clear()
     }
 }

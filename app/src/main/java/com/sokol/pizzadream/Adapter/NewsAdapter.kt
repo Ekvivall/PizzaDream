@@ -1,6 +1,7 @@
 package com.sokol.pizzadream.Adapter
 
 import android.content.Context
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,8 +10,12 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
+import com.sokol.pizzadream.Common.Common
+import com.sokol.pizzadream.EventBus.FoodItemClick
+import com.sokol.pizzadream.EventBus.NewsItemClick
 import com.sokol.pizzadream.Model.NewsModel
 import com.sokol.pizzadream.R
+import org.greenrobot.eventbus.EventBus
 
 class NewsAdapter(val items: List<NewsModel>, val context: Context) :
     RecyclerView.Adapter<NewsAdapter.MyViewHolder>() {
@@ -48,12 +53,12 @@ class NewsAdapter(val items: List<NewsModel>, val context: Context) :
         val newsItem = items[position]
         Glide.with(context).load(newsItem.image).into(holder.image)
         holder.title.text = newsItem.title
-        holder.content.text = newsItem.content
+        holder.content.text = Html.fromHtml(newsItem.content, Html.FROM_HTML_MODE_LEGACY)
         holder.date.text = newsItem.date
         holder.setListener(object : IRecyclerItemClickListener {
             override fun onItemClick(view: View, pos: Int) {
-                // Обробка події кліку для новини
-                TODO("Not yet implemented")
+                Common.newsSelected = items[pos]
+                EventBus.getDefault().postSticky(NewsItemClick(true, items[pos]))
             }
 
         })

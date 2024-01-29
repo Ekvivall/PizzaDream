@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -14,7 +13,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.sokol.pizzadream.Common.Common
-import com.sokol.pizzadream.Database.CartDatabase
+import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.CategoryClick
@@ -23,6 +22,7 @@ import com.sokol.pizzadream.EventBus.FoodItemClick
 import com.sokol.pizzadream.EventBus.LogOutClick
 import com.sokol.pizzadream.EventBus.MenuClick
 import com.sokol.pizzadream.EventBus.NewsClick
+import com.sokol.pizzadream.EventBus.NewsItemClick
 import com.sokol.pizzadream.EventBus.PlaceOrderClick
 import com.sokol.pizzadream.EventBus.ProfileClick
 import com.sokol.pizzadream.databinding.ActivityHomeBinding
@@ -43,7 +43,7 @@ class HomeActivity : AppCompatActivity() {
         Common.categorySelected = null
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        cart = CartRepository(CartDatabase.getInstance(this).getCartDAO())
+        cart = CartRepository(PizzaDatabase.getInstance(this).getCartDAO())
         val navView: BottomNavigationView = binding.navView
         navController = findNavController(R.id.nav_host_fragment_activity_main)
         // Passing each menu ID as a set of Ids because each
@@ -144,6 +144,12 @@ class HomeActivity : AppCompatActivity() {
     fun onNews(event: NewsClick) {
         if (event.isSuccess) {
             findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_news)
+        }
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onNewsSelected(event: NewsItemClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_news_detail)
         }
     }
 }

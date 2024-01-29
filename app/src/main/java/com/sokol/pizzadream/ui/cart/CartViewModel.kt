@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.sokol.pizzadream.Common.Common
-import com.sokol.pizzadream.Database.CartDatabase
+import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Entities.CartItem
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
@@ -35,7 +35,7 @@ class CartViewModel : ViewModel() {
     }
 
     fun initCartInterface(context: Context) {
-        cart = CartRepository(CartDatabase.getInstance(context).getCartDAO())
+        cart = CartRepository(PizzaDatabase.getInstance(context).getCartDAO())
     }
 
     fun onStop() {

@@ -13,7 +13,7 @@ import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.sokol.pizzadream.Common.Common
-import com.sokol.pizzadream.Database.CartDatabase
+import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Entities.CartItem
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
@@ -52,7 +52,7 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
 
     internal var compositeDisposable: CompositeDisposable = CompositeDisposable()
     internal var cart: CartInterface =
-        CartRepository(CartDatabase.getInstance(context).getCartDAO())
+        CartRepository(PizzaDatabase.getInstance(context).getCartDAO())
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         val view =
