@@ -119,11 +119,11 @@ class CartFragment : Fragment() {
     }
 
     override fun onStop() {
-        super.onStop()
         cartViewModel.onStop()
         compositeDisposable.clear()
         if (EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().unregister(this)
+        super.onStop()
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)

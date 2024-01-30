@@ -1,6 +1,7 @@
 package com.sokol.pizzadream.ui.fooddetail
 
 import android.os.Bundle
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -115,7 +116,7 @@ class FoodDetailFragment : Fragment() {
         Glide.with(requireContext()).load(it.image).into(foodImg)
         foodImgLayout.addView(foodImg)
         foodName.text = it.name!!
-        foodDesc.text = it.description!!
+        foodDesc.text = Html.fromHtml(it.description!!, Html.FROM_HTML_MODE_LEGACY)
         ratingBar.rating = it.ratingValue.toFloat()
         for (sizeModel in it.size) {
             val radioButton = RadioButton(context)

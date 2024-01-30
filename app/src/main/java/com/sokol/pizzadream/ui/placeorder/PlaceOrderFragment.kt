@@ -1,6 +1,8 @@
 package com.sokol.pizzadream.ui.placeorder
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
@@ -9,6 +11,7 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +26,8 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.braintreepayments.api.dropin.DropInRequest
+import com.braintreepayments.api.dropin.DropInResult
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.database.FirebaseDatabase
 import com.sokol.pizzadream.Common.Common
@@ -32,16 +37,21 @@ import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.MenuClick
 import com.sokol.pizzadream.Model.OrderModel
 import com.sokol.pizzadream.R
+import com.sokol.pizzadream.Remote.ICloudFunctions
+import com.sokol.pizzadream.Remote.RetrofitCloudClient
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import org.greenrobot.eventbus.EventBus
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 
 class PlaceOrderFragment : Fragment() {
+    private val REQUEST_BRAINTREE_CODE: Int = 8888
     private lateinit var edtName: EditText
     private lateinit var tilName: TextInputLayout
     private lateinit var edtPhone: EditText
@@ -62,6 +72,11 @@ class PlaceOrderFragment : Fragment() {
     private lateinit var cart: CartInterface
     private var compositeDisposable: CompositeDisposable = CompositeDisposable()
     private var totalPriceWithDelivery = ""
+    lateinit var cloudFunctions: ICloudFunctions
+    private var name = ""
+    private var phone = ""
+    private var address = ""
+    private var email = ""
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -107,6 +122,7 @@ class PlaceOrderFragment : Fragment() {
     }
 
     private fun initView(root: View) {
+        cloudFunctions = RetrofitCloudClient.getInstance().create(ICloudFunctions::class.java)
         edtName = root.findViewById(R.id.edt_name)
         tilName = root.findViewById(R.id.til_name)
         edtPhone = root.findViewById(R.id.edt_phone)
@@ -180,10 +196,9 @@ class PlaceOrderFragment : Fragment() {
         btnOrder.setOnClickListener {
             if (Common.isConnectedToInternet(requireContext())) {
                 // Обробка кнопки замовлення
-                val name = edtName.text.toString().trim()
-                val phone = "+380 " + edtPhone.text.toString().trim()
-                val email = edtEmail.text.toString().trim()
-                var address = ""
+                name = edtName.text.toString().trim()
+                phone = "+380 " + edtPhone.text.toString().trim()
+                email = edtEmail.text.toString().trim()
                 if (rdiHome.isChecked) {
                     address = edtAddress.text.toString().trim()
                     Common.totalPrice = totalPrice.text.toString()
@@ -223,6 +238,13 @@ class PlaceOrderFragment : Fragment() {
                 }
                 if (rdiCod.isChecked) {
                     paymentCOD(name, phone, email, address)
+                } else {
+                    if (Common.currentToken.isNotEmpty()) {
+                        val dropInRequest = DropInRequest().clientToken(Common.currentToken)
+                        startActivityForResult(
+                            dropInRequest.getIntent(context), REQUEST_BRAINTREE_CODE
+                        )
+                    }
                 }
             } else {
                 Toast.makeText(
@@ -312,51 +334,12 @@ class PlaceOrderFragment : Fragment() {
                                 order.isDeliveryAddress = rdiHome.isChecked
                                 order.isComment = false
                                 order.status = Common.STATUSES[0]
-                                val regex = Regex("\\d+(?=,\\d{2})")
-                                val price = totalPrice.text.toString().replace("\u00A0", "")
-                                val finalPrice = regex.find(price)?.value
-                                order.totalPrice = finalPrice!!.toDouble()
-                                order.isCod = true
-                                //Надсилання до бази даних
-                                FirebaseDatabase.getInstance().getReference(Common.ORDER_REF)
-                                    .child(Common.createOrderId()).setValue(order)
-                                    .addOnFailureListener { e ->
-                                        Toast.makeText(
-                                            requireContext(), "" + e.message, Toast.LENGTH_SHORT
-                                        ).show()
-                                    }.addOnCompleteListener { task ->
-                                        //Очищення кошика
-                                        if (task.isSuccessful) {
-                                            cart.cleanCart(Common.currentUser!!.uid!!)
-                                                .subscribeOn(Schedulers.io())
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe(object : SingleObserver<Int> {
-                                                    override fun onSubscribe(d: Disposable) {
-
-                                                    }
-
-                                                    override fun onError(e: Throwable) {
-                                                        Toast.makeText(
-                                                            requireContext(),
-                                                            "" + e.message,
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                    }
-
-                                                    override fun onSuccess(t: Int) {
-                                                        Toast.makeText(
-                                                            requireContext(),
-                                                            "Замовлення розміщено успішно",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                        EventBus.getDefault().postSticky(
-                                                            MenuClick(true)
-                                                        )
-                                                    }
-
-                                                })
-                                        }
-                                    }
+                                order.orderedTime = SimpleDateFormat("dd MMM yyyy, HH:mm").format(
+                                    Calendar.getInstance().time
+                                )
+                                order.totalPrice = if (rdiHome.isChecked) t + 60 else t
+                                order.transactionId = "Оплата при отриманні"
+                                writeOrderToFirebase(order)
                             }
 
                         })
@@ -368,6 +351,45 @@ class PlaceOrderFragment : Fragment() {
         )
     }
 
+    private fun writeOrderToFirebase(order: OrderModel) {
+        //Надсилання до бази даних
+        FirebaseDatabase.getInstance().getReference(Common.ORDER_REF).child(Common.createOrderId())
+            .setValue(order).addOnFailureListener { e ->
+                Toast.makeText(
+                    requireContext(), "" + e.message, Toast.LENGTH_SHORT
+                ).show()
+            }.addOnCompleteListener { task ->
+                //Очищення кошика
+                if (task.isSuccessful) {
+                    cart.cleanCart(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(object : SingleObserver<Int> {
+                            override fun onSubscribe(d: Disposable) {
+
+                            }
+
+                            override fun onError(e: Throwable) {
+                                Toast.makeText(
+                                    requireContext(), "" + e.message, Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                            override fun onSuccess(t: Int) {
+                                Toast.makeText(
+                                    requireContext(),
+                                    "Замовлення розміщено успішно",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                EventBus.getDefault().postSticky(
+                                    MenuClick(true)
+                                )
+                            }
+
+                        })
+                }
+            }
+
+    }
 //    override fun onRequestPermissionsResult(
 //        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
 //    ) {
@@ -404,8 +426,96 @@ class PlaceOrderFragment : Fragment() {
 //    }
 
     override fun onStop() {
-        super.onStop()
         compositeDisposable.clear()
+        super.onStop()
         //EventBus.getDefault().postSticky(HideFABCart(false))
+    }
+
+    override fun onDestroy() {
+        compositeDisposable.clear()
+        super.onDestroy()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_BRAINTREE_CODE && resultCode == Activity.RESULT_OK) {
+            if (data != null) {
+                val result =
+                    data.getParcelableExtra<DropInResult>(DropInResult.EXTRA_DROP_IN_RESULT)
+                val nonce = result!!.paymentMethodNonce
+                // Calculate sum cart
+                compositeDisposable.add(
+                    cart.getAllCart(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe({ cartItem/*: List<CartItem>*/ ->
+                            cart.sumPrice(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(object : SingleObserver<Double> {
+                                    override fun onSubscribe(d: Disposable) {
+                                    }
+
+                                    override fun onError(e: Throwable) {
+                                        if (!e.message!!.contains("Query returned empty")) {
+                                            Toast.makeText(
+                                                requireContext(), "" + e.message, Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
+
+                                    override fun onSuccess(t: Double) {
+                                        val finalPrice = if (rdiHome.isChecked) t + 60 else t
+                                        //After have all cart item, we will submit payment
+                                        compositeDisposable.add(
+                                            cloudFunctions.submitPayment(
+                                                finalPrice, nonce!!.nonce
+                                            ).subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe({ braintreeTransaction ->
+                                                    if (braintreeTransaction.success) {
+                                                        //Create order
+                                                        val order = OrderModel()
+                                                        order.userId = Common.currentUser!!.uid
+                                                        order.customerName = name
+                                                        order.customerPhone = phone
+                                                        order.customerAddress = address
+                                                        order.customerEmail = email
+                                                        order.cartItems = cartItem
+                                                        order.isDeliveryAddress = rdiHome.isChecked
+                                                        order.isComment = false
+                                                        order.status = Common.STATUSES[0]
+                                                        order.totalPrice = finalPrice
+                                                        order.transactionId =
+                                                            braintreeTransaction.transaction!!.id
+                                                        order.orderedTime =
+                                                            SimpleDateFormat("dd MMM yyyy, HH:mm").format(
+                                                                Calendar.getInstance().time
+                                                            )
+                                                        EventBus.getDefault().postSticky(
+                                                            MenuClick(true)
+                                                        )
+                                                        writeOrderToFirebase(order)
+                                                    }
+                                                }, { err: Throwable ->
+                                                    if (!err.message!!.contains("Expected BEGIN_OBJECT")) {
+                                                        Log.e("Err", err.message.toString())
+                                                        err.printStackTrace()
+                                                        Toast.makeText(
+                                                            requireContext(),
+                                                            err.message,
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    }
+                                                })
+                                        )
+                                    }
+                                })
+                        }, { terr: Throwable ->
+                            Toast.makeText(requireContext(), terr.message, Toast.LENGTH_SHORT)
+                                .show()
+
+                        })
+                )
+            }
+        }
     }
 }

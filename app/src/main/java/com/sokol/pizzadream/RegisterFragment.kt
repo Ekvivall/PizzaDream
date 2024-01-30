@@ -81,7 +81,7 @@ class RegisterFragment : Fragment() {
                             val user = firebaseAuth.currentUser
                             model.uid = user!!.uid
                             userInfoRef.child(user.uid).setValue(model)
-                                .addOnCompleteListener { task ->
+                                /*.addOnCompleteListener { task ->
                                     if (task.isSuccessful) {
                                         compositeDisposable.add(
                                             cloudFunctions.getToken().subscribeOn(Schedulers.io())
@@ -97,7 +97,7 @@ class RegisterFragment : Fragment() {
                                                 })
                                         )
                                     }
-                                }
+                                }*/
                         } else {
                             tilEmail.error = "Користувач з такою електронною адресою вже існує."
                         }

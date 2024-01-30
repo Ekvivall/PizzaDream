@@ -10,6 +10,6 @@ class Transaction {
     var subMerchantAccountId: String? = null
     var masterMerchantAccountId: String? = null
     var orderId: String? = null
-    var createAt: String? = null
-    var updateAt: String? = null
+    var createdAt: String? = null
+    var updatedAt: String? = null
 }

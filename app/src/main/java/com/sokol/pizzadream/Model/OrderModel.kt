@@ -10,10 +10,11 @@ class OrderModel {
     var customerEmail:String?=null
     var customerAddress:String?=null
     var isDeliveryAddress:Boolean = false
-    var isCod:Boolean = false
+    var transactionId: String?=null
     var cartItems: List<CartItem>? = null
     var isComment:Boolean = false
     var status:String?=null
+    var orderedTime:String?=null
     //var lat: Double = 0.toDouble()
     //var lng: Double = 0.toDouble()
 }

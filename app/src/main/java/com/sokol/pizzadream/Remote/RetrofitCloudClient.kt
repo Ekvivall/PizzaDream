@@ -9,7 +9,7 @@ object RetrofitCloudClient {
     fun getInstance():Retrofit {
         if (instances == null)
             instances = Retrofit.Builder()
-                .baseUrl("https://us-central1-pizza-dream-bfccd.cloudfunctions.net/widget")
+                .baseUrl("https://us-central1-pizza-dream-bfccd.cloudfunctions.net/widget/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build()

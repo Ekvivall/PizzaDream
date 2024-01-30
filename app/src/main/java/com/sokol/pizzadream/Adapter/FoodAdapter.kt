@@ -1,6 +1,7 @@
 package com.sokol.pizzadream.Adapter
 
 import android.content.Context
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -73,7 +74,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         Glide.with(context).load(items[position].image).into(holder.foodImage)
         holder.foodName.text = items[position].name
-        holder.foodDesc.text = items[position].description
+        holder.foodDesc.text = Html.fromHtml(items[position].description, Html.FROM_HTML_MODE_LEGACY)
         holder.radioGroupSize.removeAllViews()
         for (sizeModel in items[position].size) {
             val radioButton = RadioButton(context)

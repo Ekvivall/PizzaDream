@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity() {
         userInfoRef = database.getReference(Common.USER_REFERENCE)
         firebaseAuth = FirebaseAuth.getInstance()
         dialog = SpotsDialog.Builder().setContext(this).setCancelable(false).build()
-        //cloudFunctions = RetrofitCloudClient.getInstance().create(ICloudFunctions::class.java)
+        cloudFunctions = RetrofitCloudClient.getInstance().create(ICloudFunctions::class.java)
         providers = Arrays.asList(
             AuthUI.IdpConfig.GoogleBuilder().build()
         )
@@ -98,9 +98,9 @@ class MainActivity : AppCompatActivity() {
                                 model.email = user.email.toString()
                                 model.role = "user"
                                 userInfoRef.child(user.uid).setValue(model)
-                                    .addOnCompleteListener { task ->
+                                    /*.addOnCompleteListener { task ->
                                         if (task.isSuccessful) {
-                                            compositeDisposable.add(
+                                            *//*compositeDisposable.add(
                                                 cloudFunctions.getToken()
                                                     .subscribeOn(Schedulers.io())
                                                     .observeOn(AndroidSchedulers.mainThread())
@@ -113,9 +113,9 @@ class MainActivity : AppCompatActivity() {
                                                             Toast.LENGTH_SHORT
                                                         ).show()
                                                     })
-                                            )
+                                            )*//*
                                         }
-                                    }
+                                    }*/
                                 Common.currentUser = model
                             } else {
                                 val model = p0.getValue(UserModel::class.java)
@@ -123,7 +123,7 @@ class MainActivity : AppCompatActivity() {
                             }
                         }
                     })
-                /*compositeDisposable.add(
+                compositeDisposable.add(
                     cloudFunctions.getToken().subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread()).subscribe({ braintreeToken ->
                             Common.currentToken = braintreeToken.token
@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
                                 this, throwable.message, Toast.LENGTH_SHORT
                             ).show()
                         })
-                )*/
+                )
                 startActivity(Intent(this, HomeActivity::class.java))
                 finish()
             } else {
