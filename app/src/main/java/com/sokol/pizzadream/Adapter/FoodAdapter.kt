@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Database.Entities.CartItem
+import com.sokol.pizzadream.Database.Entities.FavoriteItem
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
@@ -157,7 +158,13 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                             )
                         } else {
                             // Додавання елемента до обраного
-                            compositeDisposable.add(favoriteInterface.addToFavorites(items[position].id.toString())
+                            val favorite = FavoriteItem()
+                            favorite.foodId = items[position].id.toString()
+                            favorite.uid = Common.currentUser?.uid.toString()
+                            favorite.foodName = items[position].name
+                            favorite.foodImage = items[position].image
+                            favorite.foodPrice = items[position].size[0].price.toDouble()
+                            compositeDisposable.add(favoriteInterface.addToFavorites(favorite)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                     Toast.makeText(

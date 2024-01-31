@@ -30,6 +30,7 @@ import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Common.SpaceItemDecoration
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Entities.CartItem
+import com.sokol.pizzadream.Database.Entities.FavoriteItem
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.Database.Repositories.FavoriteInterface
@@ -229,7 +230,13 @@ class FoodDetailFragment : Fragment() {
                             )
                         } else {
                             // Додавання елемента до обраного
-                            compositeDisposable.add(favorite.addToFavorites(Common.foodSelected?.id.toString())
+                            val fav = FavoriteItem()
+                            fav.foodId = Common.foodSelected?.id.toString()
+                            fav.uid = Common.currentUser?.uid.toString()
+                            fav.foodName = Common.foodSelected?.name
+                            fav.foodImage = Common.foodSelected?.image
+                            fav.foodPrice = Common.foodSelected?.size?.get(0)?.price!!.toDouble()
+                            compositeDisposable.add(favorite.addToFavorites(fav)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                     Toast.makeText(

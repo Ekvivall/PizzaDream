@@ -52,4 +52,9 @@
         android:name="com.sokol.pizzadream.ui.newsdetail.NewsDetailFragment"
         android:label="@string/menu_food_detail"
         tools:layout="@layout/fragment_news_detail" />
+    <fragment
+        android:id="@+id/nav_favorites"
+        android:name="com.sokol.pizzadream.ui.favorites.FavoritesFragment"
+        android:label="@string/menu_favorites"
+        tools:layout="@layout/fragment_favorites" />
 </navigation>

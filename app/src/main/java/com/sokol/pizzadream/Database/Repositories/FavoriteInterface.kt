@@ -1,10 +1,14 @@
 package com.sokol.pizzadream.Database.Repositories
 
+import com.sokol.pizzadream.Database.Entities.FavoriteItem
+import com.sokol.pizzadream.Model.FoodModel
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Single
 
 interface FavoriteInterface {
-    fun addToFavorites(foodId: String): Completable
+    fun addToFavorites(favoriteItem: FavoriteItem): Completable
     fun removeFromFavorites(foodId: String): Completable
     fun isFavorite(foodId: String): Single<Int>
+    fun getAllFavorites(uid:String): Flowable<List<FavoriteItem>>
 }

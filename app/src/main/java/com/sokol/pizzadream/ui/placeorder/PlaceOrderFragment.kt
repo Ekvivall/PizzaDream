@@ -380,6 +380,7 @@ class PlaceOrderFragment : Fragment() {
                                     "Замовлення розміщено успішно",
                                     Toast.LENGTH_SHORT
                                 ).show()
+                                compositeDisposable.dispose()
                                 EventBus.getDefault().postSticky(
                                     MenuClick(true)
                                 )
@@ -425,16 +426,7 @@ class PlaceOrderFragment : Fragment() {
 //        }
 //    }
 
-    override fun onStop() {
-        compositeDisposable.clear()
-        super.onStop()
-        //EventBus.getDefault().postSticky(HideFABCart(false))
-    }
 
-    override fun onDestroy() {
-        compositeDisposable.clear()
-        super.onDestroy()
-    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -443,11 +435,9 @@ class PlaceOrderFragment : Fragment() {
                 val result =
                     data.getParcelableExtra<DropInResult>(DropInResult.EXTRA_DROP_IN_RESULT)
                 val nonce = result!!.paymentMethodNonce
-                // Calculate sum cart
                 compositeDisposable.add(
                     cart.getAllCart(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe({ cartItem/*: List<CartItem>*/ ->
+                        .observeOn(AndroidSchedulers.mainThread()).subscribe({ cartItem ->
                             cart.sumPrice(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(object : SingleObserver<Double> {
@@ -464,7 +454,7 @@ class PlaceOrderFragment : Fragment() {
 
                                     override fun onSuccess(t: Double) {
                                         val finalPrice = if (rdiHome.isChecked) t + 60 else t
-                                        //After have all cart item, we will submit payment
+                                        // Після того, як виберемо всі товари в кошику, надішлемо платіж
                                         compositeDisposable.add(
                                             cloudFunctions.submitPayment(
                                                 finalPrice, nonce!!.nonce
@@ -472,7 +462,7 @@ class PlaceOrderFragment : Fragment() {
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribe({ braintreeTransaction ->
                                                     if (braintreeTransaction.success) {
-                                                        //Create order
+                                                        // Створення замовлення
                                                         val order = OrderModel()
                                                         order.userId = Common.currentUser!!.uid
                                                         order.customerName = name
@@ -490,21 +480,15 @@ class PlaceOrderFragment : Fragment() {
                                                             SimpleDateFormat("dd MMM yyyy, HH:mm").format(
                                                                 Calendar.getInstance().time
                                                             )
-                                                        EventBus.getDefault().postSticky(
-                                                            MenuClick(true)
-                                                        )
                                                         writeOrderToFirebase(order)
                                                     }
                                                 }, { err: Throwable ->
-                                                    if (!err.message!!.contains("Expected BEGIN_OBJECT")) {
-                                                        Log.e("Err", err.message.toString())
-                                                        err.printStackTrace()
-                                                        Toast.makeText(
-                                                            requireContext(),
-                                                            err.message,
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                    }
+                                                    Log.e("Err", err.message.toString())
+                                                    Toast.makeText(
+                                                        requireContext(),
+                                                        err.message,
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
                                                 })
                                         )
                                     }

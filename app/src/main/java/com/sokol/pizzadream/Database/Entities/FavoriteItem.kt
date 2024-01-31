@@ -1,13 +1,25 @@
 package com.sokol.pizzadream.Database.Entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import org.jetbrains.annotations.NotNull
 
 @Entity(tableName = "Favorites")
 class FavoriteItem {
     @PrimaryKey()
-    var foodId: String =""
+    var foodId: String = ""
+
+    @ColumnInfo(name = "foodName")
+    var foodName: String? = null
+
+    @ColumnInfo(name = "foodImage")
+    var foodImage: String? = null
+
+    @ColumnInfo(name = "foodPrice")
+    var foodPrice: Double = 0.0
+
+    @ColumnInfo(name = "uid")
+    var uid: String = ""
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -20,7 +32,7 @@ class FavoriteItem {
     }
 
     override fun hashCode(): Int {
-        return foodId?.hashCode() ?: 0
+        return foodId.hashCode()
     }
 
 }
