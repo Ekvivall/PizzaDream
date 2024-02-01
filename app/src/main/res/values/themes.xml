@@ -27,5 +27,8 @@
     <style parent="@android:style/Widget.Spinner" name="SpinnerwithNoArrow">
         <item name="android:background">@android:drawable/edit_text</item>
     </style>
-
+    <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
 </resources>
