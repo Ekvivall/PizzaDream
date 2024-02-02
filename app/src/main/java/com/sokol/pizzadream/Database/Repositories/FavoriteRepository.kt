@@ -11,12 +11,12 @@ class FavoriteRepository(private val favoriteDAO: FavoriteDAO) : FavoriteInterfa
         return favoriteDAO.addToFavorites(favoriteItem)
     }
 
-    override fun removeFromFavorites(foodId: String): Completable {
-        return favoriteDAO.removeFromFavorites(foodId)
+    override fun removeFromFavorites(foodId: String, uid:String): Completable {
+        return favoriteDAO.removeFromFavorites(foodId, uid)
     }
 
-    override fun isFavorite(foodId: String): Single<Int> {
-        return favoriteDAO.isFavorite(foodId)
+    override fun isFavorite(foodId: String, uid:String): Single<Int> {
+        return favoriteDAO.isFavorite(foodId, uid)
     }override fun getAllFavorites(uid: String): Flowable<List<FavoriteItem>> {
         return  favoriteDAO.getAllFavorites(uid)
     }

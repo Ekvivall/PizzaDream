@@ -75,7 +75,8 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         Glide.with(context).load(items[position].image).into(holder.foodImage)
         holder.foodName.text = items[position].name
-        holder.foodDesc.text = Html.fromHtml(items[position].description, Html.FROM_HTML_MODE_LEGACY)
+        holder.foodDesc.text =
+            Html.fromHtml(items[position].description, Html.FROM_HTML_MODE_LEGACY)
         holder.radioGroupSize.removeAllViews()
         for (sizeModel in items[position].size) {
             val radioButton = RadioButton(context)
@@ -105,8 +106,11 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
             }
         })
         // Перевірка, чи елемент вже є в обраному
-        favoriteInterface.isFavorite(items[position].id.toString()).subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
+        favoriteInterface.isFavorite(
+            items[position].id.toString(),
+            Common.currentUser?.uid.toString()
+        ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : SingleObserver<Int> {
                 override fun onSubscribe(d: Disposable) {
                 }
 
@@ -118,8 +122,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                     if (t > 0) {
                         // Встановлення обраної іконки
                         holder.favImage.setImageResource(R.drawable.ic_favorite_24)
-                    }
-                    else{
+                    } else {
                         holder.favImage.setImageResource(R.drawable.ic_favorite_border_24)
                     }
                 }
@@ -127,8 +130,11 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
             })
         // Встановлення слухача кліків для іконки Favorite
         holder.favImage.setOnClickListener {
-            favoriteInterface.isFavorite(items[position].id.toString()).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
+            favoriteInterface.isFavorite(
+                items[position].id.toString(),
+                Common.currentUser?.uid.toString()
+            ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : SingleObserver<Int> {
                     override fun onSubscribe(d: Disposable) {
                     }
 
@@ -139,22 +145,25 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                     override fun onSuccess(t: Int) {
                         if (t > 0) {
                             // Видалення елемента з обраного
-                            compositeDisposable.add(favoriteInterface.removeFromFavorites(items[position].id.toString())
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread()).subscribe({
-                                    Toast.makeText(
-                                        context,
-                                        items[position].name + " видалено з обраних",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    holder.favImage.setImageResource(R.drawable.ic_favorite_border_24)
-                                }, { err: Throwable? ->
-                                    Toast.makeText(
-                                        context,
-                                        "Помилка видалення товару з обраного" + err!!.message,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                })
+                            compositeDisposable.add(
+                                favoriteInterface.removeFromFavorites(
+                                    items[position].id.toString(),
+                                    Common.currentUser?.uid.toString()
+                                ).subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread()).subscribe({
+                                        Toast.makeText(
+                                            context,
+                                            items[position].name + " видалено з обраних",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        holder.favImage.setImageResource(R.drawable.ic_favorite_border_24)
+                                    }, { err: Throwable? ->
+                                        Toast.makeText(
+                                            context,
+                                            "Помилка видалення товару з обраного" + err!!.message,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    })
                             )
                         } else {
                             // Додавання елемента до обраного
@@ -164,22 +173,23 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                             favorite.foodName = items[position].name
                             favorite.foodImage = items[position].image
                             favorite.foodPrice = items[position].size[0].price.toDouble()
-                            compositeDisposable.add(favoriteInterface.addToFavorites(favorite)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread()).subscribe({
-                                    Toast.makeText(
-                                        context,
-                                        items[position].name + " додано до обраного",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    holder.favImage.setImageResource(R.drawable.ic_favorite_24)
-                                }, { err: Throwable? ->
-                                    Toast.makeText(
-                                        context,
-                                        "Помилка додавання товару до обраного" + err!!.message,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                })
+                            compositeDisposable.add(
+                                favoriteInterface.addToFavorites(favorite)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread()).subscribe({
+                                        Toast.makeText(
+                                            context,
+                                            items[position].name + " додано до обраного",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        holder.favImage.setImageResource(R.drawable.ic_favorite_24)
+                                    }, { err: Throwable? ->
+                                        Toast.makeText(
+                                            context,
+                                            "Помилка додавання товару до обраного" + err!!.message,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    })
                             )
                         }
                     }

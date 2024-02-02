@@ -14,11 +14,11 @@ interface FavoriteDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addToFavorites(favoriteItem: FavoriteItem): Completable
 
-    @Query("DELETE FROM Favorites WHERE foodId=:foodId")
-    fun removeFromFavorites(foodId: String): Completable
+    @Query("DELETE FROM Favorites WHERE foodId=:foodId and uid=:uid")
+    fun removeFromFavorites(foodId: String, uid:String): Completable
 
-    @Query("SELECT COUNT(foodId) FROM Favorites WHERE foodId=:foodId")
-    fun isFavorite(foodId: String): Single<Int>
+    @Query("SELECT COUNT(foodId) FROM Favorites WHERE foodId=:foodId and uid=:uid")
+    fun isFavorite(foodId: String, uid:String): Single<Int>
     @Query("SELECT * FROM Favorites WHERE uid=:uid")
     fun getAllFavorites(uid:String): Flowable<List<FavoriteItem>>
 }

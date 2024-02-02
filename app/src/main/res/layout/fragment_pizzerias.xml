@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.pizzerias.PizzeriasFragment">
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/radioButtonMap"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:textAlignment="center"
+            android:text="@string/map"
+            android:button="@drawable/radio_button_no_circle"
+            android:background="@drawable/radio_button_no_circle"
+            android:fontFamily="@font/montserrat"
+            android:textColor="@drawable/radio_button_text_color"
+            android:textSize="20sp"/>
+
+        <RadioButton
+            android:id="@+id/radioButtonList"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:text="@string/list"
+            android:button="@drawable/radio_button_no_circle"
+            android:background="@drawable/radio_button_no_circle"
+            android:fontFamily="@font/montserrat"
+            android:textSize="20sp"
+            android:textColor="@drawable/radio_button_text_color"/>
+
+    </RadioGroup>
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/map_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@string/app_name" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/pizzeria_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+</LinearLayout>

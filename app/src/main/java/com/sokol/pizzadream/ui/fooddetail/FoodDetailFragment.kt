@@ -28,9 +28,9 @@ import com.sokol.pizzadream.Adapter.AddonCategoryAdapter
 import com.sokol.pizzadream.Adapter.UserAddonAdapter
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Common.SpaceItemDecoration
-import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Entities.CartItem
 import com.sokol.pizzadream.Database.Entities.FavoriteItem
+import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.Database.Repositories.FavoriteInterface
@@ -180,7 +180,8 @@ class FoodDetailFragment : Fragment() {
             calculateTotalPrice()
         }
         // Перевірка, чи елемент вже є в обраному
-        favorite.isFavorite(Common.foodSelected?.id.toString()).subscribeOn(Schedulers.io())
+        favorite.isFavorite(Common.foodSelected?.id.toString(), Common.currentUser?.uid.toString())
+            .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
                 override fun onSubscribe(d: Disposable) {
                 }
@@ -199,7 +200,10 @@ class FoodDetailFragment : Fragment() {
             })
         // Встановлення слухача кліків для іконки Favorite
         favImage.setOnClickListener {
-            favorite.isFavorite(Common.foodSelected?.id.toString()).subscribeOn(Schedulers.io())
+            favorite.isFavorite(
+                Common.foodSelected?.id.toString(),
+                Common.currentUser?.uid.toString()
+            ).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
                     override fun onSubscribe(d: Disposable) {
                     }
@@ -211,22 +215,26 @@ class FoodDetailFragment : Fragment() {
                     override fun onSuccess(t: Int) {
                         if (t > 0) {
                             // Видалення елемента з обраного
-                            compositeDisposable.add(favorite.removeFromFavorites(Common.foodSelected?.id.toString())
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread()).subscribe({
-                                    Toast.makeText(
-                                        requireContext(),
-                                        Common.foodSelected?.name + " видалено з обраних",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    favImage.setImageResource(R.drawable.ic_favorite_border_24)
-                                }, { err: Throwable? ->
-                                    Toast.makeText(
-                                        requireContext(),
-                                        "Помилка видалення товару з обраного" + err!!.message,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                })
+                            compositeDisposable.add(
+                                favorite.removeFromFavorites(
+                                    Common.foodSelected?.id.toString(),
+                                    Common.currentUser?.uid.toString()
+                                )
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread()).subscribe({
+                                        Toast.makeText(
+                                            requireContext(),
+                                            Common.foodSelected?.name + " видалено з обраних",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        favImage.setImageResource(R.drawable.ic_favorite_border_24)
+                                    }, { err: Throwable? ->
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Помилка видалення товару з обраного" + err!!.message,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    })
                             )
                         } else {
                             // Додавання елемента до обраного
@@ -236,22 +244,23 @@ class FoodDetailFragment : Fragment() {
                             fav.foodName = Common.foodSelected?.name
                             fav.foodImage = Common.foodSelected?.image
                             fav.foodPrice = Common.foodSelected?.size?.get(0)?.price!!.toDouble()
-                            compositeDisposable.add(favorite.addToFavorites(fav)
-                                .subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread()).subscribe({
-                                    Toast.makeText(
-                                        requireContext(),
-                                        Common.foodSelected?.name + " додано до обраного",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                    favImage.setImageResource(R.drawable.ic_favorite_24)
-                                }, { err: Throwable? ->
-                                    Toast.makeText(
-                                        context,
-                                        "Помилка додавання товару до обраного" + err!!.message,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                })
+                            compositeDisposable.add(
+                                favorite.addToFavorites(fav)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread()).subscribe({
+                                        Toast.makeText(
+                                            requireContext(),
+                                            Common.foodSelected?.name + " додано до обраного",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        favImage.setImageResource(R.drawable.ic_favorite_24)
+                                    }, { err: Throwable? ->
+                                        Toast.makeText(
+                                            context,
+                                            "Помилка додавання товару до обраного" + err!!.message,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    })
                             )
                         }
                     }

@@ -5,6 +5,11 @@
         android:id="@+id/nav_home"
         android:icon="@drawable/ic_menu_menu_book"
         android:title="@string/menu_home" />
+
+    <item
+        android:id="@+id/nav_pizzerias"
+        android:icon="@drawable/ic_location_on_24"
+        android:title="@string/menu_pizzerias" />
     <item
         android:id="@+id/nav_cart"
         android:icon="@drawable/ic_shopping_cart_24"

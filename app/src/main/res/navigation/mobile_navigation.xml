@@ -57,4 +57,9 @@
         android:name="com.sokol.pizzadream.ui.favorites.FavoritesFragment"
         android:label="@string/menu_favorites"
         tools:layout="@layout/fragment_favorites" />
+    <fragment
+        android:id="@+id/nav_pizzerias"
+        android:name="com.sokol.pizzadream.ui.pizzerias.PizzeriasFragment"
+        android:label="@string/menu_pizzerias"
+        tools:layout="@layout/fragment_pizzerias" />
 </navigation>

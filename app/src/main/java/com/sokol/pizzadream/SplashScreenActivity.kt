@@ -14,14 +14,16 @@ import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Model.UserModel
 import com.sokol.pizzadream.Remote.ICloudFunctions
 import com.sokol.pizzadream.Remote.RetrofitCloudClient
-import dmax.dialog.SpotsDialog
+import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.util.concurrent.TimeUnit
 
 class SplashScreenActivity : AppCompatActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var listener: FirebaseAuth.AuthStateListener
+
     //private lateinit var dialog: android.app.AlertDialog
     private lateinit var database: FirebaseDatabase
     private lateinit var userInfoRef: DatabaseReference
@@ -72,25 +74,28 @@ class SplashScreenActivity : AppCompatActivity() {
                         override fun onDataChange(p0: DataSnapshot) {
                             val model = p0.getValue(UserModel::class.java)
                             Common.currentUser = model
+                            goToHome()
                         }
                     })
-                compositeDisposable.add(
-                    cloudFunctions.getToken().subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread()).subscribe({ braintreeToken ->
-                            Common.currentToken = braintreeToken.token
-                        }, { throwable ->
-                            Toast.makeText(
-                                this, throwable.message, Toast.LENGTH_SHORT
-                            ).show()
-                        })
-                )
-                startActivity(Intent(this, HomeActivity::class.java))
-                finish()
             } else {
                 // Користувач ще не увійшов, перенаправляємо на MainActivity
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
             }
         }
+    }
+    private fun goToHome(){
+        compositeDisposable.add(
+            cloudFunctions.getToken().subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe({ braintreeToken ->
+                    Common.currentToken = braintreeToken.token
+                }, { throwable ->
+                    Toast.makeText(
+                        this, throwable.message, Toast.LENGTH_SHORT
+                    ).show()
+                })
+        )
+        startActivity(Intent(this, HomeActivity::class.java))
+        finish()
     }
 }

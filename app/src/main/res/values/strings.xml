@@ -65,5 +65,9 @@
     <string name="menu_favorites">Обрані товари</string>
     <string name="empty_favorites">У вас немає обраних товарів</string>
     <string name="go_to_menu_fav">Ви можете додати улюблену страву з меню</string>
+    <string name="menu_pizzerias">Піцерії</string>
+    <string name="map">Карта</string>
+    <string name="list">Список</string>
+    <string name="google_maps_key">AIzaSyD9GQK9FfCjUWWWJdNiqq0xrO4Vw-smeqQ</string>
 
 </resources>

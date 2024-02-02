@@ -74,8 +74,10 @@ class FavoriteAdapter(var items: List<FavoriteItem>, val context: Context) :
         })
         holder.favImage.setOnClickListener {
             compositeDisposable.add(
-                favorite.removeFromFavorites(items[position].foodId).subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread()).subscribe({
+                favorite.removeFromFavorites(
+                    items[position].foodId,
+                    Common.currentUser?.uid.toString()
+                ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
                         Toast.makeText(
                             context,
                             items[position].foodName + " видалено з обраних",
