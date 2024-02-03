@@ -427,7 +427,6 @@ class PlaceOrderFragment : Fragment() {
 //    }
 
 
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_BRAINTREE_CODE && resultCode == Activity.RESULT_OK) {
@@ -454,10 +453,15 @@ class PlaceOrderFragment : Fragment() {
 
                                     override fun onSuccess(t: Double) {
                                         val finalPrice = if (rdiHome.isChecked) t + 60 else t
+                                        val headers = HashMap<String, String>()
+                                        headers.put(
+                                            "Authorization",
+                                            Common.buildToken(Common.authorizeToken!!)
+                                        )
                                         // Після того, як виберемо всі товари в кошику, надішлемо платіж
                                         compositeDisposable.add(
                                             cloudFunctions.submitPayment(
-                                                finalPrice, nonce!!.nonce
+                                                headers, finalPrice, nonce!!.nonce
                                             ).subscribeOn(Schedulers.io())
                                                 .observeOn(AndroidSchedulers.mainThread())
                                                 .subscribe({ braintreeTransaction ->

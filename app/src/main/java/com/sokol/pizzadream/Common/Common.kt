@@ -1,13 +1,7 @@
 package com.sokol.pizzadream.Common
 
 import android.content.Context
-import android.graphics.Typeface
 import android.net.ConnectivityManager
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.SpannableStringBuilder
-import android.text.style.StyleSpan
-import android.widget.TextView
 import com.sokol.pizzadream.Model.AddonCategoryModel
 import com.sokol.pizzadream.Model.CategoryModel
 import com.sokol.pizzadream.Model.FoodModel
@@ -36,6 +30,7 @@ object Common {
             .append(characters[Random().nextInt(characters.length)]).toString()
     }
 
+    var authorizeToken: String? = null
     var newsSelected: NewsModel? = null
     var currentToken: String = ""
     val NEWS_REF: String = "News"
@@ -61,15 +56,21 @@ object Common {
         "Доставлено",
         "Скасовано"
     )
-    fun isConnectedToInternet(context: Context): Boolean{
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+    fun isConnectedToInternet(context: Context): Boolean {
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkInfo = connectivityManager.activeNetworkInfo
         if (networkInfo != null && networkInfo.isConnected) {
             // Доступне підключення до Інтернету
-            return  true
+            return true
         }
         // Немає підключення до Інтернету
         return false
+    }
+
+    fun buildToken(authorizeToken: String): String {
+        return java.lang.StringBuilder("Bearer ").append(authorizeToken).toString()
     }
 
 }

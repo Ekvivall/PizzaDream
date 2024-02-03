@@ -14,11 +14,9 @@ import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Model.UserModel
 import com.sokol.pizzadream.Remote.ICloudFunctions
 import com.sokol.pizzadream.Remote.RetrofitCloudClient
-import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import java.util.concurrent.TimeUnit
 
 class SplashScreenActivity : AppCompatActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
@@ -65,9 +63,7 @@ class SplashScreenActivity : AppCompatActivity() {
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onCancelled(p0: DatabaseError) {
                             Toast.makeText(
-                                this@SplashScreenActivity,
-                                "" + p0.message,
-                                Toast.LENGTH_SHORT
+                                this@SplashScreenActivity, "" + p0.message, Toast.LENGTH_SHORT
                             ).show()
                         }
 
@@ -84,18 +80,26 @@ class SplashScreenActivity : AppCompatActivity() {
             }
         }
     }
-    private fun goToHome(){
-        compositeDisposable.add(
-            cloudFunctions.getToken().subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe({ braintreeToken ->
-                    Common.currentToken = braintreeToken.token
-                }, { throwable ->
-                    Toast.makeText(
-                        this, throwable.message, Toast.LENGTH_SHORT
-                    ).show()
-                })
-        )
-        startActivity(Intent(this, HomeActivity::class.java))
-        finish()
+
+    private fun goToHome() {
+        FirebaseAuth.getInstance().currentUser!!.getIdToken(true).addOnFailureListener { t ->
+            Toast.makeText(this, t.message, Toast.LENGTH_SHORT).show()
+        }.addOnCompleteListener {
+                Common.authorizeToken = it.result!!.token
+            val headers = HashMap<String, String>()
+            headers.put("Authorization", Common.buildToken(Common.authorizeToken!!))
+                compositeDisposable.add(
+                    cloudFunctions.getToken(headers).subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread()).subscribe({ braintreeToken ->
+                            Common.currentToken = braintreeToken.token
+                        }, { throwable ->
+                            Toast.makeText(
+                                this, throwable.message, Toast.LENGTH_SHORT
+                            ).show()
+                        })
+                )
+                startActivity(Intent(this, HomeActivity::class.java))
+                finish()
+            }
     }
 }

@@ -78,7 +78,7 @@ class UserAddonAdapter(val items: List<AddonModel>, val context: Context) :
             Common.foodSelected?.userSelectedAddon?.remove(t)
             //EventBus.getDefault().postSticky(AddonClick(false, t, position + 1))
             EventBus.getDefault().postSticky(UserAddonCountUpdate(true, t,position + 1))
-            //notifyDataSetChanged()
+            notifyDataSetChanged()
         }
     }
 
