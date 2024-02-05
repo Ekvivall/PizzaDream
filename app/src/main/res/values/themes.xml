@@ -31,4 +31,7 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowBackground">@drawable/splash_screen</item>
     </style>
+    <style name="MyDatePickerStyle" parent="ThemeOverlay.MaterialComponents.Dialog">
+        <item name="android:textColorPrimary">@color/black</item>
+    </style>
 </resources>

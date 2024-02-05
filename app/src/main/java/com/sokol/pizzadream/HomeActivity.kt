@@ -26,6 +26,8 @@ import com.sokol.pizzadream.EventBus.NewsClick
 import com.sokol.pizzadream.EventBus.NewsItemClick
 import com.sokol.pizzadream.EventBus.PlaceOrderClick
 import com.sokol.pizzadream.EventBus.ProfileClick
+import com.sokol.pizzadream.EventBus.VacanciesClick
+import com.sokol.pizzadream.EventBus.VacancyItemClick
 import com.sokol.pizzadream.databinding.ActivityHomeBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -156,6 +158,18 @@ class HomeActivity : AppCompatActivity() {
     fun onFavorites(event: FavoritesClick) {
         if (event.isSuccess) {
             findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_favorites)
+        }
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onVacancies(event: VacanciesClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_vacancies)
+        }
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onVacancySelected(event: VacancyItemClick) {
+        if (event.isSuccess) {
+            //findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_vacancy_detail)
         }
     }
 }

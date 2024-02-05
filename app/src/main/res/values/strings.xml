@@ -16,7 +16,7 @@
     <string name="register_btn">Зареєструватись</string>
     <string name="have_account">Вже маєте обліковий запис? Увійти</string>
     <string name="cansel">Скасувати</string>
-    <string name="send">Надіслати</string>
+    <string name="send">Прикріпити резюме та надіслати</string>
     <string name="add_to_cart">В кошик</string>
     <string name="categories">Категорії</string>
     <string name="best_deals">Хіти продажів</string>
@@ -69,5 +69,11 @@
     <string name="map">Карта</string>
     <string name="list">Список</string>
     <string name="google_maps_key">AIzaSyD9GQK9FfCjUWWWJdNiqq0xrO4Vw-smeqQ</string>
+    <string name="menu_vacancy">Вакансії</string>
+    <string name="resume_title">Заповнюй анкету та приєднуйся до нашої команди</string>
+    <string name="date_of_birth">Дата народження</string>
+    <string name="vacancy">Вакансія</string>
+    <string name="attach_resume">Прикріпити резюме</string>
+    <string name="details">Деталі</string>
 
 </resources>

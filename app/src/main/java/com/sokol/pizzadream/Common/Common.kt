@@ -7,6 +7,7 @@ import com.sokol.pizzadream.Model.CategoryModel
 import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.Model.NewsModel
 import com.sokol.pizzadream.Model.UserModel
+import com.sokol.pizzadream.Model.VacancyModel
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.util.Random
@@ -30,6 +31,9 @@ object Common {
             .append(characters[Random().nextInt(characters.length)]).toString()
     }
 
+    val RESUME_REF: String = "resumes"
+    val VACANCIES_REF: String = "Vacancies"
+    var vacancySelected: VacancyModel? = null
     var authorizeToken: String? = null
     var newsSelected: NewsModel? = null
     var currentToken: String = ""
