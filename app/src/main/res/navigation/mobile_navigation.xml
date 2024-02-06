@@ -67,4 +67,9 @@
         android:name="com.sokol.pizzadream.ui.vacancies.VacanciesFragment"
         android:label="@string/menu_vacancy"
         tools:layout="@layout/fragment_vacancies" />
+    <fragment
+        android:id="@+id/nav_vacancy_detail"
+        android:name="com.sokol.pizzadream.ui.vacancyDetail.VacancyDetailFragment"
+        android:label="@string/menu_food_detail"
+        tools:layout="@layout/fragment_vacancy_detail" />
 </navigation>

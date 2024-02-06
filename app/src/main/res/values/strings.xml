@@ -75,5 +75,12 @@
     <string name="vacancy">Вакансія</string>
     <string name="attach_resume">Прикріпити резюме</string>
     <string name="details">Деталі</string>
-
+    <string name="vacancy_title">Робота у Pizza Dream це :</string>
+    <string name="vacancy_container">1) фіксована погодинна ставка + бонус за кожну доставку + чайові;\n2) гнучкий графік роботи — ти складаєш самостійно;\n3) cтабільні виплати два рази в місяць;\n4) офіційне працевлаштування.\n</string>
+    <string name="sort">Показати спочатку</string>
+    <string-array name="sort_options">
+        <item>популярні</item>
+        <item>дешеві</item>
+        <item>дорогі</item>
+    </string-array>
 </resources>

@@ -169,7 +169,7 @@ class HomeActivity : AppCompatActivity() {
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onVacancySelected(event: VacancyItemClick) {
         if (event.isSuccess) {
-            //findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_vacancy_detail)
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_vacancy_detail)
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.sokol.pizzadream.ui.vacancies
+package com.sokol.pizzadream.ui.vacancyDetail
 
 import android.app.Activity
 import android.app.AlertDialog
@@ -7,39 +7,38 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
+import android.text.Html
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Spinner
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import com.sokol.pizzadream.Adapter.VacancyAdapter
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.EventBus.VacanciesClick
 import com.sokol.pizzadream.Model.ResumeModel
+import com.sokol.pizzadream.Model.VacancyModel
 import com.sokol.pizzadream.R
 import dmax.dialog.SpotsDialog
 import org.greenrobot.eventbus.EventBus
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
-class VacanciesFragment : Fragment() {
-    private lateinit var vacanciesRecycler: RecyclerView
-    private var vacancyAdapter: VacancyAdapter? = null
+class VacancyDetailFragment : Fragment() {
+    private lateinit var vacancyImage: ImageView
+    private lateinit var vacancyName: TextView
+    private lateinit var vacancyDesc: TextView
     private lateinit var edtName: EditText
     private lateinit var tilName: TextInputLayout
     private lateinit var edtSurname: EditText
@@ -50,7 +49,6 @@ class VacanciesFragment : Fragment() {
     private lateinit var tilPhone: TextInputLayout
     private lateinit var edtEmail: EditText
     private lateinit var tilEmail: TextInputLayout
-    private lateinit var spnVacancy: Spinner
     private lateinit var btnSendResume: Button
     private val PICK_FILE_REQUEST_CODE = 4161
     private lateinit var storageReference: StorageReference
@@ -61,41 +59,19 @@ class VacanciesFragment : Fragment() {
     private var phone = ""
     private var dateOfBirth = ""
     private var email = ""
-    private var selectedVacancyId: String = ""
     private var listResume: MutableList<ResumeModel>? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
-        val vacanciesViewModel = ViewModelProvider(this).get(VacanciesViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_vacancies, container, false)
+        val vacanciesViewModel = ViewModelProvider(this).get(VacancyDetailViewModel::class.java)
+        val root = inflater.inflate(R.layout.fragment_vacancy_detail, container, false)
         initView(root)
+        val actionBar = (activity as AppCompatActivity).supportActionBar
         if (Common.isConnectedToInternet(requireContext())) {
-            vacanciesViewModel.vacancies.observe(viewLifecycleOwner, Observer {
-                val listData = it
-                vacancyAdapter = VacancyAdapter(listData, requireContext())
-                vacanciesRecycler.adapter = vacancyAdapter
-                val vacancyNames = Array(it.size) { i -> it[i].name }
-                val adapter = ArrayAdapter(
-                    requireContext(), android.R.layout.simple_spinner_dropdown_item, vacancyNames
-                )
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-                spnVacancy.adapter = adapter
-                spnVacancy.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                    override fun onItemSelected(
-                        parent: AdapterView<*>?,
-                        view: View?,
-                        position: Int,
-                        id: Long
-                    ) {
-                        val selectedVacancy = listData[position]
-                        selectedVacancyId = selectedVacancy.id
-                        listResume = selectedVacancy.resumes
-                    }
-
-                    override fun onNothingSelected(parent: AdapterView<*>?) {
-                    }
-                }
-            })
+            vacanciesViewModel.getVacancyDetailMutableLiveData().observe(viewLifecycleOwner) {
+                displayInfo(it)
+                actionBar?.title = it.name
+            }
         } else {
             Toast.makeText(
                 requireContext(), "Будь ласка, перевірте своє з'єднання!", Toast.LENGTH_SHORT
@@ -104,13 +80,19 @@ class VacanciesFragment : Fragment() {
         return root
     }
 
+    private fun displayInfo(it: VacancyModel) {
+        Glide.with(requireContext()).load(it.image).into(vacancyImage)
+        vacancyName.text = it.name
+        vacancyDesc.text = Html.fromHtml(it.desc, Html.FROM_HTML_MODE_LEGACY)
+    }
+
     private fun initView(root: View) {
         storageReference = FirebaseStorage.getInstance().reference
         waitingDialog =
             SpotsDialog.Builder().setContext(requireContext()).setCancelable(false).build()
-        vacanciesRecycler = root.findViewById(R.id.vacancies_recycler)
-        vacanciesRecycler.setHasFixedSize(true)
-        vacanciesRecycler.layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+        vacancyImage = root.findViewById(R.id.vacancy_image)
+        vacancyName = root.findViewById(R.id.vacancy_name)
+        vacancyDesc = root.findViewById(R.id.vacancy_desc)
         edtName = root.findViewById(R.id.edt_name)
         tilName = root.findViewById(R.id.til_name)
         edtName.setText(Common.currentUser!!.firstName)
@@ -179,7 +161,6 @@ class VacanciesFragment : Fragment() {
         edtEmail = root.findViewById(R.id.edt_email)
         tilEmail = root.findViewById(R.id.til_email)
         edtEmail.setText(Common.currentUser!!.email)
-        spnVacancy = root.findViewById(R.id.spn_vacancy)
         btnSendResume = root.findViewById(R.id.btn_send_resume)
         btnSendResume.setOnClickListener {
             if (Common.isConnectedToInternet(requireContext())) {
@@ -253,7 +234,7 @@ class VacanciesFragment : Fragment() {
     private fun saveResume() {
         waitingDialog.show()
         val resumeFolder = storageReference.child(
-            "resumes/" + Common.currentUser!!.uid + "_" + spnVacancy.selectedItem + "_" + SimpleDateFormat(
+            "resumes/" + Common.currentUser!!.uid + "_" + Common.vacancySelected?.name + "_" + SimpleDateFormat(
                 "yyyy_MM_dd_HH_mm"
             ).format(
                 Calendar.getInstance().time
@@ -286,7 +267,8 @@ class VacanciesFragment : Fragment() {
     private fun writeResumeToFirebase(resume: List<ResumeModel>) {
         val updateData = HashMap<String, Any>()
         updateData["resumes"] = resume
-        FirebaseDatabase.getInstance().getReference(Common.VACANCIES_REF).child(selectedVacancyId)
+        FirebaseDatabase.getInstance().getReference(Common.VACANCIES_REF)
+            .child(Common.vacancySelected?.id!!)
             .updateChildren(updateData).addOnFailureListener { e ->
                 Toast.makeText(
                     requireContext(), "" + e.message, Toast.LENGTH_SHORT
