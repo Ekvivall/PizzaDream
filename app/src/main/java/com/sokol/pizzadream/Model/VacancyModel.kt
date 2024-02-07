@@ -6,5 +6,4 @@ class VacancyModel {
     var desc: String = ""
     var shortDesc: String = ""
     var image: String = ""
-    var resumes: MutableList<ResumeModel>? = ArrayList()
 }

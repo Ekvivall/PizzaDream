@@ -8,7 +8,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,7 +61,6 @@ class VacanciesFragment : Fragment() {
     private var dateOfBirth = ""
     private var email = ""
     private var selectedVacancyId: String = ""
-    private var listResume: MutableList<ResumeModel>? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -89,7 +87,6 @@ class VacanciesFragment : Fragment() {
                     ) {
                         val selectedVacancy = listData[position]
                         selectedVacancyId = selectedVacancy.id
-                        listResume = selectedVacancy.resumes
                     }
 
                     override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -272,9 +269,7 @@ class VacanciesFragment : Fragment() {
                     resume.phone = phone
                     resume.email = email
                     resume.resumeFile = uri.toString()
-                    if (listResume == null) listResume = ArrayList()
-                    listResume!!.add(resume)
-                    writeResumeToFirebase(listResume!!)
+                    writeResumeToFirebase(resume)
                 }
                 waitingDialog.dismiss()
             }
@@ -283,11 +278,10 @@ class VacanciesFragment : Fragment() {
         }
     }
 
-    private fun writeResumeToFirebase(resume: List<ResumeModel>) {
-        val updateData = HashMap<String, Any>()
-        updateData["resumes"] = resume
-        FirebaseDatabase.getInstance().getReference(Common.VACANCIES_REF).child(selectedVacancyId)
-            .updateChildren(updateData).addOnFailureListener { e ->
+    private fun writeResumeToFirebase(resume: ResumeModel) {
+        FirebaseDatabase.getInstance().getReference(Common.RESUME_REF).child(selectedVacancyId)
+            .push()
+            .setValue(resume).addOnFailureListener { e ->
                 Toast.makeText(
                     requireContext(), "" + e.message, Toast.LENGTH_SHORT
                 ).show()

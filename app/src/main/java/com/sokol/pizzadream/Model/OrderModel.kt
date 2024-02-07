@@ -14,7 +14,7 @@ class OrderModel {
     var cartItems: List<CartItem>? = null
     var isComment:Boolean = false
     var status:String?=null
-    var orderedTime:String?=null
+    var orderedTime:Long = 0
     //var lat: Double = 0.toDouble()
     //var lng: Double = 0.toDouble()
 }

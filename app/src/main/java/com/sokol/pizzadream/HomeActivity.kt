@@ -26,6 +26,7 @@ import com.sokol.pizzadream.EventBus.NewsClick
 import com.sokol.pizzadream.EventBus.NewsItemClick
 import com.sokol.pizzadream.EventBus.PlaceOrderClick
 import com.sokol.pizzadream.EventBus.ProfileClick
+import com.sokol.pizzadream.EventBus.ReviewPizzeriaClick
 import com.sokol.pizzadream.EventBus.VacanciesClick
 import com.sokol.pizzadream.EventBus.VacancyItemClick
 import com.sokol.pizzadream.databinding.ActivityHomeBinding
@@ -170,6 +171,12 @@ class HomeActivity : AppCompatActivity() {
     fun onVacancySelected(event: VacancyItemClick) {
         if (event.isSuccess) {
             findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_vacancy_detail)
+        }
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onReviewPizzeria(event: ReviewPizzeriaClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_add_review_pizzeria)
         }
     }
 }

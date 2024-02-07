@@ -5,4 +5,5 @@ class AddressModel {
     var lat: Double = 0.0
     var lng: Double = 0.0
     var scheduleWork: String = ""
+    var id: String = ""
 }

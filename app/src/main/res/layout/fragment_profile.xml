@@ -58,7 +58,15 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="@font/montserrat"
-                            android:text="@string/nav_header_subtitle" />
+                            android:text="@string/nav_header_subtitle"
+                            android:paddingVertical="2dp"/>
+                        <TextView
+                            android:id="@+id/profile_points"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="@font/montserrat"
+                            android:textColor="@color/red"
+                            android:text="@string/app_name" />
                     </LinearLayout>
                     <ImageView
                         android:id="@+id/img_edit_profile"
@@ -116,6 +124,20 @@
                         android:text="@string/menu_vacancy"
                         android:textSize="19sp"
                         app:drawableStartCompat="@drawable/ic_person_search_24"
+                        android:drawablePadding="8dp"/>
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="2dp"
+                        android:layout_marginVertical="8dp"
+                        android:background="@color/grey" />
+                    <TextView
+                        android:id="@+id/leave_review"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/montserrat"
+                        android:text="@string/menu_leave_review"
+                        android:textSize="19sp"
+                        app:drawableStartCompat="@drawable/ic_reviews_24"
                         android:drawablePadding="8dp"/>
                     <View
                         android:layout_width="match_parent"

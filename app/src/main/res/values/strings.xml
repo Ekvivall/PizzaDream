@@ -16,7 +16,7 @@
     <string name="register_btn">Зареєструватись</string>
     <string name="have_account">Вже маєте обліковий запис? Увійти</string>
     <string name="cansel">Скасувати</string>
-    <string name="send">Прикріпити резюме та надіслати</string>
+    <string name="send_and_attach_resume">Прикріпити резюме та надіслати</string>
     <string name="add_to_cart">В кошик</string>
     <string name="categories">Категорії</string>
     <string name="best_deals">Хіти продажів</string>
@@ -78,6 +78,12 @@
     <string name="vacancy_title">Робота у Pizza Dream це :</string>
     <string name="vacancy_container">1) фіксована погодинна ставка + бонус за кожну доставку + чайові;\n2) гнучкий графік роботи — ти складаєш самостійно;\n3) cтабільні виплати два рази в місяць;\n4) офіційне працевлаштування.\n</string>
     <string name="sort">Показати спочатку</string>
+    <string name="menu_leave_review">Залишити відгук</string>
+    <string name="choose_restaurant">Оберіть ресторан</string>
+    <string name="leave_review">Напишіть нам, якщо у Вас є побажання або зауваження з приводу роботи закладу</string>
+    <string name="comment">Відгук</string>
+    <string name="attach_photo">Прикріпити фото</string>
+    <string name="send">Надіслати</string>
     <string-array name="sort_options">
         <item>популярні</item>
         <item>дешеві</item>

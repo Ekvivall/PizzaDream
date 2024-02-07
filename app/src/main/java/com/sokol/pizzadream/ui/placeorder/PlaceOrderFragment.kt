@@ -1,7 +1,6 @@
 package com.sokol.pizzadream.ui.placeorder
 
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -30,7 +29,11 @@ import androidx.lifecycle.ViewModelProvider
 import com.braintreepayments.api.dropin.DropInRequest
 import com.braintreepayments.api.dropin.DropInResult
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
+import com.google.firebase.database.ValueEventListener
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
@@ -51,7 +54,7 @@ import java.util.Calendar
 import java.util.Locale
 
 
-class PlaceOrderFragment : Fragment() {
+class PlaceOrderFragment : Fragment(){
     private val REQUEST_BRAINTREE_CODE: Int = 8888
     private lateinit var edtName: EditText
     private lateinit var tilName: TextInputLayout
@@ -335,11 +338,9 @@ class PlaceOrderFragment : Fragment() {
                                 order.isDeliveryAddress = rdiHome.isChecked
                                 order.isComment = false
                                 order.status = Common.STATUSES[0]
-                                order.orderedTime = SimpleDateFormat("dd MMM yyyy, HH:mm").format(
-                                    Calendar.getInstance().time
-                                )
                                 order.totalPrice = if (rdiHome.isChecked) t + 60 else t
                                 order.transactionId = "Оплата при отриманні"
+                                order.orderedTime = Calendar.getInstance().timeInMillis
                                 writeOrderToFirebase(order)
                             }
 
@@ -481,10 +482,7 @@ class PlaceOrderFragment : Fragment() {
                                                         order.totalPrice = finalPrice
                                                         order.transactionId =
                                                             braintreeTransaction.transaction!!.id
-                                                        order.orderedTime =
-                                                            SimpleDateFormat("dd MMM yyyy, HH:mm").format(
-                                                                Calendar.getInstance().time
-                                                            )
+                                                        order.orderedTime = Calendar.getInstance().timeInMillis
                                                         writeOrderToFirebase(order)
                                                     }
                                                 }, { err: Throwable ->
@@ -507,4 +505,5 @@ class PlaceOrderFragment : Fragment() {
             }
         }
     }
+
 }

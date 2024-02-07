@@ -15,12 +15,15 @@ import com.bumptech.glide.Glide
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Model.NewsModel
 import com.sokol.pizzadream.R
+import java.text.SimpleDateFormat
+import java.util.Date
 
 class NewsDetailFragment : Fragment() {
     private lateinit var newsImage: ImageView
     private lateinit var newsTitle: TextView
     private lateinit var newsText: TextView
     private lateinit var newsDate: TextView
+    private var simpleDateFormat= SimpleDateFormat("dd MMM yyyy")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -46,7 +49,8 @@ class NewsDetailFragment : Fragment() {
         Glide.with(requireContext()).load(it.image).into(newsImage)
         newsTitle.text = it.title
         newsText.text = Html.fromHtml(it.content, Html.FROM_HTML_MODE_LEGACY)
-        newsDate.text = it.date
+        val date = Date(it.date)
+        newsDate.text = StringBuilder(simpleDateFormat.format(date))
     }
 
     private fun initView(root: View) {

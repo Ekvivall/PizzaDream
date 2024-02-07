@@ -31,7 +31,8 @@ object Common {
             .append(characters[Random().nextInt(characters.length)]).toString()
     }
 
-    val RESUME_REF: String = "resumes"
+    val REVIEW_REF: String = "ReviewsPizzeria"
+    val RESUME_REF: String = "Resumes"
     val VACANCIES_REF: String = "Vacancies"
     var vacancySelected: VacancyModel? = null
     var authorizeToken: String? = null

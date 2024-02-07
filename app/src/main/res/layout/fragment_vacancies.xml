@@ -162,7 +162,7 @@
                 android:layout_height="wrap_content"
                 android:height="74dp"
                 android:backgroundTint="@color/red"
-                android:text="@string/send"
+                android:text="@string/send_and_attach_resume"
                 android:textColor="@color/white"
                 android:textSize="20sp" />
         </LinearLayout>

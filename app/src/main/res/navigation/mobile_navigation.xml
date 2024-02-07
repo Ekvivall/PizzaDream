@@ -72,4 +72,9 @@
         android:name="com.sokol.pizzadream.ui.vacancyDetail.VacancyDetailFragment"
         android:label="@string/menu_food_detail"
         tools:layout="@layout/fragment_vacancy_detail" />
+    <fragment
+        android:id="@+id/nav_add_review_pizzeria"
+        android:name="com.sokol.pizzadream.ui.reviewPizzeria.ReviewPizzeriaFragment"
+        android:label="@string/menu_leave_review"
+        tools:layout="@layout/fragment_add_review_pizzeria" />
 </navigation>

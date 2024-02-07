@@ -59,7 +59,6 @@ class VacancyDetailFragment : Fragment() {
     private var phone = ""
     private var dateOfBirth = ""
     private var email = ""
-    private var listResume: MutableList<ResumeModel>? = null
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -253,9 +252,7 @@ class VacancyDetailFragment : Fragment() {
                     resume.phone = phone
                     resume.email = email
                     resume.resumeFile = uri.toString()
-                    if (listResume == null) listResume = ArrayList()
-                    listResume!!.add(resume)
-                    writeResumeToFirebase(listResume!!)
+                    writeResumeToFirebase(resume)
                 }
                 waitingDialog.dismiss()
             }
@@ -264,12 +261,9 @@ class VacancyDetailFragment : Fragment() {
         }
     }
 
-    private fun writeResumeToFirebase(resume: List<ResumeModel>) {
-        val updateData = HashMap<String, Any>()
-        updateData["resumes"] = resume
-        FirebaseDatabase.getInstance().getReference(Common.VACANCIES_REF)
-            .child(Common.vacancySelected?.id!!)
-            .updateChildren(updateData).addOnFailureListener { e ->
+    private fun writeResumeToFirebase(resume: ResumeModel) {
+        FirebaseDatabase.getInstance().getReference(Common.RESUME_REF)
+            .child(Common.vacancySelected!!.id).push().setValue(resume).addOnFailureListener { e ->
                 Toast.makeText(
                     requireContext(), "" + e.message, Toast.LENGTH_SHORT
                 ).show()

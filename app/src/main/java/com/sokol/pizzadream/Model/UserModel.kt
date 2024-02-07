@@ -8,4 +8,5 @@ class UserModel {
     var phone:String = ""
     var avatar:String = ""
     var role:String = ""
+    var points:Int = 0
 }

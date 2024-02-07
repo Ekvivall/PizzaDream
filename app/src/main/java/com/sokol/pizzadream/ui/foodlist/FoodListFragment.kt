@@ -61,28 +61,26 @@ class FoodListFragment : Fragment() {
         sortSpinner = root.findViewById(R.id.sort_spinner)
         val sortOptions = resources.getStringArray(R.array.sort_options)
         val adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            sortOptions
+            requireContext(), android.R.layout.simple_spinner_dropdown_item, sortOptions
         )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         sortSpinner.adapter = adapter
         sortSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
+                parent: AdapterView<*>?, view: View?, position: Int, id: Long
             ) {
-                var sortedFoodList: List<FoodModel> = ArrayList()
-                when (position) {
-                    1 -> sortedFoodList =
+                val sortedFoodList = when (position) {
+                    1 -> {
                         foodList.sortedBy { it.size[0].price }
+                    }
 
-                    2 -> sortedFoodList =
+                    2 -> {
                         foodList.sortedByDescending { it.size[0].price }
+                    }
 
-                    0 -> sortedFoodList = foodList
+                    else -> {
+                        foodList
+                    }
                 }
                 updateFoodList(sortedFoodList)
             }
@@ -91,6 +89,7 @@ class FoodListFragment : Fragment() {
             }
         }
     }
+
     private fun updateFoodList(foodList: List<FoodModel>) {
         foodAdapter = FoodAdapter(foodList, requireContext())
         productsRecycler.adapter = foodAdapter

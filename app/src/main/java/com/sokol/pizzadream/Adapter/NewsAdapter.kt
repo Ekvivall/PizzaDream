@@ -11,14 +11,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
-import com.sokol.pizzadream.EventBus.FoodItemClick
 import com.sokol.pizzadream.EventBus.NewsItemClick
 import com.sokol.pizzadream.Model.NewsModel
 import com.sokol.pizzadream.R
 import org.greenrobot.eventbus.EventBus
+import java.text.SimpleDateFormat
+import java.util.Date
 
 class NewsAdapter(val items: List<NewsModel>, val context: Context) :
     RecyclerView.Adapter<NewsAdapter.MyViewHolder>() {
+    private var simpleDateFormat= SimpleDateFormat("dd MMM yyyy")
     class MyViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         var image: ImageView = view.findViewById(R.id.news_image)
         var title: TextView = view.findViewById(R.id.news_title)
@@ -54,7 +56,8 @@ class NewsAdapter(val items: List<NewsModel>, val context: Context) :
         Glide.with(context).load(newsItem.image).into(holder.image)
         holder.title.text = newsItem.title
         holder.content.text = Html.fromHtml(newsItem.content, Html.FROM_HTML_MODE_LEGACY)
-        holder.date.text = newsItem.date
+        val date = Date(newsItem.date)
+        holder.date.text = StringBuilder(simpleDateFormat.format(date))
         holder.setListener(object : IRecyclerItemClickListener {
             override fun onItemClick(view: View, pos: Int) {
                 Common.newsSelected = items[pos]
