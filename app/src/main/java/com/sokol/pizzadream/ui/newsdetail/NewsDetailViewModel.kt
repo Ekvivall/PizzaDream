@@ -16,8 +16,4 @@ class NewsDetailViewModel : ViewModel() {
         return newsDetailMutableLiveData!!
     }
 
-    fun setNewsModel(newsModel: NewsModel) {
-        if (newsDetailMutableLiveData != null)
-            newsDetailMutableLiveData!!.value = newsModel
-    }
 }

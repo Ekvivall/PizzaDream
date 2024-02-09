@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -14,6 +15,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sokol.pizzadream.Adapter.FavoriteAdapter
+import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.FavoriteInterface
 import com.sokol.pizzadream.Database.Repositories.FavoriteRepository
@@ -66,7 +68,13 @@ class FavoritesFragment : Fragment() {
         layoutEmptyFav = root.findViewById(R.id.empty_favorites)
         btnGoToMenu = root.findViewById(R.id.btn_go_to_menu)
         btnGoToMenu.setOnClickListener {
-            EventBus.getDefault().postSticky(MenuClick(true))
+            if (Common.isConnectedToInternet(requireContext())) {
+                EventBus.getDefault().postSticky(MenuClick(true))
+            } else {
+                Toast.makeText(
+                    requireContext(), "Будь ласка, перевірте своє з'єднання!", Toast.LENGTH_SHORT
+                ).show()
+            }
         }
     }
 

@@ -79,7 +79,13 @@ class FoodListFragment : Fragment() {
                     }
 
                     else -> {
-                        foodList
+                        foodList.sortedWith(compareByDescending {
+                            if (it.ratingCount == 0L) {
+                                0f
+                            } else {
+                                it.ratingSum.toFloat() / it.ratingCount
+                            }
+                        })
                     }
                 }
                 updateFoodList(sortedFoodList)

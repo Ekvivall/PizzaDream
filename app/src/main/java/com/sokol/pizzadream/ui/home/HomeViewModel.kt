@@ -48,9 +48,15 @@ class HomeViewModel : ViewModel(), ICategoryLoadCallback {
                 }
                 val allFoods = mutableListOf<FoodModel>()
                 for (category in tempList) {
-                    allFoods.addAll(category.foods!!)
+                    allFoods.addAll(category.foods!!.values.toList())
                 }
-                foodListMutableLiveData!!.value = allFoods.take(15)
+                foodListMutableLiveData!!.value = allFoods.sortedWith(compareByDescending {
+                    if (it.ratingCount == 0L) {
+                        0f
+                    } else {
+                        it.ratingSum.toFloat() / it.ratingCount
+                    }
+                }).take(15)
                 categoryLoadCallbackListener.onCategoryLoadSuccess(tempList)
             }
 

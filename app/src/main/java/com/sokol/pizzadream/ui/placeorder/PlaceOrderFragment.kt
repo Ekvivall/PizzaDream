@@ -355,7 +355,9 @@ class PlaceOrderFragment : Fragment(){
 
     private fun writeOrderToFirebase(order: OrderModel) {
         //Надсилання до бази даних
-        FirebaseDatabase.getInstance().getReference(Common.ORDER_REF).child(Common.createOrderId())
+        val orderId = Common.createOrderId()
+        order.orderId = orderId
+        FirebaseDatabase.getInstance().getReference(Common.ORDER_REF).child(orderId)
             .setValue(order).addOnFailureListener { e ->
                 Toast.makeText(
                     requireContext(), "" + e.message, Toast.LENGTH_SHORT

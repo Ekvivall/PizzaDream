@@ -11,7 +11,8 @@ class FoodListViewModel : ViewModel() {
         if (foodListMutableLiveData == null) {
             foodListMutableLiveData = MutableLiveData()
         }
-        foodListMutableLiveData!!.value = Common.categorySelected!!.foods
+        val foodList = Common.categorySelected!!.foods?.values?.toList() ?: emptyList()
+        foodListMutableLiveData!!.value = foodList
         return foodListMutableLiveData!!
     }
 }

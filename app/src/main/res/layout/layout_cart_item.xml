@@ -13,13 +13,6 @@
             android:layout_width="110dp"
             android:id="@+id/img_cart_layout"
             android:layout_height="110dp">
-            <!--ImageView
-                       android:id="@+id/img_cart"
-                       android:layout_width="110dp"
-                       android:layout_height="110dp"
-                       android:scaleType="fitXY"
-                       android:src="@drawable/ic_launcher_background"
-                tools:ignore="MissingConstraints" /-->
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <LinearLayout

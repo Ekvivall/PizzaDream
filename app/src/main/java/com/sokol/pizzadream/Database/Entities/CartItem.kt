@@ -37,8 +37,8 @@ class CartItem {
     @ColumnInfo(name = "userEmail")
     var userEmail: String? = ""
 
-    /*@ColumnInfo(name = "foodExtraPrice")
-    var foodExtraPrice: Double = 0.0*/
+    @ColumnInfo(name = "categoryId")
+    var categoryId: String = ""
 
     @NotNull
     @ColumnInfo(name = "uid")

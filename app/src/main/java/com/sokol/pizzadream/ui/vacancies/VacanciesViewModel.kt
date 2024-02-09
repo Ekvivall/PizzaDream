@@ -34,7 +34,6 @@ class VacanciesViewModel : ViewModel(), IVacanciesLoadCallback {
                     val model = itemsSnapshot.getValue(VacancyModel::class.java)
                     tempList.add(model!!)
                 }
-                vacanciesListMutableLiveData!!.value = tempList
                 vacanciesLoadCallbackListener.onVacanciesLoadSuccess(tempList)
             }
 

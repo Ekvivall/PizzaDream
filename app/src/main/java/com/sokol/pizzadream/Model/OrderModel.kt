@@ -15,6 +15,5 @@ class OrderModel {
     var isComment:Boolean = false
     var status:String?=null
     var orderedTime:Long = 0
-    //var lat: Double = 0.toDouble()
-    //var lng: Double = 0.toDouble()
+    var orderId:String?=null
 }

@@ -2,10 +2,12 @@ package com.sokol.pizzadream.Common
 
 import android.content.Context
 import android.net.ConnectivityManager
+import com.sokol.pizzadream.Database.Entities.CartItem
 import com.sokol.pizzadream.Model.AddonCategoryModel
 import com.sokol.pizzadream.Model.CategoryModel
 import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.Model.NewsModel
+import com.sokol.pizzadream.Model.OrderModel
 import com.sokol.pizzadream.Model.UserModel
 import com.sokol.pizzadream.Model.VacancyModel
 import java.math.RoundingMode
@@ -31,6 +33,7 @@ object Common {
             .append(characters[Random().nextInt(characters.length)]).toString()
     }
 
+    val COMMENT_REF: String = "Comments"
     val REVIEW_REF: String = "ReviewsPizzeria"
     val RESUME_REF: String = "Resumes"
     val VACANCIES_REF: String = "Vacancies"
@@ -48,6 +51,7 @@ object Common {
     val ADDON_CATEGORY_REF: String = "Addon"
     var categorySelected: CategoryModel? = null
     var foodSelected: FoodModel? = null
+    var orderSelected: OrderModel? = null
     var currentUser: UserModel? = null
     var totalPrice: String = "Всього: 0 грн."
     val PERMISSIONS_REQUEST_LOCATION = 100

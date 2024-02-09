@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
@@ -46,10 +47,11 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
         var foodImage: ImageView = view.findViewById(R.id.food_img)
         var foodDesc: TextView = view.findViewById(R.id.food_desc)
         var radioGroupSize: RadioGroup = view.findViewById(R.id.radio_group_size)
-
         var foodPrice: TextView = view.findViewById(R.id.food_price)
         var foodCart: Button = view.findViewById(R.id.btn_add_to_cart)
         var favImage: ImageView = view.findViewById(R.id.food_fav)
+        var ratingBar: RatingBar = view.findViewById(R.id.ratingBar)
+        var rating: TextView = view.findViewById(R.id.rating)
         private var listener: IRecyclerItemClickListener? = null
         fun setListener(listener: IRecyclerItemClickListener) {
             this.listener = listener
@@ -78,6 +80,10 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
         holder.foodDesc.text =
             Html.fromHtml(items[position].description, Html.FROM_HTML_MODE_LEGACY)
         holder.radioGroupSize.removeAllViews()
+        val ratingAverage = items[position].ratingSum.toFloat() / items[position].ratingCount
+        holder.ratingBar.rating = ratingAverage
+        holder.rating.text =
+            if (items[position].ratingCount == 0L) "0" else String.format("%.1f", ratingAverage)
         for (sizeModel in items[position].size) {
             val radioButton = RadioButton(context)
             radioButton.setOnCheckedChangeListener { compoundButton, b ->
@@ -107,8 +113,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
         })
         // Перевірка, чи елемент вже є в обраному
         favoriteInterface.isFavorite(
-            items[position].id.toString(),
-            Common.currentUser?.uid.toString()
+            items[position].id.toString(), Common.currentUser?.uid.toString()
         ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : SingleObserver<Int> {
                 override fun onSubscribe(d: Disposable) {
@@ -131,8 +136,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
         // Встановлення слухача кліків для іконки Favorite
         holder.favImage.setOnClickListener {
             favoriteInterface.isFavorite(
-                items[position].id.toString(),
-                Common.currentUser?.uid.toString()
+                items[position].id.toString(), Common.currentUser?.uid.toString()
             ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : SingleObserver<Int> {
                     override fun onSubscribe(d: Disposable) {
@@ -173,6 +177,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                             favorite.foodName = items[position].name
                             favorite.foodImage = items[position].image
                             favorite.foodPrice = items[position].size[0].price.toDouble()
+                            favorite.categoryId = items[position].categoryId.toString()
                             compositeDisposable.add(
                                 favoriteInterface.addToFavorites(favorite)
                                     .subscribeOn(Schedulers.io())
@@ -209,6 +214,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
             //cartItem.foodExtraPrice = 0.0
             cartItem.foodAddon = ""
             cartItem.foodSize = items[position].userSelectedSize?.name.toString()
+            cartItem.categoryId = items[position].categoryId.toString()
             cartInterface.getItemWithAllOptionsInCart(
                 cartItem.foodId, cartItem.uid, cartItem.foodSize, cartItem.foodAddon
             ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
@@ -244,7 +250,6 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
 
                     override fun onSuccess(t: CartItem) {
                         if (t.equals(cartItem)) {
-                            //t.foodExtraPrice = cartItem.foodExtraPrice
                             t.foodAddon = cartItem.foodAddon
                             t.foodSize = cartItem.foodSize
                             t.foodQuantity += cartItem.foodQuantity

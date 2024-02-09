@@ -20,7 +20,7 @@ import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.FavoriteInterface
 import com.sokol.pizzadream.Database.Repositories.FavoriteRepository
 import com.sokol.pizzadream.EventBus.FoodItemClick
-import com.sokol.pizzadream.Model.CategoryModel
+import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.R
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -75,23 +75,22 @@ class FavoriteAdapter(var items: List<FavoriteItem>, val context: Context) :
         holder.favImage.setOnClickListener {
             compositeDisposable.add(
                 favorite.removeFromFavorites(
-                    items[position].foodId,
-                    Common.currentUser?.uid.toString()
+                    items[position].foodId, Common.currentUser?.uid.toString()
                 ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe({
-                        Toast.makeText(
-                            context,
-                            items[position].foodName + " видалено з обраних",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        items = items.filterIndexed { index, _ -> index != position }
-                        notifyDataSetChanged()
-                    }, { err: Throwable? ->
-                        Toast.makeText(
-                            context,
-                            "Помилка видалення товару з обраного" + err!!.message,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    })
+                    Toast.makeText(
+                        context,
+                        items[position].foodName + " видалено з обраних",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    items = items.filterIndexed { index, _ -> index != position }
+                    notifyDataSetChanged()
+                }, { err: Throwable? ->
+                    Toast.makeText(
+                        context,
+                        "Помилка видалення товару з обраного" + err!!.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                })
             )
         }
 
@@ -99,23 +98,18 @@ class FavoriteAdapter(var items: List<FavoriteItem>, val context: Context) :
 
     fun findFoodItem(position: Int) {
         val categoryRef = FirebaseDatabase.getInstance().getReference(Common.CATEGORY_REF)
-        categoryRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                snapshot.children.forEach { categorySnapshot ->
-                    val category = categorySnapshot.getValue(CategoryModel::class.java)
-                    category?.foods?.forEach { foodSnapshot ->
-                        if (foodSnapshot.id == items[position].foodId) {
-                            Common.foodSelected = foodSnapshot
-                            EventBus.getDefault().postSticky(FoodItemClick(true, foodSnapshot))
-                            return
-                        }
-                    }
-                }
-            }
+        categoryRef.child(items[position].categoryId).child("foods").child(items[position].foodId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val foodModel = snapshot.getValue(FoodModel::class.java)
+                    Common.foodSelected = foodModel
+                    EventBus.getDefault().postSticky(FoodItemClick(true, foodModel!!))
 
-            override fun onCancelled(error: DatabaseError) {
-            }
-        })
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                }
+            })
     }
 
     fun onStop() {

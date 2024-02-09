@@ -37,7 +37,6 @@ class NewsViewModel : ViewModel(), INewsLoadCallback {
                 }
                 // Сортування новин за датою в порядку спадання
                 val sortedList = tempList.sortedByDescending { it.date }
-                newsListMutableLiveData!!.value = sortedList
                 newsLoadCallbackListener.onNewsLoadSuccess(sortedList)
             }
 

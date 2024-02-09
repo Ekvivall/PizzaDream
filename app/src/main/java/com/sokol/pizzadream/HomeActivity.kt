@@ -29,6 +29,8 @@ import com.sokol.pizzadream.EventBus.ProfileClick
 import com.sokol.pizzadream.EventBus.ReviewPizzeriaClick
 import com.sokol.pizzadream.EventBus.VacanciesClick
 import com.sokol.pizzadream.EventBus.VacancyItemClick
+import com.sokol.pizzadream.EventBus.ViewAddCommentClick
+import com.sokol.pizzadream.EventBus.ViewOrdersClick
 import com.sokol.pizzadream.databinding.ActivityHomeBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -177,6 +179,18 @@ class HomeActivity : AppCompatActivity() {
     fun onReviewPizzeria(event: ReviewPizzeriaClick) {
         if (event.isSuccess) {
             findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_add_review_pizzeria)
+        }
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onViewOrders(event: ViewOrdersClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_view_orders)
+        }
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onAddComment(event: ViewAddCommentClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_add_comment_food)
         }
     }
 }

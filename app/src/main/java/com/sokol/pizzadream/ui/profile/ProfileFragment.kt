@@ -17,6 +17,7 @@ import com.sokol.pizzadream.EventBus.LogOutClick
 import com.sokol.pizzadream.EventBus.NewsClick
 import com.sokol.pizzadream.EventBus.ReviewPizzeriaClick
 import com.sokol.pizzadream.EventBus.VacanciesClick
+import com.sokol.pizzadream.EventBus.ViewOrdersClick
 import com.sokol.pizzadream.Model.UserModel
 import com.sokol.pizzadream.R
 import org.greenrobot.eventbus.EventBus
@@ -32,6 +33,7 @@ class ProfileFragment : Fragment() {
     private lateinit var favorites: TextView
     private lateinit var vacancies: TextView
     private lateinit var leaveReview: TextView
+    private lateinit var viewOrders: TextView
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -110,6 +112,16 @@ class ProfileFragment : Fragment() {
         leaveReview.setOnClickListener {
             if (Common.isConnectedToInternet(requireContext())) {
                 EventBus.getDefault().postSticky(ReviewPizzeriaClick(true))
+            } else {
+                Toast.makeText(
+                    requireContext(), "Будь ласка, перевірте своє з'єднання!", Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        viewOrders = root.findViewById(R.id.view_orders)
+        viewOrders.setOnClickListener {
+            if (Common.isConnectedToInternet(requireContext())) {
+                EventBus.getDefault().postSticky(ViewOrdersClick(true))
             } else {
                 Toast.makeText(
                     requireContext(), "Будь ласка, перевірте своє з'єднання!", Toast.LENGTH_SHORT

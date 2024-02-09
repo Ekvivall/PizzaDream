@@ -84,6 +84,11 @@
     <string name="comment">Відгук</string>
     <string name="attach_photo">Прикріпити фото</string>
     <string name="send">Надіслати</string>
+    <string name="menu_view_orders">Історія замовлень</string>
+    <string name="empty_orders">У вас немає замовлень</string>
+    <string name="go_to_menu_order">Перейдіть в меню, щоб оформити своє перше замовлення</string>
+    <string name="add_comment">Додати відгук</string>
+    <string name="delivery">Доставка: 60грн.</string>
     <string-array name="sort_options">
         <item>популярні</item>
         <item>дешеві</item>

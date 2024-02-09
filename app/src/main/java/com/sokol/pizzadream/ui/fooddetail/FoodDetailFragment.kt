@@ -73,6 +73,7 @@ class FoodDetailFragment : Fragment() {
     private val compositeDisposable = CompositeDisposable()
     private lateinit var favImage: ImageView
     private lateinit var favorite: FavoriteInterface
+    private lateinit var rating: TextView
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -118,7 +119,9 @@ class FoodDetailFragment : Fragment() {
         foodImgLayout.addView(foodImg)
         foodName.text = it.name!!
         foodDesc.text = Html.fromHtml(it.description!!, Html.FROM_HTML_MODE_LEGACY)
-        ratingBar.rating = it.ratingValue.toFloat()
+        val ratingAverage = it.ratingSum.toFloat() / it.ratingCount
+        ratingBar.rating = ratingAverage
+        rating.text = if (it.ratingCount == 0L) "0" else String.format("%.1f", ratingAverage)
         for (sizeModel in it.size) {
             val radioButton = RadioButton(context)
             radioButton.setOnCheckedChangeListener { compoundButton, b ->
@@ -167,6 +170,7 @@ class FoodDetailFragment : Fragment() {
         btnShowComment = root.findViewById(R.id.btnShowComment)
         radioGroupSize = root.findViewById(R.id.radio_group_size)
         favImage = root.findViewById(R.id.food_fav)
+        rating = root.findViewById(R.id.rating)
         btnDecrease.setOnClickListener {
             val quantity = foodQuantity.text.toString().toInt()
             if (quantity > 1) {
@@ -181,8 +185,8 @@ class FoodDetailFragment : Fragment() {
         }
         // Перевірка, чи елемент вже є в обраному
         favorite.isFavorite(Common.foodSelected?.id.toString(), Common.currentUser?.uid.toString())
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
+            .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : SingleObserver<Int> {
                 override fun onSubscribe(d: Disposable) {
                 }
 
@@ -201,10 +205,9 @@ class FoodDetailFragment : Fragment() {
         // Встановлення слухача кліків для іконки Favorite
         favImage.setOnClickListener {
             favorite.isFavorite(
-                Common.foodSelected?.id.toString(),
-                Common.currentUser?.uid.toString()
-            ).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
+                Common.foodSelected?.id.toString(), Common.currentUser?.uid.toString()
+            ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : SingleObserver<Int> {
                     override fun onSubscribe(d: Disposable) {
                     }
 
@@ -219,8 +222,7 @@ class FoodDetailFragment : Fragment() {
                                 favorite.removeFromFavorites(
                                     Common.foodSelected?.id.toString(),
                                     Common.currentUser?.uid.toString()
-                                )
-                                    .subscribeOn(Schedulers.io())
+                                ).subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                         Toast.makeText(
                                             requireContext(),
@@ -244,9 +246,9 @@ class FoodDetailFragment : Fragment() {
                             fav.foodName = Common.foodSelected?.name
                             fav.foodImage = Common.foodSelected?.image
                             fav.foodPrice = Common.foodSelected?.size?.get(0)?.price!!.toDouble()
+                            fav.categoryId = Common.foodSelected?.categoryId.toString()
                             compositeDisposable.add(
-                                favorite.addToFavorites(fav)
-                                    .subscribeOn(Schedulers.io())
+                                favorite.addToFavorites(fav).subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                         Toast.makeText(
                                             requireContext(),
@@ -276,6 +278,7 @@ class FoodDetailFragment : Fragment() {
             cartItem.foodImage = Common.foodSelected?.image
             cartItem.foodPrice = totalPrice
             cartItem.foodQuantity = foodQuantity.text.toString().toInt()
+            cartItem.categoryId = Common.foodSelected?.categoryId.toString()
             if (Common.foodSelected!!.userSelectedAddon != null) {/*for (foodAddon in Common.foodSelected!!.userSelectedAddon!!) {
                     if (foodAddon != Common.foodSelected!!.userSelectedAddon!![0]) cartItem.foodAddon += ", "
                     cartItem.foodAddon += foodAddon.name + " x" + foodAddon.userCount
