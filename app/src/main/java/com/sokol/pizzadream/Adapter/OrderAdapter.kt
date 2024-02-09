@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
+import com.sokol.pizzadream.EventBus.OrderDetailClick
 import com.sokol.pizzadream.EventBus.ViewAddCommentClick
 import com.sokol.pizzadream.Model.OrderModel
 import com.sokol.pizzadream.R
@@ -85,8 +86,8 @@ class OrderAdapter(val items: List<OrderModel>, val context: Context) :
         }
         holder.setListener(object : IRecyclerItemClickListener {
             override fun onItemClick(view: View, pos: Int) {
-                //Common.newsSelected = items[pos]
-                //EventBus.getDefault().postSticky(NewsItemClick(true, items[pos]))
+                Common.orderSelected = items[pos]
+                EventBus.getDefault().postSticky(OrderDetailClick(true))
             }
 
         })

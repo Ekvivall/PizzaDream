@@ -24,6 +24,7 @@ import com.sokol.pizzadream.EventBus.LogOutClick
 import com.sokol.pizzadream.EventBus.MenuClick
 import com.sokol.pizzadream.EventBus.NewsClick
 import com.sokol.pizzadream.EventBus.NewsItemClick
+import com.sokol.pizzadream.EventBus.OrderDetailClick
 import com.sokol.pizzadream.EventBus.PlaceOrderClick
 import com.sokol.pizzadream.EventBus.ProfileClick
 import com.sokol.pizzadream.EventBus.ReviewPizzeriaClick
@@ -191,6 +192,12 @@ class HomeActivity : AppCompatActivity() {
     fun onAddComment(event: ViewAddCommentClick) {
         if (event.isSuccess) {
             findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_add_comment_food)
+        }
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onOrderSelected(event: OrderDetailClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_order_detail)
         }
     }
 }

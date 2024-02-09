@@ -87,4 +87,9 @@
         android:name="com.sokol.pizzadream.ui.commentFood.CommentFoodFragment"
         android:label="@string/menu_leave_review"
         tools:layout="@layout/fragment_add_comment" />
+    <fragment
+        android:id="@+id/nav_order_detail"
+        android:name="com.sokol.pizzadream.ui.viewOrderDetail.OrderDetailFragment"
+        android:label=""
+        tools:layout="@layout/fragment_order_detail" />
 </navigation>

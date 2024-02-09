@@ -9,21 +9,29 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Database.Entities.CartItem
+import com.sokol.pizzadream.EventBus.FoodItemClick
 import com.sokol.pizzadream.Model.AddonModel
+import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.greenrobot.eventbus.EventBus
 
 class OrderFoodAdapter(val items: List<CartItem>, val context: Context) :
     RecyclerView.Adapter<OrderFoodAdapter.MyViewHolder>() {
 
-    class MyViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class MyViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         var foodImgLayout: ConstraintLayout = view.findViewById(R.id.img_order_layout)
         var foodName: TextView = view.findViewById(R.id.txt_food_name_order)
         var foodSize: TextView = view.findViewById(R.id.txt_food_size_order)
@@ -31,6 +39,15 @@ class OrderFoodAdapter(val items: List<CartItem>, val context: Context) :
         var foodPrice: TextView = view.findViewById(R.id.txt_food_price_order)
         var foodAddonTitle: TextView = view.findViewById(R.id.txt_food_addon_order_title)
         var foodQuantity: TextView = view.findViewById(R.id.txt_food_quantity_order)
+        private var listener: IRecyclerItemClickListener? = null
+        fun setListener(listener: IRecyclerItemClickListener) {
+            this.listener = listener
+            itemView.setOnClickListener(this)
+        }
+
+        override fun onClick(p0: View?) {
+            listener!!.onItemClick(p0!!, adapterPosition)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -88,5 +105,26 @@ class OrderFoodAdapter(val items: List<CartItem>, val context: Context) :
         holder.foodPrice.text =
             StringBuilder("").append(Common.formatPrice(items[position].foodPrice * items[position].foodQuantity))
                 .toString()
+        holder.setListener(object : IRecyclerItemClickListener {
+            override fun onItemClick(view: View, pos: Int) {
+                findFoodItem(pos)
+            }
+        })
+    }
+
+    fun findFoodItem(position: Int) {
+        val categoryRef = FirebaseDatabase.getInstance().getReference(Common.CATEGORY_REF)
+        categoryRef.child(items[position].categoryId).child("foods").child(items[position].foodId)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val foodModel = snapshot.getValue(FoodModel::class.java)
+                    Common.foodSelected = foodModel
+                    EventBus.getDefault().postSticky(FoodItemClick(true, foodModel!!))
+
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                }
+            })
     }
 }
