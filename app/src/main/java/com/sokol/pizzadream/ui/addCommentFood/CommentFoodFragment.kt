@@ -1,4 +1,4 @@
-package com.sokol.pizzadream.ui.commentFood
+package com.sokol.pizzadream.ui.addCommentFood
 
 import android.os.Bundle
 import android.view.LayoutInflater

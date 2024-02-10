@@ -37,6 +37,8 @@ import com.sokol.pizzadream.Database.Repositories.FavoriteInterface
 import com.sokol.pizzadream.Database.Repositories.FavoriteRepository
 import com.sokol.pizzadream.EventBus.AddonCategoryClick
 import com.sokol.pizzadream.EventBus.AddonClick
+import com.sokol.pizzadream.EventBus.CommentsClick
+import com.sokol.pizzadream.EventBus.FoodItemClick
 import com.sokol.pizzadream.EventBus.UserAddonCountUpdate
 import com.sokol.pizzadream.Model.AddonModel
 import com.sokol.pizzadream.Model.FoodModel
@@ -168,6 +170,9 @@ class FoodDetailFragment : Fragment() {
         btnIncrease = root.findViewById(R.id.img_increase)
         ratingBar = root.findViewById(R.id.ratingBar)
         btnShowComment = root.findViewById(R.id.btnShowComment)
+        btnShowComment.setOnClickListener {
+            EventBus.getDefault().postSticky(CommentsClick(true))
+        }
         radioGroupSize = root.findViewById(R.id.radio_group_size)
         favImage = root.findViewById(R.id.food_fav)
         rating = root.findViewById(R.id.rating)

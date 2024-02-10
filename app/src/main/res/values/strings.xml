@@ -20,7 +20,7 @@
     <string name="add_to_cart">В кошик</string>
     <string name="categories">Категорії</string>
     <string name="best_deals">Хіти продажів</string>
-    <string name="show_comment">Показати коментарі</string>
+    <string name="show_comment">Відгуки про товар</string>
     <string name="size">Розмір:</string>
     <string name="addon">Додати складники</string>
     <string name="empty_cart">Ваш кошик порожній</string>
@@ -98,6 +98,7 @@
     <string name="goods_worth">Товарів на суму:</string>
     <string name="cost_delivery">Вартість доставки:</string>
     <string name="total">Разом</string>
+    <string name="comments">Відгуки</string>
     <string-array name="sort_options">
         <item>популярні</item>
         <item>дешеві</item>

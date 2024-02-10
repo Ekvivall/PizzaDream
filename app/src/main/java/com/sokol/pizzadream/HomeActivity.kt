@@ -17,6 +17,7 @@ import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.CategoryClick
+import com.sokol.pizzadream.EventBus.CommentsClick
 import com.sokol.pizzadream.EventBus.EditProfileClick
 import com.sokol.pizzadream.EventBus.FavoritesClick
 import com.sokol.pizzadream.EventBus.FoodItemClick
@@ -198,6 +199,12 @@ class HomeActivity : AppCompatActivity() {
     fun onOrderSelected(event: OrderDetailClick) {
         if (event.isSuccess) {
             findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_order_detail)
+        }
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onComments(event: CommentsClick) {
+        if (event.isSuccess) {
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_comments)
         }
     }
 }

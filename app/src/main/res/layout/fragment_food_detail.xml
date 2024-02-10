@@ -170,7 +170,7 @@
                 android:layout_margin="8dp"
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="8dp"
-                android:backgroundTint="@color/grey"
+                android:backgroundTint="@color/red"
                 android:text="@string/show_comment"
                 android:textColor="@android:color/white"
                 app:cornerRadius="10dp" />

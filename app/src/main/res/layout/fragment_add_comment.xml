@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="8dp"
-    tools:context=".ui.commentFood.CommentFoodFragment">
+    tools:context=".ui.addCommentFood.CommentFoodFragment">
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/add_comment_recycler"
         android:layout_width="match_parent"
