@@ -16,4 +16,5 @@ class OrderModel {
     var status:String?=null
     var orderedTime:Long = 0
     var orderId:String?=null
+    var forTime:String?=null
 }

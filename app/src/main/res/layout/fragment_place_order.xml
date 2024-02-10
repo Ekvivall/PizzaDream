@@ -70,47 +70,30 @@
                             android:layout_marginBottom="8dp"
                             android:fontFamily="@font/montserrat"
                             android:hint="@string/first_name"
-                            android:textColor="@color/black"
                             android:inputType="textPersonName"
                             android:minHeight="48dp"
+                            android:textColor="@color/black"
                             android:textSize="18sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!--com.vicmikhailau.maskededittext.MaskedEditText
-                        android:id="@+id/edt_phone"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="-5dp"
-                        android:layout_marginRight="-5dp"
-                        android:layout_marginBottom="8dp"
-                        android:fontFamily="@font/montserrat"
-                        android:hint="@string/phone"
-                        android:inputType="phone"
-                        android:minHeight="48dp"
-                        android:paddingStart="19dp"
-                        android:paddingBottom="23dp"
-                        android:textColor="@android:color/black"
-                        android:textSize="18sp"
-                        app:mask="## ### ## ##"
-                        app:prefixText="+380" /-->
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/til_phone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         app:boxBackgroundColor="@color/white"
                         app:boxStrokeColor="@color/black"
+                        app:hintTextColor="@color/black"
                         app:prefixText="+380"
-                        app:prefixTextColor="@color/black"
-                        app:hintTextColor="@color/black">
+                        app:prefixTextColor="@color/black">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/edt_phone"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="@string/phone"
-                            android:textColor="@color/black"
                             android:inputType="phone"
                             android:maxLength="12"
+                            android:textColor="@color/black"
                             android:textSize="18sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -130,9 +113,9 @@
                             android:layout_marginBottom="8dp"
                             android:fontFamily="@font/montserrat"
                             android:hint="@string/email"
-                            android:textColor="@color/black"
                             android:inputType="textEmailAddress"
                             android:minHeight="48dp"
+                            android:textColor="@color/black"
                             android:textSize="18sp" />
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
@@ -216,8 +199,8 @@
                             android:layout_marginBottom="8dp"
                             android:fontFamily="@font/montserrat"
                             android:hint="@string/address"
-                            android:textColor="@color/black"
                             android:minHeight="48dp"
+                            android:textColor="@color/black"
                             android:textSize="18sp" />
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -227,6 +210,66 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:visibility="gone" />
+
+                    <RadioGroup
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/rdi_as_soon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="8dp"
+                            android:checked="true"
+                            android:fontFamily="@font/montserrat"
+                            android:text="@string/as_soon_as_possible"
+                            android:textSize="18sp" />
+
+                        <RadioButton
+                            android:id="@+id/rdi_for_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
+                            android:fontFamily="@font/montserrat"
+                            android:text="@string/for_time"
+                            android:textSize="18sp" />
+                    </RadioGroup>
+
+                    <TextView
+                        android:id="@+id/title_as_soon"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/red"
+                        android:fontFamily="@font/montserrat"
+                        android:textSize="16sp"/>
+                    <LinearLayout
+                        android:id="@+id/order_spinners"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:orientation="horizontal">
+
+                        <Spinner
+                            android:id="@+id/date_spinner"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="9dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/montserrat"
+                            android:minHeight="48dp"
+                            android:textSize="16sp" />
+
+                        <Spinner
+                            android:id="@+id/time_spinner"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="9dp"
+                            android:layout_weight="1"
+                            android:fontFamily="@font/montserrat"
+                            android:minHeight="48dp"
+                            android:textSize="16sp" />
+                    </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
@@ -271,6 +314,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
+
                         <RadioButton
                             android:id="@+id/rdi_cod"
                             android:layout_width="match_parent"

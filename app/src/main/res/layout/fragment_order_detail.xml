@@ -153,6 +153,17 @@
                         android:textColor="@color/black"
                         android:textSize="14sp"
                         app:drawableStartCompat="@drawable/ic_location_on_24" />
+                    <TextView
+                        android:id="@+id/customer_time"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:drawablePadding="8dp"
+                        android:fontFamily="@font/montserrat"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:visibility="gone"
+                        app:drawableStartCompat="@drawable/ic_access_time_24" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

@@ -15,11 +15,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -29,11 +32,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.braintreepayments.api.dropin.DropInRequest
 import com.braintreepayments.api.dropin.DropInResult
 import com.google.android.material.textfield.TextInputLayout
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ServerValue
-import com.google.firebase.database.ValueEventListener
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
@@ -54,7 +53,7 @@ import java.util.Calendar
 import java.util.Locale
 
 
-class PlaceOrderFragment : Fragment(){
+class PlaceOrderFragment : Fragment() {
     private val REQUEST_BRAINTREE_CODE: Int = 8888
     private lateinit var edtName: EditText
     private lateinit var tilName: TextInputLayout
@@ -81,6 +80,15 @@ class PlaceOrderFragment : Fragment(){
     private var phone = ""
     private var address = ""
     private var email = ""
+    private lateinit var rdiAsSoon: RadioButton
+    private lateinit var rdiForTime: RadioButton
+    private lateinit var titleAsSoon: TextView
+    private lateinit var orderSpinners: LinearLayout
+    private lateinit var dateSpinner: Spinner
+    private lateinit var timeSpinner: Spinner
+    private val timeFormat = SimpleDateFormat("HH:mm")
+    val dateFormat = SimpleDateFormat("dd.MM.yyyy")
+    private var calendar = Calendar.getInstance()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -142,6 +150,15 @@ class PlaceOrderFragment : Fragment(){
         rdiOnlinePayment = root.findViewById(R.id.rdi_online_payment)
         btnOrder = root.findViewById(R.id.btn_order)
         totalPrice = root.findViewById(R.id.txt_total_price)
+        rdiAsSoon = root.findViewById(R.id.rdi_as_soon)
+        rdiForTime = root.findViewById(R.id.rdi_for_time)
+        titleAsSoon = root.findViewById(R.id.title_as_soon)
+        orderSpinners = root.findViewById(R.id.order_spinners)
+        dateSpinner = root.findViewById(R.id.date_spinner)
+        timeSpinner = root.findViewById(R.id.time_spinner)
+        calendar = addTime(rdiHome.isChecked)
+        val formattedTime = timeFormat.format(calendar.time)
+        titleAsSoon.text = StringBuilder("Зверніть увагу! Доставка до ").append(formattedTime)
         val regex = Regex("\\d+(?=,\\d{2})")
         val price = Common.totalPrice.replace("\u00A0", "")
         val finalPrice = regex.find(price)?.value
@@ -196,6 +213,10 @@ class PlaceOrderFragment : Fragment(){
                 radioGroupAddresses.visibility = View.VISIBLE
                 totalPrice.text = Common.totalPrice
             }
+            updateTime(rdiAsSoon.isChecked)
+        }
+        rdiAsSoon.setOnCheckedChangeListener { _, isChecked ->
+            updateTime(isChecked)
         }
         btnOrder.setOnClickListener {
             if (Common.isConnectedToInternet(requireContext())) {
@@ -308,6 +329,80 @@ class PlaceOrderFragment : Fragment(){
         }
     }
 
+    private fun updateTime(isChecked: Boolean) {
+        if (isChecked) {
+            calendar = addTime(rdiHome.isChecked)
+            orderSpinners.visibility = View.GONE
+            titleAsSoon.visibility = View.VISIBLE
+            val formattedTime = timeFormat.format(calendar.time)
+            titleAsSoon.text =
+                StringBuilder(if (rdiHome.isChecked) "Зверніть увагу! Доставка до " else "Зверніть увагу! Можна отримати о ").append(
+                    formattedTime
+                )
+        } else {
+            calendar = addTime(rdiHome.isChecked)
+            titleAsSoon.visibility = View.GONE
+            orderSpinners.visibility = View.VISIBLE
+            val dates = mutableListOf<String>()
+            for (i in 0..4) {
+                dates.add(dateFormat.format(calendar.time))
+                calendar.add(Calendar.DATE, 1)
+            }
+            val adapterDate = ArrayAdapter(
+                requireContext(), android.R.layout.simple_spinner_dropdown_item, dates
+            )
+            adapterDate.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            dateSpinner.adapter = adapterDate
+            dateSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?, view: View?, position: Int, id: Long
+                ) {
+                    calendar = addTime(rdiHome.isChecked)
+                    val times = mutableListOf<String>()
+                    val currentTime = calendar.get(Calendar.HOUR_OF_DAY)
+                    var startTime = if (position == 0 && currentTime > 10) currentTime else 10
+                    var currentMinute = 20
+                    if (position == 0) {
+                        currentMinute = calendar.get(Calendar.MINUTE)
+                        // Округлення хвилин до найближчого кратного числа 10
+                        currentMinute = (Math.ceil(currentMinute / 10.0) * 10).toInt()
+                        // Якщо поточні хвилини більше 50, перехід до наступної години
+                        if (currentMinute >= 60) {
+                            startTime++
+                            currentMinute = 0
+                        }
+                    }
+                    calendar.set(Calendar.HOUR_OF_DAY, startTime)
+                    calendar.set(Calendar.MINUTE, currentMinute)
+                    while (calendar.get(Calendar.HOUR_OF_DAY) < 20) {
+                        times.add(timeFormat.format(calendar.time))
+                        calendar.add(Calendar.MINUTE, 10)
+                    }
+
+                    val adapterTime = ArrayAdapter(
+                        requireContext(), android.R.layout.simple_spinner_dropdown_item, times
+                    )
+                    adapterTime.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                    timeSpinner.adapter = adapterTime
+                }
+
+                override fun onNothingSelected(p0: AdapterView<*>?) {
+                }
+            }
+
+        }
+    }
+
+    private fun addTime(checked: Boolean): Calendar {
+        val calendar = Calendar.getInstance()
+        if (checked) {
+            calendar.add(Calendar.MINUTE, 30)
+        } else {
+            calendar.add(Calendar.MINUTE, 10)
+        }
+        return calendar
+    }
+
     private fun paymentCOD(name: String, phone: String, email: String, address: String) {
         compositeDisposable.add(
             cart.getAllCart(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
@@ -341,6 +436,11 @@ class PlaceOrderFragment : Fragment(){
                                 order.totalPrice = if (rdiHome.isChecked) t + 60 else t
                                 order.transactionId = "Оплата при отриманні"
                                 order.orderedTime = Calendar.getInstance().timeInMillis
+                                if (rdiForTime.isChecked) {
+                                    order.forTime =
+                                        StringBuilder().append(dateSpinner.selectedItem).append(" ")
+                                            .append(timeSpinner.selectedItem).toString()
+                                }
                                 writeOrderToFirebase(order)
                             }
 
@@ -357,8 +457,8 @@ class PlaceOrderFragment : Fragment(){
         //Надсилання до бази даних
         val orderId = Common.createOrderId()
         order.orderId = orderId
-        FirebaseDatabase.getInstance().getReference(Common.ORDER_REF).child(orderId)
-            .setValue(order).addOnFailureListener { e ->
+        FirebaseDatabase.getInstance().getReference(Common.ORDER_REF).child(orderId).setValue(order)
+            .addOnFailureListener { e ->
                 Toast.makeText(
                     requireContext(), "" + e.message, Toast.LENGTH_SHORT
                 ).show()
@@ -395,41 +495,6 @@ class PlaceOrderFragment : Fragment(){
             }
 
     }
-//    override fun onRequestPermissionsResult(
-//        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-//    ) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        if (requestCode == Common.PERMISSIONS_REQUEST_LOCATION) {
-//            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                // Дозвіл на доступ наданий
-//                if (ActivityCompat.checkSelfPermission(
-//                        requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION
-//                    ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-//                        requireContext(), android.Manifest.permission.ACCESS_COARSE_LOCATION
-//                    ) == PackageManager.PERMISSION_GRANTED
-//                ) {
-//                    // Отримання останнього відомого розташування і починаємо прослуховування змін розташування
-//                    val lastKnownLocation =
-//                        locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-//                    if (lastKnownLocation != null) {
-//                        val latitude = lastKnownLocation.latitude
-//                        val longitude = lastKnownLocation.longitude
-//                        edtAddress.setText("Latitude: $latitude\\nLongitude: $longitude")
-//                    }
-//                    locationManager.requestLocationUpdates(
-//                        LocationManager.GPS_PROVIDER,
-//                        Common.MIN_TIME_BETWEEN_UPDATES,
-//                        Common.MIN_DISTANCE_CHANGE_FOR_UPDATES,
-//                        locationListener
-//                    )
-//                }
-//            } else {
-//                Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT)
-//                    .show()
-//            }
-//        }
-//    }
-
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -484,7 +549,15 @@ class PlaceOrderFragment : Fragment(){
                                                         order.totalPrice = finalPrice
                                                         order.transactionId =
                                                             braintreeTransaction.transaction!!.id
-                                                        order.orderedTime = Calendar.getInstance().timeInMillis
+                                                        order.orderedTime =
+                                                            Calendar.getInstance().timeInMillis
+                                                        if (rdiForTime.isChecked) {
+                                                            order.forTime =
+                                                                StringBuilder().append(dateSpinner.selectedItem)
+                                                                    .append(" ")
+                                                                    .append(timeSpinner.selectedItem)
+                                                                    .toString()
+                                                        }
                                                         writeOrderToFirebase(order)
                                                     }
                                                 }, { err: Throwable ->

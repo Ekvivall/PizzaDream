@@ -37,6 +37,7 @@ class OrderDetailFragment : Fragment() {
     private lateinit var priceDelivery: TextView
     private lateinit var totalPrice: TextView
     private lateinit var btnAddComment: Button
+    private lateinit var customerTime: TextView
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -95,6 +96,10 @@ class OrderDetailFragment : Fragment() {
             Common.orderSelected = order
             EventBus.getDefault().postSticky(ViewAddCommentClick(true))
         }
+        if(order.forTime != null){
+            customerTime.text = StringBuilder("Замовлено на ").append(order.forTime)
+            customerTime.visibility = View.VISIBLE
+        }
     }
 
     private fun initView(root: View) {
@@ -114,5 +119,6 @@ class OrderDetailFragment : Fragment() {
         priceDelivery = root.findViewById(R.id.price_delivery)
         totalPrice = root.findViewById(R.id.total_price)
         btnAddComment = root.findViewById(R.id.btn_add_comment)
+        customerTime = root.findViewById(R.id.customer_time)
     }
 }
