@@ -77,8 +77,4 @@ class FavoritesFragment : Fragment() {
             }
         }
     }
-
-    override fun onStop() {
-        super.onStop()
-    }
 }

@@ -6,12 +6,12 @@ import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Database.Entities.CartItem
 
 class CommentFoodViewModel:ViewModel() {
-    private var foodMutableLiveData:MutableLiveData<List<CartItem>>?=null
-    fun getFoodMutableLiveData():MutableLiveData<List<CartItem>>{
+    private var foodMutableLiveData:MutableLiveData<CartItem>?=null
+    fun getFoodMutableLiveData():MutableLiveData<CartItem>{
         if(foodMutableLiveData == null){
             foodMutableLiveData = MutableLiveData()
         }
-        foodMutableLiveData!!.value = Common.orderSelected!!.cartItems
+        foodMutableLiveData!!.value = Common.cartItemSelected
         return foodMutableLiveData!!
     }
 }

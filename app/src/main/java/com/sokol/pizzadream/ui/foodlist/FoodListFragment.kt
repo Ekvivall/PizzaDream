@@ -46,10 +46,6 @@ class FoodListFragment : Fragment() {
         return root
     }
 
-    override fun onStop() {
-        if (foodAdapter != null) foodAdapter!!.onStop()
-        super.onStop()
-    }
 
     private fun initView(root: View) {
         layoutAnimatorController =

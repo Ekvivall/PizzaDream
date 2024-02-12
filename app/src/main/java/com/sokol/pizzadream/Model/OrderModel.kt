@@ -12,7 +12,6 @@ class OrderModel {
     var isDeliveryAddress:Boolean = false
     var transactionId: String?=null
     var cartItems: List<CartItem>? = null
-    var isComment:Boolean = false
     var status:String?=null
     var orderedTime:Long = 0
     var orderId:String?=null

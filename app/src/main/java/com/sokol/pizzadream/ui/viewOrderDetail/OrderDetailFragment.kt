@@ -36,7 +36,6 @@ class OrderDetailFragment : Fragment() {
     private lateinit var priceFood: TextView
     private lateinit var priceDelivery: TextView
     private lateinit var totalPrice: TextView
-    private lateinit var btnAddComment: Button
     private lateinit var customerTime: TextView
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -81,7 +80,7 @@ class OrderDetailFragment : Fragment() {
             priceDelivery.text = Common.formatPrice(0.0)
         }
         val adapter = OrderFoodAdapter(
-            order.cartItems!!, requireContext()
+            order.cartItems!!, requireContext(), order
         )
         orderFoodsRecycler.adapter = adapter
         paymentType.text = when (order.transactionId) {
@@ -89,13 +88,6 @@ class OrderDetailFragment : Fragment() {
             else -> "Онлайн оплата"
         }
         totalPrice.text = Common.formatPrice(order.totalPrice)
-        if (order.status == Common.STATUSES[4] && !order.isComment) btnAddComment.visibility =
-            View.VISIBLE
-        else btnAddComment.visibility = View.GONE
-        btnAddComment.setOnClickListener {
-            Common.orderSelected = order
-            EventBus.getDefault().postSticky(ViewAddCommentClick(true))
-        }
         if(order.forTime != null){
             customerTime.text = StringBuilder("Замовлено на ").append(order.forTime)
             customerTime.visibility = View.VISIBLE
@@ -118,7 +110,6 @@ class OrderDetailFragment : Fragment() {
         priceFood = root.findViewById(R.id.price_food)
         priceDelivery = root.findViewById(R.id.price_delivery)
         totalPrice = root.findViewById(R.id.total_price)
-        btnAddComment = root.findViewById(R.id.btn_add_comment)
         customerTime = root.findViewById(R.id.customer_time)
     }
 }

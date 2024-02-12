@@ -309,17 +309,6 @@
                     </LinearLayout>
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_add_comment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:backgroundTint="@color/red"
-                android:text="@string/add_comment"
-                android:textColor="@color/white"
-                android:visibility="gone"
-                app:cornerRadius="28dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </RelativeLayout>

@@ -30,7 +30,6 @@ class OrderAdapter(val items: List<OrderModel>, val context: Context) :
         var address: TextView = view.findViewById(R.id.customer_address)
         var totalPrice: TextView = view.findViewById(R.id.total_price)
         var recyclerView: RecyclerView = view.findViewById(R.id.order_foods_recycler)
-        var btnAddComment: Button = view.findViewById(R.id.btn_add_comment)
         var delivery: TextView = view.findViewById(R.id.delivery)
         private var listener: IRecyclerItemClickListener? = null
 
@@ -63,7 +62,7 @@ class OrderAdapter(val items: List<OrderModel>, val context: Context) :
         val layoutManager = LinearLayoutManager(context)
         holder.recyclerView.layoutManager = layoutManager
         val adapter = OrderFoodAdapter(
-            orderItem.cartItems!!, context
+            orderItem.cartItems!!, context, orderItem
         )
         if (orderItem.status == Common.STATUSES[4]) {
             holder.status.setTextColor(ContextCompat.getColor(context, R.color.green))
@@ -92,12 +91,5 @@ class OrderAdapter(val items: List<OrderModel>, val context: Context) :
 
         })
 
-        if (orderItem.status == Common.STATUSES[4] && !orderItem.isComment) holder.btnAddComment.visibility =
-            View.VISIBLE
-        else holder.btnAddComment.visibility = View.GONE
-        holder.btnAddComment.setOnClickListener {
-            Common.orderSelected = orderItem
-            EventBus.getDefault().postSticky(ViewAddCommentClick(true))
-        }
     }
 }

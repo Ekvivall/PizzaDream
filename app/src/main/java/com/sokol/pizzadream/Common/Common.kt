@@ -51,6 +51,7 @@ object Common {
     val ADDON_CATEGORY_REF: String = "Addon"
     var categorySelected: CategoryModel? = null
     var foodSelected: FoodModel? = null
+    var cartItemSelected: CartItem? = null
     var orderSelected: OrderModel? = null
     var currentUser: UserModel? = null
     var totalPrice: String = "Всього: 0 грн."

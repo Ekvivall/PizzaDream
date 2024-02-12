@@ -431,7 +431,6 @@ class PlaceOrderFragment : Fragment() {
                                 order.customerEmail = email
                                 order.cartItems = cartItem
                                 order.isDeliveryAddress = rdiHome.isChecked
-                                order.isComment = false
                                 order.status = Common.STATUSES[0]
                                 order.totalPrice = if (rdiHome.isChecked) t + 60 else t
                                 order.transactionId = "Оплата при отриманні"
@@ -544,7 +543,6 @@ class PlaceOrderFragment : Fragment() {
                                                         order.customerEmail = email
                                                         order.cartItems = cartItem
                                                         order.isDeliveryAddress = rdiHome.isChecked
-                                                        order.isComment = false
                                                         order.status = Common.STATUSES[0]
                                                         order.totalPrice = finalPrice
                                                         order.transactionId =

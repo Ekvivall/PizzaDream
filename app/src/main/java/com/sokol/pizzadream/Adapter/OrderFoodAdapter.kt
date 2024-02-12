@@ -4,6 +4,7 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -19,8 +20,10 @@ import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Database.Entities.CartItem
 import com.sokol.pizzadream.EventBus.FoodItemClick
+import com.sokol.pizzadream.EventBus.ViewAddCommentClick
 import com.sokol.pizzadream.Model.AddonModel
 import com.sokol.pizzadream.Model.FoodModel
+import com.sokol.pizzadream.Model.OrderModel
 import com.sokol.pizzadream.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.greenrobot.eventbus.EventBus
 
-class OrderFoodAdapter(val items: List<CartItem>, val context: Context) :
+class OrderFoodAdapter(val items: List<CartItem>, val context: Context, val order:OrderModel) :
     RecyclerView.Adapter<OrderFoodAdapter.MyViewHolder>() {
 
     class MyViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
@@ -39,6 +42,7 @@ class OrderFoodAdapter(val items: List<CartItem>, val context: Context) :
         var foodPrice: TextView = view.findViewById(R.id.txt_food_price_order)
         var foodAddonTitle: TextView = view.findViewById(R.id.txt_food_addon_order_title)
         var foodQuantity: TextView = view.findViewById(R.id.txt_food_quantity_order)
+        var btnAddComment: Button = view.findViewById(R.id.btn_add_comment)
         private var listener: IRecyclerItemClickListener? = null
         fun setListener(listener: IRecyclerItemClickListener) {
             this.listener = listener
@@ -110,6 +114,14 @@ class OrderFoodAdapter(val items: List<CartItem>, val context: Context) :
                 findFoodItem(pos)
             }
         })
+        if (order.status == Common.STATUSES[4] && !items[position].isComment) holder.btnAddComment.visibility =
+            View.VISIBLE
+        else holder.btnAddComment.visibility = View.GONE
+        holder.btnAddComment.setOnClickListener {
+            Common.orderSelected = order
+            Common.cartItemSelected = items[position]
+            EventBus.getDefault().postSticky(ViewAddCommentClick(true))
+        }
     }
 
     fun findFoodItem(position: Int) {

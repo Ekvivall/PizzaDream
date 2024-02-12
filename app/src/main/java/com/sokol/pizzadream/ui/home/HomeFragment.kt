@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.view.animation.LayoutAnimationController
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -53,12 +54,6 @@ class HomeFragment : Fragment() {
             ).show()
         }
         return root
-    }
-
-    override fun onStop() {
-        if (foodAdapter != null)
-            foodAdapter!!.onStop()
-        super.onStop()
     }
 
     private fun initView(root: View) {

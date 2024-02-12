@@ -119,7 +119,6 @@ class CartFragment : Fragment() {
     }
 
     override fun onStop() {
-        cartViewModel.onStop()
         compositeDisposable.clear()
         if (EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().unregister(this)

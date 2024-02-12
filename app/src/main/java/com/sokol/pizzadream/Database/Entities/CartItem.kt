@@ -39,6 +39,8 @@ class CartItem {
 
     @ColumnInfo(name = "categoryId")
     var categoryId: String = ""
+    @ColumnInfo(name = "comment")
+    var isComment: Boolean = false
 
     @NotNull
     @ColumnInfo(name = "uid")
