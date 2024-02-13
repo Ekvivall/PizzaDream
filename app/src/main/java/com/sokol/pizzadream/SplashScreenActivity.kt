@@ -10,8 +10,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.storageMetadata
+import com.google.firebase.installations.FirebaseInstallations
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Model.UserModel
 import com.sokol.pizzadream.Remote.ICloudFunctions
@@ -71,8 +70,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         override fun onDataChange(p0: DataSnapshot) {
                             val model = p0.getValue(UserModel::class.java)
-                            Common.currentUser = model
-                            goToHome()
+                            goToHome(model)
                         }
                     })
             } else {
@@ -83,25 +81,36 @@ class SplashScreenActivity : AppCompatActivity() {
         }
     }
 
-    private fun goToHome() {
+    private fun goToHome(model:UserModel?) {
         FirebaseAuth.getInstance().currentUser!!.getIdToken(true).addOnFailureListener { t ->
             Toast.makeText(this, t.message, Toast.LENGTH_SHORT).show()
         }.addOnCompleteListener {
-                Common.authorizeToken = it.result!!.token
+            Common.authorizeToken = it.result!!.token
             val headers = HashMap<String, String>()
             headers.put("Authorization", Common.buildToken(Common.authorizeToken!!))
-                compositeDisposable.add(
-                    cloudFunctions.getToken(headers).subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread()).subscribe({ braintreeToken ->
+            compositeDisposable.add(
+                cloudFunctions.getToken(headers).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread()).subscribe({ braintreeToken ->
+                        FirebaseInstallations.getInstance().id.addOnFailureListener { e ->
+                            Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
                             Common.currentToken = braintreeToken.token
-                        }, { throwable ->
-                            Toast.makeText(
-                                this, throwable.message, Toast.LENGTH_SHORT
-                            ).show()
-                        })
-                )
-                startActivity(Intent(this, HomeActivity::class.java))
-                finish()
-            }
+                            startActivity(Intent(this, HomeActivity::class.java))
+                            finish()
+                        }.addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                Common.currentUser = model
+                                Common.currentToken = braintreeToken.token
+                                Common.updateToken(this@SplashScreenActivity, task.result)
+                                startActivity(Intent(this, HomeActivity::class.java))
+                                finish()
+                            }
+                        }
+                    }, { throwable ->
+                        Toast.makeText(
+                            this, throwable.message, Toast.LENGTH_SHORT
+                        ).show()
+                    })
+            )
+        }
     }
 }

@@ -1,15 +1,27 @@
 package com.sokol.pizzadream.Common
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.net.ConnectivityManager
+import android.os.Build
+import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import com.google.firebase.database.FirebaseDatabase
 import com.sokol.pizzadream.Database.Entities.CartItem
 import com.sokol.pizzadream.Model.AddonCategoryModel
 import com.sokol.pizzadream.Model.CategoryModel
 import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.Model.NewsModel
 import com.sokol.pizzadream.Model.OrderModel
+import com.sokol.pizzadream.Model.TokenModel
 import com.sokol.pizzadream.Model.UserModel
 import com.sokol.pizzadream.Model.VacancyModel
+import com.sokol.pizzadream.R
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.util.Random
@@ -33,6 +45,9 @@ object Common {
             .append(characters[Random().nextInt(characters.length)]).toString()
     }
 
+    val NOTIFICATION_CONTENT: String = "content"
+    val NOTIFICATION_TITLE = "title"
+    val TOKEN_REF: String = "Tokens"
     val COMMENT_REF: String = "Comments"
     val REVIEW_REF: String = "ReviewsPizzeria"
     val RESUME_REF: String = "Resumes"
@@ -81,6 +96,57 @@ object Common {
 
     fun buildToken(authorizeToken: String): String {
         return java.lang.StringBuilder("Bearer ").append(authorizeToken).toString()
+    }
+
+    fun updateToken(context: Context, token: String) {
+        val tokenModel = TokenModel()
+        tokenModel.email = currentUser!!.email
+        tokenModel.token = token
+        FirebaseDatabase.getInstance().getReference(TOKEN_REF).child(currentUser!!.uid!!)
+            .setValue(tokenModel).addOnFailureListener { e ->
+                Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    fun showNotification(
+        context: Context,
+        id: Int,
+        title: String?,
+        content: String?,
+        intent: Intent?
+    ) {
+        var pendingIntent: PendingIntent? = null
+        if (intent != null) {
+            // Створення PendingIntent для запуску заданого Intent при натисканні на сповіщення
+            pendingIntent =
+                PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+        val notificationChannelId = "sokol.pizzadream"
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Створення каналу сповіщень, якщо працюємо на Android 8.0 або вище
+            val notificationChannel = NotificationChannel(
+                notificationChannelId, "Pizza Dream", NotificationManager.IMPORTANCE_DEFAULT
+            )
+            notificationChannel.description = "Pizza Dream"
+            notificationChannel.enableLights(true)
+            notificationChannel.enableVibration(true)
+            notificationChannel.lightColor = Color.RED
+            notificationChannel.vibrationPattern = longArrayOf(0, 1000, 500, 1000)
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+        val builder = NotificationCompat.Builder(context, notificationChannelId)
+        builder.setContentTitle(title).setContentText(content).setAutoCancel(true)
+            .setSmallIcon(R.drawable.icon)
+            .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.icon))
+        if (pendingIntent != null) {
+            // Встановлення PendingIntent для сповіщення, яке виконується при натисканні на нього
+            builder.setContentIntent(pendingIntent)
+        }
+        val notification = builder.build()
+        // Відображення сповіщення
+        notificationManager.notify(id, notification)
     }
 
 }

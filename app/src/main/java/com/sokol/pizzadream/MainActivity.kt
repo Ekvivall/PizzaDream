@@ -13,6 +13,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.installations.FirebaseInstallations
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Model.UserModel
 import com.sokol.pizzadream.Remote.ICloudFunctions
@@ -105,18 +106,26 @@ class MainActivity : AppCompatActivity() {
                         headers.put("Authorization", Common.buildToken(Common.authorizeToken!!))
                         compositeDisposable.add(
                             cloudFunctions.getToken(headers).subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe({ braintreeToken ->
-                                    Common.currentToken = braintreeToken.token
+                                .observeOn(AndroidSchedulers.mainThread()).subscribe({ braintreeToken ->
+                                    FirebaseInstallations.getInstance().id.addOnFailureListener { e ->
+                                        Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
+                                        Common.currentToken = braintreeToken.token
+                                    }.addOnCompleteListener { task ->
+                                        if (task.isSuccessful) {
+                                            Common.currentToken = braintreeToken.token
+                                            Common.updateToken(this@MainActivity, task.result)
+                                        }
+                                    }
                                 }, { throwable ->
                                     Toast.makeText(
                                         this, throwable.message, Toast.LENGTH_SHORT
                                     ).show()
                                 })
                         )
-                        startActivity(Intent(this, HomeActivity::class.java))
-                        finish()
                     }
+
+                /*startActivity(Intent(this, HomeActivity::class.java))
+                finish()*/
             }
         }
     }
