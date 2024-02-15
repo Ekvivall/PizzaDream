@@ -21,7 +21,6 @@ import com.sokol.pizzadream.Remote.RetrofitCloudClient
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import java.util.Arrays
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -45,17 +44,10 @@ class MainActivity : AppCompatActivity() {
         firebaseAuth.addAuthStateListener(listener)
     }
 
-    override fun onResume() {
-        super.onResume()
-        firebaseAuth.addAuthStateListener(listener)
-    }
-
     override fun onStop() {
-        if (firebaseAuth != null && listener != null) {
-            firebaseAuth.removeAuthStateListener(listener)
-        }
-        compositeDisposable.clear()
         super.onStop()
+        firebaseAuth.removeAuthStateListener(listener)
+        compositeDisposable.clear()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,17 +56,24 @@ class MainActivity : AppCompatActivity() {
         initFirebase()
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        firebaseAuth.removeAuthStateListener(listener)
+        compositeDisposable.clear()
+    }
+
     private fun initFirebase() {
         database = FirebaseDatabase.getInstance()
         userInfoRef = database.getReference(Common.USER_REFERENCE)
         firebaseAuth = FirebaseAuth.getInstance()
         cloudFunctions = RetrofitCloudClient.getInstance().create(ICloudFunctions::class.java)
-        providers = Arrays.asList(
+        providers = listOf(
             AuthUI.IdpConfig.GoogleBuilder().build()
         )
         listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val user = firebaseAuth.currentUser
             if (user != null) {
+                var model = UserModel()
                 userInfoRef.child(user.uid)
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onCancelled(p0: DatabaseError) {
@@ -84,7 +83,6 @@ class MainActivity : AppCompatActivity() {
 
                         override fun onDataChange(p0: DataSnapshot) {
                             if (!p0.exists()) {
-                                val model = UserModel()
                                 model.uid = user.uid
                                 model.firstName = user.displayName.toString()
                                 model.email = user.email.toString()
@@ -92,40 +90,63 @@ class MainActivity : AppCompatActivity() {
                                 userInfoRef.child(user.uid).setValue(model)
                                 Common.currentUser = model
                             } else {
-                                val model = p0.getValue(UserModel::class.java)
+                                model = p0.getValue(UserModel::class.java)!!
                                 Common.currentUser = model
+                                if (model.role == "user") {
+                                    user.getIdToken(true).addOnFailureListener { t ->
+                                        Toast.makeText(this@MainActivity, t.message, Toast.LENGTH_SHORT)
+                                            .show()
+                                    }
+                                        .addOnCompleteListener {
+                                            Common.authorizeToken = it.result!!.token
+                                            val headers = HashMap<String, String>()
+                                            headers["Authorization"] = Common.buildToken(Common.authorizeToken!!)
+                                            compositeDisposable.add(
+                                                cloudFunctions.getToken(headers)
+                                                    .subscribeOn(Schedulers.io())
+                                                    .observeOn(AndroidSchedulers.mainThread())
+                                                    .subscribe({ braintreeToken ->
+                                                        FirebaseInstallations.getInstance().id.addOnFailureListener { e ->
+                                                            Toast.makeText(
+                                                                this@MainActivity,
+                                                                e.message,
+                                                                Toast.LENGTH_SHORT
+                                                            )
+                                                                .show()
+                                                            Common.currentToken = braintreeToken.token
+                                                        }.addOnCompleteListener { task ->
+                                                            if (task.isSuccessful) {
+                                                                Common.currentToken =
+                                                                    braintreeToken.token
+                                                                Common.updateToken(
+                                                                    this@MainActivity,
+                                                                    task.result
+                                                                )
+                                                                startActivity(Intent(this@MainActivity, HomeActivity::class.java))
+                                                                finish()
+                                                            }
+                                                        }
+                                                    }, { throwable ->
+                                                        Toast.makeText(
+                                                            this@MainActivity,
+                                                            throwable.message,
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    })
+                                            )
+                                        }
+                                } else {
+                                    firebaseAuth.signOut()
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "Ви ввели неправильні облікові дані клієнта",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
+
                         }
                     })
-                user.getIdToken(true).addOnFailureListener { t ->
-                    Toast.makeText(this, t.message, Toast.LENGTH_SHORT).show()
-                }
-                    .addOnCompleteListener {
-                        Common.authorizeToken = it.result!!.token
-                        val headers = HashMap<String, String>()
-                        headers.put("Authorization", Common.buildToken(Common.authorizeToken!!))
-                        compositeDisposable.add(
-                            cloudFunctions.getToken(headers).subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread()).subscribe({ braintreeToken ->
-                                    FirebaseInstallations.getInstance().id.addOnFailureListener { e ->
-                                        Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
-                                        Common.currentToken = braintreeToken.token
-                                    }.addOnCompleteListener { task ->
-                                        if (task.isSuccessful) {
-                                            Common.currentToken = braintreeToken.token
-                                            Common.updateToken(this@MainActivity, task.result)
-                                        }
-                                    }
-                                }, { throwable ->
-                                    Toast.makeText(
-                                        this, throwable.message, Toast.LENGTH_SHORT
-                                    ).show()
-                                })
-                        )
-                    }
-
-                /*startActivity(Intent(this, HomeActivity::class.java))
-                finish()*/
             }
         }
     }

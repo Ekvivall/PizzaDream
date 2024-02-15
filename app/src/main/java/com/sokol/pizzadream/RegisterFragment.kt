@@ -12,11 +12,8 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Model.UserModel
-import com.sokol.pizzadream.Remote.ICloudFunctions
 import com.sokol.pizzadream.databinding.FragmentRegisterBinding
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 
 class RegisterFragment : Fragment() {
     private lateinit var binding: FragmentRegisterBinding
@@ -24,7 +21,6 @@ class RegisterFragment : Fragment() {
     private lateinit var userInfoRef: DatabaseReference
     private lateinit var database: FirebaseDatabase
     private var compositeDisposable = CompositeDisposable()
-    private lateinit var cloudFunctions: ICloudFunctions
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -81,23 +77,6 @@ class RegisterFragment : Fragment() {
                             val user = firebaseAuth.currentUser
                             model.uid = user!!.uid
                             userInfoRef.child(user.uid).setValue(model)
-                                /*.addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        compositeDisposable.add(
-                                            cloudFunctions.getToken().subscribeOn(Schedulers.io())
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe({ braintreeToken ->
-                                                    Common.currentToken = braintreeToken.token
-                                                }, { throwable ->
-                                                    Toast.makeText(
-                                                        requireContext(),
-                                                        throwable.message,
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                })
-                                        )
-                                    }
-                                }*/
                         } else {
                             tilEmail.error = "Користувач з такою електронною адресою вже існує."
                         }

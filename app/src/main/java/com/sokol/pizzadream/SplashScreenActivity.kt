@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -38,13 +39,15 @@ class SplashScreenActivity : AppCompatActivity() {
         firebaseAuth.addAuthStateListener(listener)
     }
 
-    override fun onResume() {
-        super.onResume()
-        firebaseAuth.addAuthStateListener(listener)
-    }
 
     override fun onStop() {
         super.onStop()
+        firebaseAuth.removeAuthStateListener(listener)
+        compositeDisposable.clear()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
         firebaseAuth.removeAuthStateListener(listener)
         compositeDisposable.clear()
     }
@@ -54,8 +57,6 @@ class SplashScreenActivity : AppCompatActivity() {
         userInfoRef = database.getReference(Common.USER_REFERENCE)
         firebaseAuth = FirebaseAuth.getInstance()
         cloudFunctions = RetrofitCloudClient.getInstance().create(ICloudFunctions::class.java)
-        //dialog = SpotsDialog.Builder().setContext(this).setCancelable(false).build()
-        //dialog.show()
         listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val user = firebaseAuth.currentUser
             // Користувач вже увійшов, перенаправити на HomeActivity
@@ -70,18 +71,24 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         override fun onDataChange(p0: DataSnapshot) {
                             val model = p0.getValue(UserModel::class.java)
-                            goToHome(model)
+                            if (model!!.role == "user") {
+                                goToHome(model)
+                            }
+                            else{
+                                startActivity(Intent(this@SplashScreenActivity, MainActivity::class.java))
+                                finish()
+                            }
                         }
                     })
             } else {
                 // Користувач ще не увійшов, перенаправляємо на MainActivity
-                startActivity(Intent(this, MainActivity::class.java))
+                startActivity(Intent(this@SplashScreenActivity, MainActivity::class.java))
                 finish()
             }
         }
     }
 
-    private fun goToHome(model:UserModel?) {
+    private fun goToHome(model: UserModel?) {
         FirebaseAuth.getInstance().currentUser!!.getIdToken(true).addOnFailureListener { t ->
             Toast.makeText(this, t.message, Toast.LENGTH_SHORT).show()
         }.addOnCompleteListener {
@@ -94,14 +101,17 @@ class SplashScreenActivity : AppCompatActivity() {
                         FirebaseInstallations.getInstance().id.addOnFailureListener { e ->
                             Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
                             Common.currentToken = braintreeToken.token
-                            startActivity(Intent(this, HomeActivity::class.java))
-                            finish()
                         }.addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 Common.currentUser = model
                                 Common.currentToken = braintreeToken.token
                                 Common.updateToken(this@SplashScreenActivity, task.result)
-                                startActivity(Intent(this, HomeActivity::class.java))
+                                startActivity(
+                                    Intent(
+                                        this@SplashScreenActivity,
+                                        HomeActivity::class.java
+                                    )
+                                )
                                 finish()
                             }
                         }

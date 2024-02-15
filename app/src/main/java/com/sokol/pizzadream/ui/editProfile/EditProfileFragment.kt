@@ -18,6 +18,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.EmailAuthProvider
@@ -33,7 +34,9 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.EventBus.ProfileClick
+import com.sokol.pizzadream.Model.UserModel
 import com.sokol.pizzadream.R
+import com.sokol.pizzadream.ui.profile.ProfileViewModel
 import dmax.dialog.SpotsDialog
 import org.greenrobot.eventbus.EventBus
 
@@ -54,19 +57,33 @@ class EditProfileFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+        val userViewModel = ViewModelProvider(this).get(EditProfileViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_edit_profile, container, false)
         initView(root)
+        if (Common.isConnectedToInternet(requireContext())) {
+            userViewModel.getUserMutableLiveData().observe(viewLifecycleOwner) {
+                displayInfo(it)
+            }
+        } else {
+            Toast.makeText(
+                requireContext(), "Будь ласка, перевірте своє з'єднання!", Toast.LENGTH_SHORT
+            ).show()
+        }
         return root
     }
-
+    private fun displayInfo(it: UserModel) {
+        profileName.setText(it.firstName)
+        profileLastName.setText(it.lastName)
+        profilePhone.setText(it.phone.replace(" ", ""))
+        if (it.avatar.isNotEmpty()) {
+            Glide.with(this).load(it.avatar).into(profileImage)
+        }
+    }
     private fun initView(root: View) {
         storageReference = FirebaseStorage.getInstance().reference
         waitingDialog =
             SpotsDialog.Builder().setContext(requireContext()).setCancelable(false).build()
         profileImage = root.findViewById(R.id.profile_image)
-        if (Common.currentUser!!.avatar.isNotEmpty()) {
-            Glide.with(this).load(Common.currentUser!!.avatar).into(profileImage)
-        }
         editAvatar = root.findViewById(R.id.edit_avatar)
         profileImage.setOnClickListener {
             editAvatar()
@@ -81,8 +98,6 @@ class EditProfileFragment : Fragment() {
         tilLastName = root.findViewById(R.id.til_last_name)
         tilPhone = root.findViewById(R.id.til_phone)
         saveEditProfile = root.findViewById(R.id.btn_save_edit_profile)
-        profileName.setText(Common.currentUser?.firstName)
-        profileLastName.setText(Common.currentUser?.lastName)
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
@@ -117,7 +132,6 @@ class EditProfileFragment : Fragment() {
             }
         }
         profilePhone.addTextChangedListener(textWatcher)
-        profilePhone.setText(Common.currentUser?.phone!!.replace(" ", ""))
         saveEditProfile.setOnClickListener {
             if (Common.isConnectedToInternet(requireContext())) {
                 val name = profileName.text.toString().trim()

@@ -103,6 +103,7 @@ class HomeActivity : AppCompatActivity() {
         super.onStop()
     }
 
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onCategorySelected(event: CategoryClick) {
         if (event.isSuccess) {
