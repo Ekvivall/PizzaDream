@@ -157,7 +157,7 @@ class PlaceOrderFragment : Fragment() {
         dateSpinner = root.findViewById(R.id.date_spinner)
         timeSpinner = root.findViewById(R.id.time_spinner)
         calendar = addTime(rdiHome.isChecked)
-        val formattedTime = timeFormat.format(calendar.time)
+        val formattedTime = checkTime(calendar)
         titleAsSoon.text = StringBuilder("Зверніть увагу! Доставка до ").append(formattedTime)
         val regex = Regex("\\d+(?=,\\d{2})")
         val price = Common.totalPrice.replace("\u00A0", "")
@@ -236,6 +236,11 @@ class PlaceOrderFragment : Fragment() {
                 tilPhone.error = null
                 tilAddress.error = null
                 tilEmail.error = null
+                if (timeSpinner.visibility == View.VISIBLE && timeSpinner.selectedItemPosition == -1) {
+                    Toast.makeText(requireContext(), "Оберіть час доставки", Toast.LENGTH_SHORT)
+                        .show()
+                    return@setOnClickListener
+                }
                 if (name.isEmpty()) {
                     tilName.error = "Будь ласка, введіть своє ім'я"
                     return@setOnClickListener
@@ -329,12 +334,29 @@ class PlaceOrderFragment : Fragment() {
         }
     }
 
+    private fun checkTime(calendar: Calendar): String {
+
+        val currentTime = calendar.get(Calendar.HOUR_OF_DAY)
+        if (currentTime in 10..19) {
+            calendar.set(Calendar.HOUR_OF_DAY, currentTime)
+            calendar.set(Calendar.MINUTE, 0)
+        } else if (currentTime < 10) {
+            calendar.set(Calendar.HOUR_OF_DAY, 10)
+            calendar.set(Calendar.MINUTE, 30)
+        } else {
+            calendar.add(Calendar.DATE, 1)
+            calendar.set(Calendar.HOUR_OF_DAY, 10)
+            calendar.set(Calendar.MINUTE, 30)
+        }
+        return timeFormat.format(calendar.time)
+    }
+
     private fun updateTime(isChecked: Boolean) {
         if (isChecked) {
             calendar = addTime(rdiHome.isChecked)
             orderSpinners.visibility = View.GONE
             titleAsSoon.visibility = View.VISIBLE
-            val formattedTime = timeFormat.format(calendar.time)
+            val formattedTime = checkTime(calendar)
             titleAsSoon.text =
                 StringBuilder(if (rdiHome.isChecked) "Зверніть увагу! Доставка до " else "Зверніть увагу! Можна отримати о ").append(
                     formattedTime

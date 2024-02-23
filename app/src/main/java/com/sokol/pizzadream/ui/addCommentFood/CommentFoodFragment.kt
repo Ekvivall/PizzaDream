@@ -109,11 +109,9 @@ class CommentFoodFragment : Fragment() {
         } else {
             foodAddonTitle.visibility = View.VISIBLE
         }
-        foodQuantity.text =
-            StringBuilder(it.foodQuantity.toString()).append(" шт.")
+        foodQuantity.text = StringBuilder(it.foodQuantity.toString()).append(" шт.")
         foodPrice.text =
-            StringBuilder("").append(Common.formatPrice(it.foodPrice * it.foodQuantity))
-                .toString()
+            StringBuilder("").append(Common.formatPrice(it.foodPrice * it.foodQuantity)).toString()
     }
 
 
@@ -155,8 +153,10 @@ class CommentFoodFragment : Fragment() {
     }
 
     private fun writeReviewToFirebase(comment: CommentModel) {
-        FirebaseDatabase.getInstance().getReference(Common.COMMENT_REF).child(comment.foodId).push()
-            .setValue(comment).addOnFailureListener { e ->
+        val commentRef =
+            FirebaseDatabase.getInstance().getReference(Common.COMMENT_REF).child(comment.foodId)
+        comment.id = commentRef.push().key.toString()
+        commentRef.child(comment.id).setValue(comment).addOnFailureListener { e ->
                 Toast.makeText(
                     requireContext(), "" + e.message, Toast.LENGTH_SHORT
                 ).show()

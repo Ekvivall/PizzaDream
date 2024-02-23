@@ -252,6 +252,7 @@ class VacancyDetailFragment : Fragment() {
                     resume.phone = phone
                     resume.email = email
                     resume.resumeFile = uri.toString()
+                    resume.resumeTimeStamp = Calendar.getInstance().timeInMillis
                     writeResumeToFirebase(resume)
                 }
                 waitingDialog.dismiss()

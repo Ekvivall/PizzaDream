@@ -7,4 +7,5 @@ class ResumeModel {
     var phone: String = ""
     var email: String = ""
     var resumeFile: String = ""
+    var resumeTimeStamp: Long = 0
 }
