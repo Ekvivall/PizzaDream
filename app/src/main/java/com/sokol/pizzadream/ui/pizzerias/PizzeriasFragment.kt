@@ -37,7 +37,7 @@ class PizzeriasFragment : Fragment() {
     private lateinit var mapView: MapView
     private lateinit var recyclerView: RecyclerView
     private lateinit var pizzeriasViewModel: PizzeriasViewModel
-    private lateinit var googleMap: GoogleMap
+    private var googleMap: GoogleMap? = null
     private lateinit var locationManager: LocationManager
     private var addressAdapter: AddressAdapter? = null
     override fun onCreateView(
@@ -91,12 +91,12 @@ class PizzeriasFragment : Fragment() {
         mapView.onCreate(savedInstanceState)
         mapView.getMapAsync { map ->
             googleMap = map
-            googleMap.uiSettings.isZoomControlsEnabled = true
+            googleMap!!.uiSettings.isZoomControlsEnabled = true
         }
     }
 
     private fun updateMapMarkers(addressList: List<AddressModel>) {
-        googleMap.clear()
+        googleMap?.clear()
         // Отримання розташування користувача
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
@@ -117,11 +117,11 @@ class PizzeriasFragment : Fragment() {
                 val markerOptions = MarkerOptions()
                     .position(userLatLng)
                     .title("Моє розташування")
-                googleMap.addMarker(markerOptions)
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 12.0f))
+                googleMap?.addMarker(markerOptions)
+                googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 12.0f))
             }
         } else {
-            googleMap.animateCamera(
+            googleMap?.animateCamera(
                 CameraUpdateFactory.newLatLngZoom(
                     LatLng(
                         48.4652948442045,
@@ -135,7 +135,7 @@ class PizzeriasFragment : Fragment() {
                 .position(LatLng(address.lat, address.lng))
                 .title(address.name)
                 .icon(bitmapDescriptorFromVector(requireContext(), R.drawable.ic_local_pizza_24))
-            googleMap.addMarker(markerOptions)
+            googleMap?.addMarker(markerOptions)
         }
     }
 

@@ -1,7 +1,7 @@
 package com.sokol.pizzadream.Database.Repositories
 
 import com.sokol.pizzadream.Database.Entities.FavoriteItem
-import com.sokol.pizzadream.Database.FavoriteDAO
+import com.sokol.pizzadream.Database.DAO.FavoriteDAO
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single

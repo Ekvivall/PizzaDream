@@ -1,6 +1,6 @@
 package com.sokol.pizzadream.Database.Repositories
 
-import com.sokol.pizzadream.Database.CartDAO
+import com.sokol.pizzadream.Database.DAO.CartDAO
 import com.sokol.pizzadream.Database.Entities.CartItem
 import io.reactivex.Completable
 import io.reactivex.Flowable

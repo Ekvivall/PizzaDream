@@ -7,9 +7,7 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.view.animation.LayoutAnimationController
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -35,17 +33,16 @@ class HomeFragment : Fragment() {
         val root = inflater.inflate(R.layout.fragment_home, container, false)
         initView(root)
         if (Common.isConnectedToInternet(requireContext())) {
-            homeViewModel.categoryList.observe(viewLifecycleOwner, Observer {
+            homeViewModel.categoryList.observe(viewLifecycleOwner) {
                 val listData = it
                 val adapter = CategoryAdapter(listData, requireContext())
                 categoryRecycler.adapter = adapter
                 categoryRecycler.layoutAnimation = layoutAnimatorController
-            })
-            homeViewModel.getFoodListMutableLiveData().observe(viewLifecycleOwner, Observer {
+            }
+            homeViewModel.getFoodListMutableLiveData().observe(viewLifecycleOwner) {
                 foodAdapter = FoodAdapter(it, requireContext())
                 bestProductsRecycler.adapter = foodAdapter
-                //bestProductsRecycler.layoutAnimation = layoutAnimatorController
-            })
+            }
         } else {
             Toast.makeText(
                 requireContext(),

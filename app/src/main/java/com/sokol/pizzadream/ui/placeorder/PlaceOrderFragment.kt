@@ -236,7 +236,7 @@ class PlaceOrderFragment : Fragment() {
                 tilPhone.error = null
                 tilAddress.error = null
                 tilEmail.error = null
-                if (timeSpinner.visibility == View.VISIBLE && timeSpinner.selectedItemPosition == -1) {
+                if (rdiForTime.isChecked && timeSpinner.selectedItemPosition == -1) {
                     Toast.makeText(requireContext(), "Оберіть час доставки", Toast.LENGTH_SHORT)
                         .show()
                     return@setOnClickListener

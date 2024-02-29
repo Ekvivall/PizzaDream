@@ -1,4 +1,4 @@
-package com.sokol.pizzadream.Database
+package com.sokol.pizzadream.Database.DAO
 
 import androidx.room.Dao
 import androidx.room.Insert

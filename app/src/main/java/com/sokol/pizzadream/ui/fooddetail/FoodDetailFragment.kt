@@ -94,6 +94,8 @@ class FoodDetailFragment : Fragment() {
                     root.findViewById<View>(R.id.view_before_addon).visibility = View.GONE
                     root.findViewById<TextView>(R.id.addon_text).visibility = View.GONE
                 } else {
+                    root.findViewById<View>(R.id.view_before_addon).visibility = View.VISIBLE
+                    root.findViewById<TextView>(R.id.addon_text).visibility = View.VISIBLE
                     val adapter = AddonCategoryAdapter(listData, requireContext())
                     categoryRecycler.adapter = adapter
                     Common.addonCategorySelected = it[0]
@@ -483,6 +485,7 @@ class FoodDetailFragment : Fragment() {
         super.onStop()
         Common.foodSelected?.userSelectedAddon = null
         if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this)
+        Common.addonCategorySelected = null
     }
 
     override fun onResume() {
