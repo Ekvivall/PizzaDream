@@ -101,6 +101,7 @@
     <string name="comments">Відгуки</string>
     <string name="as_soon_as_possible">Якомога швидше</string>
     <string name="for_time">На час</string>
+    <string name="settings">Налаштування</string>
     <string-array name="sort_options">
         <item>популярні</item>
         <item>дешеві</item>

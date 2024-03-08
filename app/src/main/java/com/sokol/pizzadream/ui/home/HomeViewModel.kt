@@ -56,7 +56,7 @@ class HomeViewModel : ViewModel(), ICategoryLoadCallback {
                     } else {
                         it.ratingSum.toFloat() / it.ratingCount
                     }
-                }).take(15)
+                })//.take(15)
                 categoryLoadCallbackListener.onCategoryLoadSuccess(tempList)
             }
 
