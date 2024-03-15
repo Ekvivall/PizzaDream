@@ -75,8 +75,8 @@ object Common {
     val MIN_DISTANCE_CHANGE_FOR_UPDATES: Float = 10f
     var STATUSES: List<String> = listOf(
         "Очікує підтвердження",
-        "Підготовка",
-        "Готовий до доставки",
+        "Підготовлено",
+        "Готове до доставки",
         "В дорозі",
         "Доставлено",
         "Скасовано"
@@ -139,7 +139,6 @@ object Common {
         val builder = NotificationCompat.Builder(context, notificationChannelId)
         builder.setContentTitle(title).setContentText(content).setAutoCancel(true)
             .setSmallIcon(R.drawable.icon)
-            .setLargeIcon(BitmapFactory.decodeResource(context.resources, R.drawable.icon))
         if (pendingIntent != null) {
             // Встановлення PendingIntent для сповіщення, яке виконується при натисканні на нього
             builder.setContentIntent(pendingIntent)

@@ -12,6 +12,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.installations.FirebaseInstallations
+import com.google.firebase.messaging.FirebaseMessaging
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Model.UserModel
 import com.sokol.pizzadream.Remote.ICloudFunctions
@@ -98,7 +99,7 @@ class SplashScreenActivity : AppCompatActivity() {
             compositeDisposable.add(
                 cloudFunctions.getToken(headers).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread()).subscribe({ braintreeToken ->
-                        FirebaseInstallations.getInstance().id.addOnFailureListener { e ->
+                        FirebaseMessaging.getInstance().token.addOnFailureListener { e ->
                             Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
                             Common.currentToken = braintreeToken.token
                         }.addOnCompleteListener { task ->

@@ -303,6 +303,6 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
     }
 
     fun onStop() {
-        if (compositeDisposable != null) compositeDisposable.clear()
+        compositeDisposable.clear()
     }
 }
