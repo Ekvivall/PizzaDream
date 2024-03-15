@@ -1,18 +1,20 @@
 package com.sokol.pizzadream.Adapter
 
 import android.content.Context
+import android.content.DialogInterface
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.FirebaseDatabase
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.EventBus.OrderDetailClick
-import com.sokol.pizzadream.EventBus.ViewAddCommentClick
 import com.sokol.pizzadream.Model.OrderModel
 import com.sokol.pizzadream.R
 import org.greenrobot.eventbus.EventBus
@@ -31,6 +33,7 @@ class OrderAdapter(val items: List<OrderModel>, val context: Context) :
         var totalPrice: TextView = view.findViewById(R.id.total_price)
         var recyclerView: RecyclerView = view.findViewById(R.id.order_foods_recycler)
         var delivery: TextView = view.findViewById(R.id.delivery)
+        var btnCancelOrder: Button = view.findViewById(R.id.btn_cancel_order)
         private var listener: IRecyclerItemClickListener? = null
 
         init {
@@ -66,8 +69,52 @@ class OrderAdapter(val items: List<OrderModel>, val context: Context) :
         )
         if (orderItem.status == Common.STATUSES[4]) {
             holder.status.setTextColor(ContextCompat.getColor(context, R.color.green))
+            holder.btnCancelOrder.visibility = View.GONE
         } else {
+            if (orderItem.status == Common.STATUSES[5]) {
+                holder.btnCancelOrder.visibility = View.GONE
+            } else {
+                holder.btnCancelOrder.visibility = View.VISIBLE
+            }
             holder.status.setTextColor(ContextCompat.getColor(context, R.color.red))
+        }
+
+        holder.btnCancelOrder.setOnClickListener {
+            val builder = androidx.appcompat.app.AlertDialog.Builder(
+                context, R.style.CustomAlertDialog
+            )
+            builder.setTitle("Відмінити замовлення")
+                .setMessage("Ви дійсно хочете відмінити замовлення?")
+                .setNegativeButton("Відміна") { dialogInterface, _ -> dialogInterface.dismiss() }
+                .setPositiveButton("Так") { dialogInterface, _ ->
+                    val updateData = HashMap<String, Any>()
+                    updateData["status"] = Common.STATUSES[5]
+                    FirebaseDatabase.getInstance().getReference(Common.ORDER_REF)
+                        .child(orderItem.orderId!!).updateChildren(updateData)
+                        .addOnFailureListener { e ->
+                            Toast.makeText(
+                                context, e.message, Toast.LENGTH_SHORT
+                            ).show()
+                        }.addOnSuccessListener {
+                            orderItem.status = Common.STATUSES[5]
+                            notifyItemChanged(position)
+                        }
+                }
+            val dialog = builder.create()
+            dialog.show()
+            val positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+            positiveButton.setTextColor(
+                ContextCompat.getColor(
+                    context, R.color.red
+                )
+            )
+            val negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+            negativeButton.setTextColor(
+                ContextCompat.getColor(
+                    context, R.color.black
+                )
+            )
+
         }
         holder.recyclerView.adapter = adapter
         val date = Date(orderItem.orderedTime)
@@ -92,4 +139,5 @@ class OrderAdapter(val items: List<OrderModel>, val context: Context) :
         })
 
     }
+
 }
