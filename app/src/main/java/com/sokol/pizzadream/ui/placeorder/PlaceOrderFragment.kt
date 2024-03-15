@@ -38,10 +38,13 @@ import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.MenuClick
+import com.sokol.pizzadream.Model.FCMSendData
 import com.sokol.pizzadream.Model.OrderModel
 import com.sokol.pizzadream.R
 import com.sokol.pizzadream.Remote.ICloudFunctions
+import com.sokol.pizzadream.Remote.IFCMService
 import com.sokol.pizzadream.Remote.RetrofitCloudClient
+import com.sokol.pizzadream.Remote.RetrofitFCMClient
 import io.reactivex.SingleObserver
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -87,8 +90,9 @@ class PlaceOrderFragment : Fragment() {
     private lateinit var dateSpinner: Spinner
     private lateinit var timeSpinner: Spinner
     private val timeFormat = SimpleDateFormat("HH:mm")
-    val dateFormat = SimpleDateFormat("dd.MM.yyyy")
+    private val dateFormat = SimpleDateFormat("dd.MM.yyyy")
     private var calendar = Calendar.getInstance()
+    private lateinit var ifcmService: IFCMService
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -135,6 +139,7 @@ class PlaceOrderFragment : Fragment() {
 
     private fun initView(root: View) {
         cloudFunctions = RetrofitCloudClient.getInstance().create(ICloudFunctions::class.java)
+        ifcmService = RetrofitFCMClient.getInstance().create(IFCMService::class.java)
         edtName = root.findViewById(R.id.edt_name)
         tilName = root.findViewById(R.id.til_name)
         edtPhone = root.findViewById(R.id.edt_phone)
@@ -248,7 +253,7 @@ class PlaceOrderFragment : Fragment() {
                 if (phone.length == 5) {
                     tilPhone.error = "Будь ласка, введіть свій номер телефону"
                     return@setOnClickListener
-                } else if (phone.length < 12) {
+                } else if (phone.length < 17) {
                     tilPhone.error = "Будь ласка, введіть свій повний номер телефону"
                     return@setOnClickListener
                 }
@@ -500,15 +505,26 @@ class PlaceOrderFragment : Fragment() {
                             }
 
                             override fun onSuccess(t: Int) {
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Замовлення розміщено успішно",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                compositeDisposable.dispose()
-                                EventBus.getDefault().postSticky(
-                                    MenuClick(true)
-                                )
+                                compositeDisposable.clear()
+                                val dataSend = HashMap<String, String>()
+                                dataSend[Common.NOTIFICATION_TITLE] = "Нове замовлення"
+                                dataSend[Common.NOTIFICATION_CONTENT] =
+                                    "У Вас нове замовлення $orderId."
+                                val sendData = FCMSendData(Common.getNewOrderTopic(), dataSend)
+                                compositeDisposable.add(
+                                    ifcmService.sendNotification(sendData)
+                                        .subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread())
+                                        .subscribe{
+                                            Toast.makeText(
+                                                requireContext(),
+                                                "Замовлення розміщено успішно",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                            EventBus.getDefault().postSticky(
+                                                MenuClick(true)
+                                            )
+                                        })
                             }
 
                         })

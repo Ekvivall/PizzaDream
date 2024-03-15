@@ -50,7 +50,7 @@ class HomeFragment : Fragment() {
             }
             homeViewModel.getFoodListMutableLiveData().observe(viewLifecycleOwner) {
                 foodList = it
-                foodAdapter = FoodAdapter(it, requireContext())
+                foodAdapter = FoodAdapter(it.take(15), requireContext())
                 bestProductsRecycler.adapter = foodAdapter
             }
         } else {
@@ -86,7 +86,7 @@ class HomeFragment : Fragment() {
             searchView.setQuery("", false)
             searchView.onActionViewCollapsed()
             menuItem.collapseActionView()
-            updateFoodList(foodList)
+            updateFoodList(foodList.take(15))
         }
     }
 
