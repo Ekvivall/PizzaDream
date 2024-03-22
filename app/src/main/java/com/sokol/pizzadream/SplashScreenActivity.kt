@@ -107,12 +107,16 @@ class SplashScreenActivity : AppCompatActivity() {
                                 Common.currentUser = model
                                 Common.currentToken = braintreeToken.token
                                 Common.updateToken(this@SplashScreenActivity, task.result)
-                                startActivity(
-                                    Intent(
-                                        this@SplashScreenActivity,
-                                        HomeActivity::class.java
-                                    )
+                                val myIntent = Intent(
+                                    this@SplashScreenActivity, HomeActivity::class.java
                                 )
+                                var isOpenNewOrder = false
+                                if (intent.extras != null) {
+                                    isOpenNewOrder =
+                                        intent.extras!!.getBoolean(Common.IS_OPEN_ACTIVITY_ORDER, false)
+                                }
+                                myIntent.putExtra(Common.IS_OPEN_ACTIVITY_ORDER, isOpenNewOrder)
+                                startActivity(myIntent)
                                 finish()
                             }
                         }

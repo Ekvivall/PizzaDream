@@ -1,5 +1,6 @@
 package com.sokol.pizzadream.ui.viewOrderDetail
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.FirebaseDatabase
 import com.sokol.pizzadream.Adapter.OrderFoodAdapter
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.EventBus.ViewAddCommentClick
@@ -37,6 +39,7 @@ class OrderDetailFragment : Fragment() {
     private lateinit var priceDelivery: TextView
     private lateinit var totalPrice: TextView
     private lateinit var customerTime: TextView
+    private lateinit var btnCancelOrder: Button
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -64,8 +67,52 @@ class OrderDetailFragment : Fragment() {
         orderStatus.text = order.status
         if (order.status == Common.STATUSES[4]) {
             orderStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.green))
+            btnCancelOrder.visibility = View.GONE
         } else {
+            if (order.status == Common.STATUSES[5]) {
+                btnCancelOrder.visibility = View.GONE
+            } else {
+                btnCancelOrder.visibility = View.VISIBLE
+            }
             orderStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+        }
+        btnCancelOrder.setOnClickListener {
+            val builder = androidx.appcompat.app.AlertDialog.Builder(
+                requireContext(), R.style.CustomAlertDialog
+            )
+            builder.setTitle("Відмінити замовлення")
+                .setMessage("Ви дійсно хочете відмінити замовлення?")
+                .setNegativeButton("Відміна") { dialogInterface, _ -> dialogInterface.dismiss() }
+                .setPositiveButton("Так") { dialogInterface, _ ->
+                    val updateData = HashMap<String, Any>()
+                    updateData["status"] = Common.STATUSES[5]
+                    FirebaseDatabase.getInstance().getReference(Common.ORDER_REF)
+                        .child(order.orderId!!).updateChildren(updateData)
+                        .addOnFailureListener { e ->
+                            Toast.makeText(
+                                context, e.message, Toast.LENGTH_SHORT
+                            ).show()
+                        }.addOnSuccessListener {
+                            order.status = Common.STATUSES[5]
+                            orderStatus.text = Common.STATUSES[5]
+                            btnCancelOrder.visibility = View.GONE
+                        }
+                }
+            val dialog = builder.create()
+            dialog.show()
+            val positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+            positiveButton.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(), R.color.red
+                )
+            )
+            val negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+            negativeButton.setTextColor(
+                ContextCompat.getColor(
+                    requireContext(), R.color.black
+                )
+            )
+
         }
         customerName.text = order.customerName
         customerPhone.text = order.customerPhone
@@ -92,9 +139,11 @@ class OrderDetailFragment : Fragment() {
             customerTime.text = StringBuilder("Замовлено на ").append(order.forTime)
             customerTime.visibility = View.VISIBLE
         }
+
     }
 
     private fun initView(root: View) {
+        btnCancelOrder = root.findViewById(R.id.btn_cancel_order)
         orderId = root.findViewById(R.id.order_id)
         orderDate = root.findViewById(R.id.order_date)
         orderStatus = root.findViewById(R.id.order_status)

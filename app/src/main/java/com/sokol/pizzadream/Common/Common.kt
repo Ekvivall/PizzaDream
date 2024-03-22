@@ -45,6 +45,7 @@ object Common {
             .append(characters[Random().nextInt(characters.length)]).toString()
     }
 
+    val IS_OPEN_ACTIVITY_ORDER: String ="IsOpenActivityOrder"
     val NOTIFICATION_CONTENT: String = "content"
     val NOTIFICATION_TITLE = "title"
     val TOKEN_REF: String = "Tokens"

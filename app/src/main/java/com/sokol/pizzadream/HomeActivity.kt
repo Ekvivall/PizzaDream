@@ -63,8 +63,15 @@ class HomeActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        checkOpenOrderFragment()
     }
-
+    private fun checkOpenOrderFragment() {
+        val  isOpenNewOrder = intent.extras!!.getBoolean(Common.IS_OPEN_ACTIVITY_ORDER, false)
+        if(isOpenNewOrder){
+            navController.popBackStack();
+            navController.navigate(R.id.nav_view_orders)
+        }
+    }
      private fun signOut() {
          val builder = androidx.appcompat.app.AlertDialog.Builder(this, R.style.CustomAlertDialog)
          builder.setTitle("Вихід")
