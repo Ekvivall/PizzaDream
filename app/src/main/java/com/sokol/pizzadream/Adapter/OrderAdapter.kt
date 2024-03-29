@@ -14,9 +14,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.FirebaseDatabase
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
+import com.sokol.pizzadream.Database.PizzaDatabase
+import com.sokol.pizzadream.Database.Repositories.CartInterface
+import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.OrderDetailClick
 import com.sokol.pizzadream.Model.OrderModel
 import com.sokol.pizzadream.R
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import org.greenrobot.eventbus.EventBus
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -24,6 +30,9 @@ import java.util.Date
 class OrderAdapter(val items: List<OrderModel>, val context: Context) :
     RecyclerView.Adapter<OrderAdapter.MyViewHolder>() {
     private var simpleDateFormat = SimpleDateFormat("dd MMM yyyy HH:mm")
+    private var compositeDisposable: CompositeDisposable = CompositeDisposable()
+    private var cart: CartInterface =
+        CartRepository(PizzaDatabase.getInstance(context).getCartDAO())
 
     class MyViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
         var status: TextView = view.findViewById(R.id.order_status)
@@ -34,6 +43,7 @@ class OrderAdapter(val items: List<OrderModel>, val context: Context) :
         var recyclerView: RecyclerView = view.findViewById(R.id.order_foods_recycler)
         var delivery: TextView = view.findViewById(R.id.delivery)
         var btnCancelOrder: Button = view.findViewById(R.id.btn_cancel_order)
+        var btnAddToCart: Button = view.findViewById(R.id.btn_add_to_cart)
         private var listener: IRecyclerItemClickListener? = null
 
         init {
@@ -70,15 +80,30 @@ class OrderAdapter(val items: List<OrderModel>, val context: Context) :
         if (orderItem.status == Common.STATUSES[4]) {
             holder.status.setTextColor(ContextCompat.getColor(context, R.color.green))
             holder.btnCancelOrder.visibility = View.GONE
+            holder.btnAddToCart.visibility = View.VISIBLE
         } else {
             if (orderItem.status == Common.STATUSES[5]) {
                 holder.btnCancelOrder.visibility = View.GONE
+                holder.btnAddToCart.visibility = View.VISIBLE
             } else {
                 holder.btnCancelOrder.visibility = View.VISIBLE
+                holder.btnAddToCart.visibility = View.GONE
             }
             holder.status.setTextColor(ContextCompat.getColor(context, R.color.red))
         }
-
+        holder.btnAddToCart.setOnClickListener {
+            val cartItems = orderItem.cartItems!!.toTypedArray()
+            compositeDisposable.add(
+                cart.insertOrReplaceAll(*cartItems).subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread()).subscribe{
+                        Toast.makeText(
+                            context,
+                            "Успішно додано всі товари до кошика",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+            )
+        }
         holder.btnCancelOrder.setOnClickListener {
             val builder = androidx.appcompat.app.AlertDialog.Builder(
                 context, R.style.CustomAlertDialog
