@@ -103,6 +103,7 @@
     <string name="for_time">На час</string>
     <string name="settings">Налаштування</string>
     <string name="btn_cancel_order">Відмінити замовлення</string>
+    <string name="btn_update">Оновити</string>
     <string-array name="sort_options">
         <item>популярні</item>
         <item>дешеві</item>
