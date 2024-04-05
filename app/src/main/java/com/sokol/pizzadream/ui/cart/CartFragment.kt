@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.sokol.pizzadream.Adapter.CartAdapter
 import com.sokol.pizzadream.Common.Common
+import com.sokol.pizzadream.Database.Entities.CartItemDB
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
@@ -51,9 +52,7 @@ class CartFragment : Fragment() {
     private lateinit var cartViewModel: CartViewModel
     private var adapter: CartAdapter? = null
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         cartViewModel = ViewModelProvider(this).get(CartViewModel::class.java)
         cartViewModel.initCartInterface(requireContext())
@@ -73,15 +72,14 @@ class CartFragment : Fragment() {
                     recyclerCart.adapter = adapter
                     recyclerCart.layoutManager?.onRestoreInstanceState(recyclerViewState)
                 }
+                val price =
+                    if (it.isNotEmpty()) it.sumOf { x -> x.foodQuantity * x.foodPrice } else 0.0
+                totalPrice.text = StringBuilder("Всього: ").append(Common.formatPrice(price))
             }
         })
         return root
     }
 
-    override fun onResume() {
-        super.onResume()
-        calculateTotalPrice()
-    }
 
     private fun initView(root: View) {
         setHasOptionsMenu(true)
@@ -120,18 +118,15 @@ class CartFragment : Fragment() {
 
     override fun onStop() {
         compositeDisposable.clear()
-        if (EventBus.getDefault().isRegistered(this))
-            EventBus.getDefault().unregister(this)
+        if (EventBus.getDefault().isRegistered(this)) EventBus.getDefault().unregister(this)
         super.onStop()
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onUpdateItemInCart(event: UpdateItemsInCart) {
         recyclerViewState = recyclerCart.layoutManager?.onSaveInstanceState()
-        cart.updateCart(event.cartItem)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : SingleObserver<Int> {
+        cart.updateCart(event.cartItem).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
                 override fun onSubscribe(d: Disposable) {
                 }
 
@@ -141,7 +136,6 @@ class CartFragment : Fragment() {
                 }
 
                 override fun onSuccess(t: Int) {
-                    calculateTotalPrice()
                 }
 
             })
@@ -149,41 +143,32 @@ class CartFragment : Fragment() {
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onRemoveItemInCart(event: RemoveItemsInCart) {
-        //recyclerViewState = recyclerCart.layoutManager?.onSaveInstanceState()
-        //adapter?.notifyItemRemoved(event.position)
-        /*adapter = CartAdapter(adapter!!.items, requireContext())
-        recyclerCart.adapter = adapter
-        recyclerCart.layoutManager?.onRestoreInstanceState(recyclerViewState)*/
-        //recyclerCart.adapter?.notifyDataSetChanged()
-        calculateTotalPrice()
-    }
-
-    private fun calculateTotalPrice() {
-        cart.sumPrice(Common.currentUser!!.uid!!)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : SingleObserver<Double> {
+        //calculateTotalPrice()
+        cart.deleteCart(CartItemDB(event.cartItem)).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
                 override fun onSubscribe(d: Disposable) {
                 }
 
                 override fun onError(e: Throwable) {
-                    if (!e.message!!.contains("Query returned empty"))
-                        Toast.makeText(context, "" + e.message!!, Toast.LENGTH_SHORT).show()
-                    else
-                        totalPrice.text = StringBuilder("Всього: ").append(Common.formatPrice(0.0))
+                    Toast.makeText(context, "" + e.message, Toast.LENGTH_SHORT).show()
                 }
 
-                override fun onSuccess(t: Double) {
-                    totalPrice.text = StringBuilder("Всього: ").append(Common.formatPrice(t))
+                override fun onSuccess(t: Int) {
+                    if (event.isEmpty) {
+                        recyclerCart.visibility = View.GONE
+                        btnOrder.isEnabled = false
+                        layoutEmptyCart.visibility = View.VISIBLE
+                        totalPrice.text = StringBuilder("Всього: ").append(Common.formatPrice(0.0))
+                    }
                 }
 
             })
     }
 
+
     override fun onStart() {
         super.onStart()
-        if (!EventBus.getDefault().isRegistered(this))
-            EventBus.getDefault().register(this)
+        if (!EventBus.getDefault().isRegistered(this)) EventBus.getDefault().register(this)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -193,10 +178,8 @@ class CartFragment : Fragment() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.clear_cart) {
-            cart.cleanCart(Common.currentUser?.uid.toString())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object :SingleObserver<Int>{
+            cart.cleanCart(Common.currentUser?.uid.toString()).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
                     override fun onSubscribe(d: Disposable) {
                     }
 
@@ -205,7 +188,10 @@ class CartFragment : Fragment() {
                     }
 
                     override fun onSuccess(t: Int) {
-                        calculateTotalPrice()
+                        recyclerCart.visibility = View.GONE
+                        btnOrder.isEnabled = false
+                        layoutEmptyCart.visibility = View.VISIBLE
+                        totalPrice.text = StringBuilder("Всього: ").append(Common.formatPrice(0.0))
                     }
 
                 })

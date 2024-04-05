@@ -1,6 +1,5 @@
 package com.sokol.pizzadream.Model
 
-import com.sokol.pizzadream.Database.Entities.CartItem
 
 class OrderModel {
     var totalPrice:Double = 0.toDouble()

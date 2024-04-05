@@ -32,13 +32,22 @@ import androidx.lifecycle.ViewModelProvider
 import com.braintreepayments.api.dropin.DropInRequest
 import com.braintreepayments.api.dropin.DropInResult
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.sokol.pizzadream.Common.Common
+import com.sokol.pizzadream.Database.Entities.CartItemDB
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.MenuClick
+import com.sokol.pizzadream.Model.AddonModel
+import com.sokol.pizzadream.Model.CartItem
 import com.sokol.pizzadream.Model.FCMSendData
+import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.Model.OrderModel
 import com.sokol.pizzadream.R
 import com.sokol.pizzadream.Remote.ICloudFunctions
@@ -433,44 +442,55 @@ class PlaceOrderFragment : Fragment() {
     private fun paymentCOD(name: String, phone: String, email: String, address: String) {
         compositeDisposable.add(
             cart.getAllCart(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe({ cartItem ->
-                    //Коли є всі cartItems, отримання загальної вартості
-                    cart.sumPrice(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(object : SingleObserver<Double> {
-                            override fun onSubscribe(d: Disposable) {
-                            }
-
-                            override fun onError(e: Throwable) {
-                                if (!e.message!!.contains("Query returned empty")) {
-                                    Toast.makeText(
-                                        requireContext(), "" + e.message, Toast.LENGTH_SHORT
-                                    ).show()
+                .observeOn(AndroidSchedulers.mainThread()).subscribe({ cartItems ->
+                    val tempList = ArrayList<CartItem>()
+                    var counter = 0
+                    for (item in cartItems) {
+                        val foodRef =
+                            FirebaseDatabase.getInstance().getReference(Common.CATEGORY_REF)
+                                .child(item.categoryId).child("foods").child(item.foodId)
+                        foodRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                val model = snapshot.getValue(FoodModel::class.java)
+                                if (model != null) {
+                                    val cartItem = createCartItem(model, item)
+                                    tempList.add(cartItem)
+                                    counter++
+                                    if (counter == cartItems.size) {
+                                        val order = OrderModel()
+                                        order.userId = Common.currentUser!!.uid
+                                        order.customerName = name
+                                        order.customerPhone = phone
+                                        order.customerAddress = address
+                                        order.customerEmail = email
+                                        order.cartItems = tempList
+                                        order.isDeliveryAddress = rdiHome.isChecked
+                                        order.status = Common.STATUSES[0]
+                                        val price =
+                                            if (cartItems.isNotEmpty()) tempList.sumOf { x -> x.foodQuantity * x.foodPrice } else 0.0
+                                        order.totalPrice =
+                                            if (rdiHome.isChecked) price + 60 else price
+                                        order.transactionId = "Оплата при отриманні"
+                                        order.orderedTime = Calendar.getInstance().timeInMillis
+                                        if (rdiForTime.isChecked) {
+                                            order.forTime =
+                                                StringBuilder().append(dateSpinner.selectedItem)
+                                                    .append(" ").append(timeSpinner.selectedItem)
+                                                    .toString()
+                                        }
+                                        writeOrderToFirebase(order)
+                                    }
+                                } else {
+                                    cart.deleteCart(item).subscribeOn(Schedulers.io())
+                                        .observeOn(AndroidSchedulers.mainThread()).subscribe()
                                 }
                             }
 
-                            override fun onSuccess(t: Double) {
-                                val order = OrderModel()
-                                order.userId = Common.currentUser!!.uid
-                                order.customerName = name
-                                order.customerPhone = phone
-                                order.customerAddress = address
-                                order.customerEmail = email
-                                order.cartItems = cartItem
-                                order.isDeliveryAddress = rdiHome.isChecked
-                                order.status = Common.STATUSES[0]
-                                order.totalPrice = if (rdiHome.isChecked) t + 60 else t
-                                order.transactionId = "Оплата при отриманні"
-                                order.orderedTime = Calendar.getInstance().timeInMillis
-                                if (rdiForTime.isChecked) {
-                                    order.forTime =
-                                        StringBuilder().append(dateSpinner.selectedItem).append(" ")
-                                            .append(timeSpinner.selectedItem).toString()
-                                }
-                                writeOrderToFirebase(order)
+                            override fun onCancelled(error: DatabaseError) {
                             }
 
                         })
+                    }
                 }, { throwable ->
                     Toast.makeText(
                         requireContext(), "" + throwable.message, Toast.LENGTH_SHORT
@@ -511,20 +531,18 @@ class PlaceOrderFragment : Fragment() {
                                 dataSend[Common.NOTIFICATION_CONTENT] =
                                     "У Вас нове замовлення $orderId."
                                 val sendData = FCMSendData(Common.getNewOrderTopic(), dataSend)
-                                compositeDisposable.add(
-                                    ifcmService.sendNotification(sendData)
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe{
-                                            Toast.makeText(
-                                                requireContext(),
-                                                "Замовлення розміщено успішно",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                            EventBus.getDefault().postSticky(
-                                                MenuClick(true)
-                                            )
-                                        })
+                                compositeDisposable.add(ifcmService.sendNotification(sendData)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread()).subscribe {
+                                        Toast.makeText(
+                                            requireContext(),
+                                            "Замовлення розміщено успішно",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        EventBus.getDefault().postSticky(
+                                            MenuClick(true)
+                                        )
+                                    })
                             }
 
                         })
@@ -542,71 +560,88 @@ class PlaceOrderFragment : Fragment() {
                 val nonce = result!!.paymentMethodNonce
                 compositeDisposable.add(
                     cart.getAllCart(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread()).subscribe({ cartItem ->
-                            cart.sumPrice(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe(object : SingleObserver<Double> {
-                                    override fun onSubscribe(d: Disposable) {
-                                    }
+                        .observeOn(AndroidSchedulers.mainThread()).subscribe({ cartItems ->
+                            val tempList = ArrayList<CartItem>()
+                            var counter = 0
+                            for (item in cartItems) {
+                                val foodRef =
+                                    FirebaseDatabase.getInstance().getReference(Common.CATEGORY_REF)
+                                        .child(item.categoryId).child("foods").child(item.foodId)
+                                foodRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        val model = snapshot.getValue(FoodModel::class.java)
+                                        if (model != null) {
+                                            val cartItem = createCartItem(model, item)
+                                            tempList.add(cartItem)
+                                            counter++
+                                            if (counter == cartItems.size) {
 
-                                    override fun onError(e: Throwable) {
-                                        if (!e.message!!.contains("Query returned empty")) {
-                                            Toast.makeText(
-                                                requireContext(), "" + e.message, Toast.LENGTH_SHORT
-                                            ).show()
+                                                val price =
+                                                    if (cartItems.isNotEmpty()) tempList.sumOf { x -> x.foodQuantity * x.foodPrice } else 0.0
+                                                val finalPrice =
+                                                    if (rdiHome.isChecked) price + 60 else price
+                                                val headers = HashMap<String, String>()
+                                                headers.put(
+                                                    "Authorization",
+                                                    Common.buildToken(Common.authorizeToken!!)
+                                                )
+                                                // Після того, як виберемо всі товари в кошику, надішлемо платіж
+                                                compositeDisposable.add(
+                                                    cloudFunctions.submitPayment(
+                                                        headers, finalPrice, nonce!!.nonce
+                                                    ).subscribeOn(Schedulers.io())
+                                                        .observeOn(AndroidSchedulers.mainThread())
+                                                        .subscribe({ braintreeTransaction ->
+                                                            if (braintreeTransaction.success) {
+                                                                // Створення замовлення
+                                                                val order = OrderModel()
+                                                                order.userId =
+                                                                    Common.currentUser!!.uid
+                                                                order.customerName = name
+                                                                order.customerPhone = phone
+                                                                order.customerAddress = address
+                                                                order.customerEmail = email
+                                                                order.cartItems = tempList
+                                                                order.isDeliveryAddress =
+                                                                    rdiHome.isChecked
+                                                                order.status = Common.STATUSES[0]
+                                                                order.totalPrice = finalPrice
+                                                                order.transactionId =
+                                                                    braintreeTransaction.transaction!!.id
+                                                                order.orderedTime =
+                                                                    Calendar.getInstance().timeInMillis
+                                                                if (rdiForTime.isChecked) {
+                                                                    order.forTime =
+                                                                        StringBuilder().append(
+                                                                            dateSpinner.selectedItem
+                                                                        ).append(" ")
+                                                                            .append(timeSpinner.selectedItem)
+                                                                            .toString()
+                                                                }
+                                                                writeOrderToFirebase(order)
+                                                            }
+                                                        }, { err: Throwable ->
+                                                            Log.e("Err", err.message.toString())
+                                                            Toast.makeText(
+                                                                requireContext(),
+                                                                err.message,
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        })
+                                                )
+                                            }
+                                        } else {
+                                            cart.deleteCart(item).subscribeOn(Schedulers.io())
+                                                .observeOn(AndroidSchedulers.mainThread())
+                                                .subscribe()
                                         }
                                     }
 
-                                    override fun onSuccess(t: Double) {
-                                        val finalPrice = if (rdiHome.isChecked) t + 60 else t
-                                        val headers = HashMap<String, String>()
-                                        headers.put(
-                                            "Authorization",
-                                            Common.buildToken(Common.authorizeToken!!)
-                                        )
-                                        // Після того, як виберемо всі товари в кошику, надішлемо платіж
-                                        compositeDisposable.add(
-                                            cloudFunctions.submitPayment(
-                                                headers, finalPrice, nonce!!.nonce
-                                            ).subscribeOn(Schedulers.io())
-                                                .observeOn(AndroidSchedulers.mainThread())
-                                                .subscribe({ braintreeTransaction ->
-                                                    if (braintreeTransaction.success) {
-                                                        // Створення замовлення
-                                                        val order = OrderModel()
-                                                        order.userId = Common.currentUser!!.uid
-                                                        order.customerName = name
-                                                        order.customerPhone = phone
-                                                        order.customerAddress = address
-                                                        order.customerEmail = email
-                                                        order.cartItems = cartItem
-                                                        order.isDeliveryAddress = rdiHome.isChecked
-                                                        order.status = Common.STATUSES[0]
-                                                        order.totalPrice = finalPrice
-                                                        order.transactionId =
-                                                            braintreeTransaction.transaction!!.id
-                                                        order.orderedTime =
-                                                            Calendar.getInstance().timeInMillis
-                                                        if (rdiForTime.isChecked) {
-                                                            order.forTime =
-                                                                StringBuilder().append(dateSpinner.selectedItem)
-                                                                    .append(" ")
-                                                                    .append(timeSpinner.selectedItem)
-                                                                    .toString()
-                                                        }
-                                                        writeOrderToFirebase(order)
-                                                    }
-                                                }, { err: Throwable ->
-                                                    Log.e("Err", err.message.toString())
-                                                    Toast.makeText(
-                                                        requireContext(),
-                                                        err.message,
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                })
-                                        )
+                                    override fun onCancelled(error: DatabaseError) {
                                     }
+
                                 })
+                            }
                         }, { terr: Throwable ->
                             Toast.makeText(requireContext(), terr.message, Toast.LENGTH_SHORT)
                                 .show()
@@ -617,4 +652,26 @@ class PlaceOrderFragment : Fragment() {
         }
     }
 
+    private fun createCartItem(model: FoodModel, item: CartItemDB): CartItem {
+        val cartItem = CartItem()
+        cartItem.foodId = model.id.toString()
+        cartItem.foodName = model.name
+        cartItem.foodImage = model.image
+        var totalPrice = model.size.find { it.name == item.foodSize }!!.price.toDouble()
+        if (item.foodAddon.isNotEmpty()) {
+            val addonModels: List<AddonModel> = Gson().fromJson(
+                item.foodAddon, object : TypeToken<List<AddonModel>>() {}.type
+            )
+            totalPrice += addonModels.sumOf { x -> x.price.toDouble() * x.userCount }
+        }
+        cartItem.foodPrice = totalPrice
+        cartItem.foodQuantity = item.foodQuantity
+        cartItem.foodAddon = item.foodAddon
+        cartItem.foodSize = item.foodSize
+        cartItem.categoryId = model.categoryId.toString()
+        cartItem.userEmail = item.userEmail
+        cartItem.uid = item.uid
+        cartItem.id = item.id
+        return cartItem
+    }
 }

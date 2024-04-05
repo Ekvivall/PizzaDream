@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.FirebaseDatabase
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
+import com.sokol.pizzadream.Database.Entities.CartItemDB
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
@@ -93,8 +94,9 @@ class OrderAdapter(val items: List<OrderModel>, val context: Context) :
         }
         holder.btnAddToCart.setOnClickListener {
             val cartItems = orderItem.cartItems!!.toTypedArray()
+            val cartItemsDB = cartItems.map { CartItemDB(it) }.toTypedArray()
             compositeDisposable.add(
-                cart.insertOrReplaceAll(*cartItems).subscribeOn(Schedulers.io())
+                cart.insertOrReplaceAll(*cartItemsDB).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread()).subscribe{
                         Toast.makeText(
                             context,

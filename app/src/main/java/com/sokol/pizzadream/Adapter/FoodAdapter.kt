@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
-import com.sokol.pizzadream.Database.Entities.CartItem
+import com.sokol.pizzadream.Database.Entities.CartItemDB
 import com.sokol.pizzadream.Database.Entities.FavoriteItemDB
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
@@ -200,13 +200,10 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
         }
 
         holder.foodCart.setOnClickListener {
-            val cartItem = CartItem()
+            val cartItem = CartItemDB()
             cartItem.uid = Common.currentUser?.uid.toString()
             cartItem.userEmail = Common.currentUser?.email
             cartItem.foodId = items[position].id.toString()
-            cartItem.foodName = items[position].name
-            cartItem.foodImage = items[position].image
-            cartItem.foodPrice = items[position].userSelectedSize?.price?.toDouble()!!
             cartItem.foodQuantity = 1
             //cartItem.foodExtraPrice = 0.0
             cartItem.foodAddon = ""
@@ -215,7 +212,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
             cartInterface.getItemWithAllOptionsInCart(
                 cartItem.foodId, cartItem.uid, cartItem.foodSize, cartItem.foodAddon
             ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : SingleObserver<CartItem> {
+                .subscribe(object : SingleObserver<CartItemDB> {
                     override fun onSubscribe(d: Disposable) {
                     }
 
@@ -227,7 +224,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                                     .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                         Toast.makeText(
                                             context,
-                                            cartItem.foodName + " додано до кошика",
+                                            items[position].name + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }, { t: Throwable? ->
@@ -245,7 +242,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                         ).show()
                     }
 
-                    override fun onSuccess(t: CartItem) {
+                    override fun onSuccess(t: CartItemDB) {
                         if (t.equals(cartItem)) {
                             t.foodAddon = cartItem.foodAddon
                             t.foodSize = cartItem.foodSize
@@ -268,7 +265,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                                     override fun onSuccess(t: Int) {
                                         Toast.makeText(
                                             context,
-                                            cartItem.foodName + " додано до кошика",
+                                            items[position].name + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
@@ -281,7 +278,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                                     .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                         Toast.makeText(
                                             context,
-                                            cartItem.foodName + " додано до кошика",
+                                            items[position].name + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }, { t: Throwable? ->

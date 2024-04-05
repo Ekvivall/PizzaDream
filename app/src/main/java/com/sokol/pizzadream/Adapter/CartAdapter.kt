@@ -26,7 +26,7 @@ import com.google.gson.reflect.TypeToken
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Common.SpaceItemDecoration
-import com.sokol.pizzadream.Database.Entities.CartItem
+import com.sokol.pizzadream.Database.Entities.CartItemDB
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
@@ -37,6 +37,7 @@ import com.sokol.pizzadream.EventBus.UpdateItemsInCart
 import com.sokol.pizzadream.EventBus.UserAddonCountUpdate
 import com.sokol.pizzadream.Model.AddonCategoryModel
 import com.sokol.pizzadream.Model.AddonModel
+import com.sokol.pizzadream.Model.CartItem
 import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.R
 import io.reactivex.SingleObserver
@@ -152,7 +153,7 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
             holder.foodPrice.text =
                 StringBuilder("").append(Common.formatPrice(cartItem.foodPrice * cartItem.foodQuantity))
                     .toString()
-            EventBus.getDefault().postSticky(UpdateItemsInCart(cartItem))
+            EventBus.getDefault().postSticky(UpdateItemsInCart(CartItemDB(cartItem)))
         }
         holder.foodDecrease.setOnClickListener {
             if (cartItem.foodQuantity > 1) {
@@ -161,26 +162,13 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
                 holder.foodPrice.text =
                     StringBuilder("").append(Common.formatPrice(cartItem.foodPrice * cartItem.foodQuantity))
                         .toString()
-                EventBus.getDefault().postSticky(UpdateItemsInCart(cartItem))
+                EventBus.getDefault().postSticky(UpdateItemsInCart(CartItemDB(cartItem)))
             }
         }
         holder.foodRemove.setOnClickListener {
-            cart.deleteCart(cartItem).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
-                    override fun onSubscribe(d: Disposable) {
-                    }
-
-                    override fun onError(e: Throwable) {
-                        Toast.makeText(context, "" + e.message, Toast.LENGTH_SHORT).show()
-                    }
-
-                    override fun onSuccess(t: Int) {
-                        items = items.filterIndexed { index, _ -> index != position }
-                        notifyDataSetChanged()
-                        EventBus.getDefault().postSticky(RemoveItemsInCart(position))
-                    }
-
-                })
+            notifyItemRemoved(position)
+            items = items.filterIndexed { index, _ -> index != position }
+            EventBus.getDefault().postSticky(RemoveItemsInCart(cartItem, items.isEmpty()))
         }
         holder.setListener(object : IRecyclerItemClickListener {
             override fun onItemClick(view: View, pos: Int) {
@@ -299,7 +287,7 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
         btnCancel.setOnClickListener { dialog.dismiss() }
         btnOk.setOnClickListener {
             //Спочатку видалення елемента
-            cart.deleteCart(cartItem).subscribeOn(Schedulers.io())
+            cart.deleteCart(CartItemDB(cartItem)).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()).subscribe(object : SingleObserver<Int> {
                     override fun onSuccess(t: Int) {
                         //Після успішного видалення ми оновлюємо інформацію і знову додаємо в кошик
@@ -309,12 +297,12 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
                         cartItem.foodSize = Common.foodSelected?.userSelectedSize?.name.toString()
                         cartItem.foodPrice = totalPrice
                         //Вставка
-                        compositeDisposable.add(cart.insertOrReplaceAll(cartItem)
+                        compositeDisposable.add(cart.insertOrReplaceAll(CartItemDB(cartItem))
                             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                             .subscribe({
                                 dialog.dismiss()
                                 notifyItemChanged(position)
-                                EventBus.getDefault().postSticky(UpdateItemsInCart(cartItem))
+                                EventBus.getDefault().postSticky(UpdateItemsInCart(CartItemDB(cartItem)))
                             }, { t: Throwable? ->
                                 Toast.makeText(context, t!!.message, Toast.LENGTH_SHORT).show()
                             })

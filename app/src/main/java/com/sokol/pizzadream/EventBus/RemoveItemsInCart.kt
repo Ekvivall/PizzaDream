@@ -1,4 +1,6 @@
 package com.sokol.pizzadream.EventBus
 
-class RemoveItemsInCart(var position:Int) {
+import com.sokol.pizzadream.Model.CartItem
+
+class RemoveItemsInCart(var cartItem: CartItem, var isEmpty: Boolean) {
 }

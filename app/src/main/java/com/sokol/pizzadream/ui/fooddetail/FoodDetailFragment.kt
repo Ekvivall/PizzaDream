@@ -28,7 +28,7 @@ import com.sokol.pizzadream.Adapter.AddonCategoryAdapter
 import com.sokol.pizzadream.Adapter.UserAddonAdapter
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Common.SpaceItemDecoration
-import com.sokol.pizzadream.Database.Entities.CartItem
+import com.sokol.pizzadream.Database.Entities.CartItemDB
 import com.sokol.pizzadream.Database.Entities.FavoriteItemDB
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
@@ -273,13 +273,10 @@ class FoodDetailFragment : Fragment() {
                 })
         }
         btnCart.setOnClickListener {
-            val cartItem = CartItem()
+            val cartItem = CartItemDB()
             cartItem.uid = Common.currentUser?.uid.toString()
             cartItem.userEmail = Common.currentUser?.email
             cartItem.foodId = Common.foodSelected?.id.toString()
-            cartItem.foodName = Common.foodSelected?.name
-            cartItem.foodImage = Common.foodSelected?.image
-            cartItem.foodPrice = totalPrice
             cartItem.foodQuantity = foodQuantity.text.toString().toInt()
             cartItem.categoryId = Common.foodSelected?.categoryId.toString()
             if (Common.foodSelected!!.userSelectedAddon != null) {/*for (foodAddon in Common.foodSelected!!.userSelectedAddon!!) {
@@ -294,7 +291,7 @@ class FoodDetailFragment : Fragment() {
             cart.getItemWithAllOptionsInCart(
                 cartItem.foodId, cartItem.uid, cartItem.foodSize, cartItem.foodAddon
             ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : SingleObserver<CartItem> {
+                .subscribe(object : SingleObserver<CartItemDB> {
                     override fun onSubscribe(d: Disposable) {
                     }
 
@@ -305,7 +302,7 @@ class FoodDetailFragment : Fragment() {
                                     .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                         Toast.makeText(
                                             context,
-                                            cartItem.foodName + " додано до кошика",
+                                            Common.foodSelected?.name + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }, { t: Throwable? ->
@@ -323,7 +320,7 @@ class FoodDetailFragment : Fragment() {
                         ).show()
                     }
 
-                    override fun onSuccess(t: CartItem) {
+                    override fun onSuccess(t: CartItemDB) {
                         if (t.equals(cartItem)) {
                             //t.foodExtraPrice = cartItem.foodExtraPrice
                             t.foodAddon = cartItem.foodAddon
@@ -347,7 +344,7 @@ class FoodDetailFragment : Fragment() {
                                     override fun onSuccess(t: Int) {
                                         Toast.makeText(
                                             context,
-                                            cartItem.foodName + " додано до кошика",
+                                            Common.foodSelected?.name + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
@@ -359,7 +356,7 @@ class FoodDetailFragment : Fragment() {
                                     .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                         Toast.makeText(
                                             context,
-                                            cartItem.foodName + " додано до кошика",
+                                            Common.foodSelected?.name + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }, { t: Throwable? ->

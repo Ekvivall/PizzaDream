@@ -18,10 +18,11 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
-import com.sokol.pizzadream.Database.Entities.CartItem
+import com.sokol.pizzadream.Database.Entities.CartItemDB
 import com.sokol.pizzadream.EventBus.FoodItemClick
 import com.sokol.pizzadream.EventBus.ViewAddCommentClick
 import com.sokol.pizzadream.Model.AddonModel
+import com.sokol.pizzadream.Model.CartItem
 import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.Model.OrderModel
 import com.sokol.pizzadream.R

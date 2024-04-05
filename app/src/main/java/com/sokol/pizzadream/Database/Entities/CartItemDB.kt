@@ -3,25 +3,17 @@ package com.sokol.pizzadream.Database.Entities
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.sokol.pizzadream.Model.CartItem
 import org.jetbrains.annotations.NotNull
 
 @Entity(tableName = "Cart"/*, primaryKeys = ["uid", "foodId", "foodSize", "foodAddon"]*/)
-class CartItem {
+class CartItemDB(){
     @PrimaryKey(autoGenerate = true)
     var id: Int? = null
 
     @NotNull
     @ColumnInfo(name = "foodId")
     var foodId: String = ""
-
-    @ColumnInfo(name = "foodName")
-    var foodName: String? = null
-
-    @ColumnInfo(name = "foodImage")
-    var foodImage: String? = null
-
-    @ColumnInfo(name = "foodPrice")
-    var foodPrice: Double = 0.0
 
     @ColumnInfo(name = "foodQuantity")
     var foodQuantity: Int = 0
@@ -39,8 +31,6 @@ class CartItem {
 
     @ColumnInfo(name = "categoryId")
     var categoryId: String = ""
-    @ColumnInfo(name = "comment")
-    var isComment: Boolean = false
 
     @NotNull
     @ColumnInfo(name = "uid")
@@ -49,7 +39,7 @@ class CartItem {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as CartItem
+        other as CartItemDB
 
         if (foodId != other.foodId) return false
         if (foodAddon != other.foodAddon) return false
@@ -63,6 +53,17 @@ class CartItem {
         result = 31 * result + foodAddon.hashCode()
         result = 31 * result + foodSize.hashCode()
         return result
+    }
+
+    constructor(cartItem: CartItem) : this() {
+        this.id = cartItem.id
+        this.foodId = cartItem.foodId
+        this.foodQuantity = cartItem.foodQuantity
+        this.foodAddon = cartItem.foodAddon
+        this.foodSize = cartItem.foodSize
+        this.userEmail = cartItem.userEmail
+        this.categoryId = cartItem.categoryId
+        this.uid = cartItem.uid
     }
 
 }

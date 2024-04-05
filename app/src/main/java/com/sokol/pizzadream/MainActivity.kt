@@ -123,7 +123,16 @@ class MainActivity : AppCompatActivity() {
                                                                     this@MainActivity,
                                                                     task.result
                                                                 )
-                                                                startActivity(Intent(this@MainActivity, HomeActivity::class.java))
+                                                                val myIntent = Intent(
+                                                                    this@MainActivity, HomeActivity::class.java
+                                                                )
+                                                                var isOpenNewOrder = false
+                                                                if (intent.extras != null) {
+                                                                    isOpenNewOrder =
+                                                                        intent.extras!!.getBoolean(Common.IS_OPEN_ACTIVITY_ORDER, false)
+                                                                }
+                                                                myIntent.putExtra(Common.IS_OPEN_ACTIVITY_ORDER, isOpenNewOrder)
+                                                                startActivity(myIntent)
                                                                 finish()
                                                             }
                                                         }

@@ -5,15 +5,15 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Build
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.google.firebase.database.FirebaseDatabase
-import com.sokol.pizzadream.Database.Entities.CartItem
+import com.sokol.pizzadream.Database.Entities.CartItemDB
 import com.sokol.pizzadream.Model.AddonCategoryModel
+import com.sokol.pizzadream.Model.CartItem
 import com.sokol.pizzadream.Model.CategoryModel
 import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.Model.NewsModel
