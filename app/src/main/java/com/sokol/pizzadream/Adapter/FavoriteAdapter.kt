@@ -15,11 +15,11 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.sokol.pizzadream.Callback.IRecyclerItemClickListener
 import com.sokol.pizzadream.Common.Common
-import com.sokol.pizzadream.Database.Entities.FavoriteItem
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.FavoriteInterface
 import com.sokol.pizzadream.Database.Repositories.FavoriteRepository
 import com.sokol.pizzadream.EventBus.FoodItemClick
+import com.sokol.pizzadream.Model.FavoriteItem
 import com.sokol.pizzadream.Model.FoodModel
 import com.sokol.pizzadream.R
 import io.reactivex.android.schedulers.AndroidSchedulers

@@ -7,9 +7,9 @@ import androidx.room.RoomDatabase
 import com.sokol.pizzadream.Database.DAO.CartDAO
 import com.sokol.pizzadream.Database.DAO.FavoriteDAO
 import com.sokol.pizzadream.Database.Entities.CartItem
-import com.sokol.pizzadream.Database.Entities.FavoriteItem
+import com.sokol.pizzadream.Database.Entities.FavoriteItemDB
 
-@Database(version = 1, entities = [CartItem::class, FavoriteItem::class], exportSchema = false)
+@Database(version = 1, entities = [CartItem::class, FavoriteItemDB::class], exportSchema = false)
 abstract class PizzaDatabase:RoomDatabase() {
     abstract fun getCartDAO(): CartDAO
     abstract fun getFavoriteDAO(): FavoriteDAO

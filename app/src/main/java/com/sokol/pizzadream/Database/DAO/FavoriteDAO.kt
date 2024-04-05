@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.sokol.pizzadream.Database.Entities.FavoriteItem
+import com.sokol.pizzadream.Database.Entities.FavoriteItemDB
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
@@ -12,7 +12,7 @@ import io.reactivex.Single
 @Dao
 interface FavoriteDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun addToFavorites(favoriteItem: FavoriteItem): Completable
+    fun addToFavorites(favoriteItem: FavoriteItemDB): Completable
 
     @Query("DELETE FROM Favorites WHERE foodId=:foodId and uid=:uid")
     fun removeFromFavorites(foodId: String, uid:String): Completable
@@ -20,5 +20,5 @@ interface FavoriteDAO {
     @Query("SELECT COUNT(foodId) FROM Favorites WHERE foodId=:foodId and uid=:uid")
     fun isFavorite(foodId: String, uid:String): Single<Int>
     @Query("SELECT * FROM Favorites WHERE uid=:uid")
-    fun getAllFavorites(uid:String): Flowable<List<FavoriteItem>>
+    fun getAllFavorites(uid:String): Flowable<List<FavoriteItemDB>>
 }

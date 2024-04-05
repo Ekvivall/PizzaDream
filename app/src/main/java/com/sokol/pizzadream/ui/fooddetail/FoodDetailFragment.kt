@@ -29,7 +29,7 @@ import com.sokol.pizzadream.Adapter.UserAddonAdapter
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Common.SpaceItemDecoration
 import com.sokol.pizzadream.Database.Entities.CartItem
-import com.sokol.pizzadream.Database.Entities.FavoriteItem
+import com.sokol.pizzadream.Database.Entities.FavoriteItemDB
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
@@ -38,7 +38,6 @@ import com.sokol.pizzadream.Database.Repositories.FavoriteRepository
 import com.sokol.pizzadream.EventBus.AddonCategoryClick
 import com.sokol.pizzadream.EventBus.AddonClick
 import com.sokol.pizzadream.EventBus.CommentsClick
-import com.sokol.pizzadream.EventBus.FoodItemClick
 import com.sokol.pizzadream.EventBus.UserAddonCountUpdate
 import com.sokol.pizzadream.Model.AddonModel
 import com.sokol.pizzadream.Model.FoodModel
@@ -247,12 +246,9 @@ class FoodDetailFragment : Fragment() {
                             )
                         } else {
                             // Додавання елемента до обраного
-                            val fav = FavoriteItem()
+                            val fav = FavoriteItemDB()
                             fav.foodId = Common.foodSelected?.id.toString()
                             fav.uid = Common.currentUser?.uid.toString()
-                            fav.foodName = Common.foodSelected?.name
-                            fav.foodImage = Common.foodSelected?.image
-                            fav.foodPrice = Common.foodSelected?.size?.get(0)?.price!!.toDouble()
                             fav.categoryId = Common.foodSelected?.categoryId.toString()
                             compositeDisposable.add(
                                 favorite.addToFavorites(fav).subscribeOn(Schedulers.io())
