@@ -38,6 +38,7 @@ import com.sokol.pizzadream.Database.Repositories.FavoriteRepository
 import com.sokol.pizzadream.EventBus.AddonCategoryClick
 import com.sokol.pizzadream.EventBus.AddonClick
 import com.sokol.pizzadream.EventBus.CommentsClick
+import com.sokol.pizzadream.EventBus.CreateCustomerPizzaClick
 import com.sokol.pizzadream.EventBus.UserAddonCountUpdate
 import com.sokol.pizzadream.Model.AddonModel
 import com.sokol.pizzadream.Model.FoodModel
@@ -75,6 +76,7 @@ class FoodDetailFragment : Fragment() {
     private lateinit var favImage: ImageView
     private lateinit var favorite: FavoriteInterface
     private lateinit var rating: TextView
+    private lateinit var btnCreateCustomerPizza: Button
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -173,6 +175,16 @@ class FoodDetailFragment : Fragment() {
         btnShowComment = root.findViewById(R.id.btnShowComment)
         btnShowComment.setOnClickListener {
             EventBus.getDefault().postSticky(CommentsClick(true))
+        }
+        btnCreateCustomerPizza = root.findViewById(R.id.btnCreateCustomerPizza)
+        btnCreateCustomerPizza.visibility = if (Common.foodSelected?.id == "pizza_constructor") {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        btnCreateCustomerPizza.setOnClickListener {
+            Common.userSelectedAddon = Common.foodSelected?.userSelectedAddon
+            EventBus.getDefault().postSticky(CreateCustomerPizzaClick(true))
         }
         radioGroupSize = root.findViewById(R.id.radio_group_size)
         favImage = root.findViewById(R.id.food_fav)

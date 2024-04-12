@@ -7,7 +7,6 @@ import io.reactivex.Single
 
 interface CartInterface {
     fun getAllCart(uid:String): Flowable<List<CartItemDB>>
-    //fun sumPrice(uid:String): Single<Double>
     fun getItemInCart(foodId:String, uid:String): Single<CartItemDB>
     fun insertOrReplaceAll(vararg cartItem: CartItemDB): Completable
     fun updateCart(cart: CartItemDB): Single<Int>

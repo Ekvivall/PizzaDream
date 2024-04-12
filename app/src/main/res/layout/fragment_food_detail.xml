@@ -166,6 +166,18 @@
             </androidx.cardview.widget.CardView>
 
             <Button
+                android:id="@+id/btnCreateCustomerPizza"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:backgroundTint="@color/red"
+                android:text="@string/btn_create_customer_pizza"
+                android:visibility="gone"
+                android:textColor="@android:color/white"
+                app:cornerRadius="10dp" />
+            <Button
                 android:id="@+id/btnShowComment"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

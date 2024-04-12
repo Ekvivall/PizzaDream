@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import com.google.firebase.database.FirebaseDatabase
 import com.sokol.pizzadream.Database.Entities.CartItemDB
 import com.sokol.pizzadream.Model.AddonCategoryModel
+import com.sokol.pizzadream.Model.AddonModel
 import com.sokol.pizzadream.Model.CartItem
 import com.sokol.pizzadream.Model.CategoryModel
 import com.sokol.pizzadream.Model.FoodModel
@@ -60,6 +61,7 @@ object Common {
     val NEWS_REF: String = "News"
     val ORDER_REF: String = "Orders"
     var userSelectedAddress: String = ""
+    var userSelectedAddon: MutableList<AddonModel>? = null
     val ADDON_ADDRESS_REF: String = "Addresses"
     var addonCategorySelected: AddonCategoryModel? = null
     val USER_REFERENCE: String = "Users"

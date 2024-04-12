@@ -18,6 +18,7 @@ import com.sokol.pizzadream.Database.Repositories.CartInterface
 import com.sokol.pizzadream.Database.Repositories.CartRepository
 import com.sokol.pizzadream.EventBus.CategoryClick
 import com.sokol.pizzadream.EventBus.CommentsClick
+import com.sokol.pizzadream.EventBus.CreateCustomerPizzaClick
 import com.sokol.pizzadream.EventBus.EditProfileClick
 import com.sokol.pizzadream.EventBus.FavoritesClick
 import com.sokol.pizzadream.EventBus.FoodItemClick
@@ -114,39 +115,39 @@ class HomeActivity : AppCompatActivity() {
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onCategorySelected(event: CategoryClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_foodList)
+            navController.navigate(R.id.nav_foodList)
         }
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onFoodSelected(event: FoodItemClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_foodDetail)
+            navController.navigate(R.id.nav_foodDetail)
         }
     }
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onMenu(event: MenuClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_home)
+            navController.navigate(R.id.nav_home)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onPlaceOrder(event: PlaceOrderClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_place_order)
+            navController.navigate(R.id.nav_place_order)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onEditProfile(event: EditProfileClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_edit_profile)
+            navController.navigate(R.id.nav_edit_profile)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onProfile(event: ProfileClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_profile)
+            navController.navigate(R.id.nav_profile)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
@@ -158,61 +159,67 @@ class HomeActivity : AppCompatActivity() {
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onNews(event: NewsClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_news)
+            navController.navigate(R.id.nav_news)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onNewsSelected(event: NewsItemClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_news_detail)
+            navController.navigate(R.id.nav_news_detail)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onFavorites(event: FavoritesClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_favorites)
+            navController.navigate(R.id.nav_favorites)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onVacancies(event: VacanciesClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_vacancies)
+            navController.navigate(R.id.nav_vacancies)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onVacancySelected(event: VacancyItemClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_vacancy_detail)
+            navController.navigate(R.id.nav_vacancy_detail)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onReviewPizzeria(event: ReviewPizzeriaClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_add_review_pizzeria)
+            navController.navigate(R.id.nav_add_review_pizzeria)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onViewOrders(event: ViewOrdersClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_view_orders)
+            navController.navigate(R.id.nav_view_orders)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onAddComment(event: ViewAddCommentClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_add_comment_food)
+            navController.navigate(R.id.nav_add_comment_food)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onOrderSelected(event: OrderDetailClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_order_detail)
+            navController.navigate(R.id.nav_order_detail)
         }
     }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onComments(event: CommentsClick) {
         if (event.isSuccess) {
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.nav_comments)
+            navController.navigate(R.id.nav_comments)
+        }
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onCreateCustomerPizza(event: CreateCustomerPizzaClick) {
+        if (event.isSuccess) {
+            navController.navigate(R.id.nav_create_customer_pizza)
         }
     }
 }

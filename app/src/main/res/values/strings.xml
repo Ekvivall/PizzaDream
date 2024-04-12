@@ -104,6 +104,12 @@
     <string name="settings">Налаштування</string>
     <string name="btn_cancel_order">Відмінити замовлення</string>
     <string name="btn_update">Оновити</string>
+    <string name="btn_create_customer_pizza">Створити свою піцу за 20 грн</string>
+    <string name="create_customer_pizza">Створення своєї піци</string>
+    <string name="label_create_customer_pizza">Створіть власну піцу</string>
+    <string name="pizza_name">Назва піци</string>
+    <string name="btnPlaceOrder">Перейти до оплати</string>
+    <string name="tvPaymentInfo">Ви можете опублікувати свою піцу за 20 грн. Кожна покупка Вашої піци буде приносити Вам 5% від її вартості у вигляді бонусних балів.</string>
     <string-array name="sort_options">
         <item>популярні</item>
         <item>дешеві</item>

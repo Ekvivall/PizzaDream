@@ -12,10 +12,6 @@ class CartRepository(private val cartDAO: CartDAO): CartInterface {
     }
 
 
-    /*override fun sumPrice(uid: String): Single<Double> {
-        return cartDAO.sumPrice(uid)
-    }*/
-
     override fun getItemInCart(foodId: String, uid: String): Single<CartItemDB> {
         return cartDAO.getItemInCart(foodId, uid)
     }
