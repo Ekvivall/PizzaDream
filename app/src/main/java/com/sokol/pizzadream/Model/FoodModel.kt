@@ -14,4 +14,5 @@ class FoodModel {
     var userSelectedSize:SizeModel?=null
     var createdUserId: String? = null
     var createdUserName: String? = null
+    var transactionId: String?=null
 }

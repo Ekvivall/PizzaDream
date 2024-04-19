@@ -73,6 +73,7 @@ object Common {
     var orderSelected: OrderModel? = null
     var currentUser: UserModel? = null
     var totalPrice: String = "Всього: 0 грн."
+    val customerPizzas = "customer_pizzas"
     val PERMISSIONS_REQUEST_LOCATION = 100
     val MIN_TIME_BETWEEN_UPDATES: Long = 1000
     val MIN_DISTANCE_CHANGE_FOR_UPDATES: Float = 10f

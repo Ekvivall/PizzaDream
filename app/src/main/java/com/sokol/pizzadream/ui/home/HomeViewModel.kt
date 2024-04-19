@@ -48,7 +48,7 @@ class HomeViewModel : ViewModel(), ICategoryLoadCallback {
                 }
                 val allFoods = mutableListOf<FoodModel>()
                 for (category in tempList) {
-                    allFoods.addAll(category.foods!!.values.toList())
+                    allFoods.addAll(category.foods!!.values.filter { it.image != "" }.toList())
                 }
                 foodListMutableLiveData!!.value = allFoods.sortedWith(compareByDescending {
                     if (it.ratingCount == 0L) {

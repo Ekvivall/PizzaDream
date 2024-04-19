@@ -11,7 +11,8 @@ class FoodListViewModel : ViewModel() {
         if (foodListMutableLiveData == null) {
             foodListMutableLiveData = MutableLiveData()
         }
-        val foodList = Common.categorySelected!!.foods?.values?.toList() ?: emptyList()
+        val foodList = Common.categorySelected!!.foods?.values?.filter { it.image != "" }?.toList()
+            ?: emptyList()
         foodListMutableLiveData!!.value = foodList
         return foodListMutableLiveData!!
     }
