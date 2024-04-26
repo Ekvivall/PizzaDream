@@ -156,7 +156,7 @@ class CreateCustomerPizzaFragment : Fragment() {
                                     Toast.makeText(
                                         requireContext(),
                                         "Ваше замовлення оплачено! Наш адміністратор перевірить і додасть фото вашої піци.",
-                                        Toast.LENGTH_SHORT
+                                        Toast.LENGTH_LONG
                                     ).show()
                                     EventBus.getDefault().postSticky(MenuClick(true))
                                 }

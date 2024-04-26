@@ -5,13 +5,13 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.ConnectivityManager
 import android.os.Build
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.google.firebase.database.FirebaseDatabase
-import com.sokol.pizzadream.Database.Entities.CartItemDB
 import com.sokol.pizzadream.Model.AddonCategoryModel
 import com.sokol.pizzadream.Model.AddonModel
 import com.sokol.pizzadream.Model.CartItem
@@ -46,7 +46,7 @@ object Common {
             .append(characters[Random().nextInt(characters.length)]).toString()
     }
 
-    val IS_OPEN_ACTIVITY_ORDER: String ="IsOpenActivityOrder"
+    val IS_OPEN_ACTIVITY_ORDER: String = "IsOpenActivityOrder"
     val NOTIFICATION_CONTENT: String = "content"
     val NOTIFICATION_TITLE = "title"
     val TOKEN_REF: String = "Tokens"
@@ -113,11 +113,7 @@ object Common {
     }
 
     fun showNotification(
-        context: Context,
-        id: Int,
-        title: String?,
-        content: String?,
-        intent: Intent?
+        context: Context, id: Int, title: String?, content: String?, intent: Intent?
     ) {
         var pendingIntent: PendingIntent? = null
         if (intent != null) {
@@ -152,8 +148,50 @@ object Common {
         notificationManager.notify(id, notification)
     }
 
+    fun showNotification(
+        context: Context, id: Int, title: String?, content: String?, bitmap: Bitmap, intent: Intent?
+    ) {
+        var pendingIntent: PendingIntent? = null
+        if (intent != null) {
+            // Створення PendingIntent для запуску заданого Intent при натисканні на сповіщення
+            pendingIntent =
+                PendingIntent.getActivity(context, id, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+        val notificationChannelId = "sokol.pizzadream"
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Створення каналу сповіщень, якщо працюємо на Android 8.0 або вище
+            val notificationChannel = NotificationChannel(
+                notificationChannelId, "Pizza Dream", NotificationManager.IMPORTANCE_DEFAULT
+            )
+            notificationChannel.description = "Pizza Dream"
+            notificationChannel.enableLights(true)
+            notificationChannel.enableVibration(true)
+            notificationChannel.lightColor = Color.RED
+            notificationChannel.vibrationPattern = longArrayOf(0, 1000, 500, 1000)
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+        val builder = NotificationCompat.Builder(context, notificationChannelId)
+        builder.setContentTitle(title).setContentText(content).setAutoCancel(true)
+            .setSmallIcon(R.drawable.icon).setLargeIcon(bitmap)
+            .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bitmap))
+        if (pendingIntent != null) {
+            // Встановлення PendingIntent для сповіщення, яке виконується при натисканні на нього
+            builder.setContentIntent(pendingIntent)
+        }
+        val notification = builder.build()
+        // Відображення сповіщення
+        notificationManager.notify(id, notification)
+    }
+
     fun getNewOrderTopic(): String {
         return StringBuilder("/topics/new_order").toString()
     }
 
+    fun getNewsTopic(): String {
+        return StringBuilder("/topics/news").toString()
+    }
+
+    val IMAGE_URL: String = "IMAGE_URL"
 }

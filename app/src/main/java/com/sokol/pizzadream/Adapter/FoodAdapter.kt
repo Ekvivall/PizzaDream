@@ -52,6 +52,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
         var favImage: ImageView = view.findViewById(R.id.food_fav)
         var ratingBar: RatingBar = view.findViewById(R.id.ratingBar)
         var rating: TextView = view.findViewById(R.id.rating)
+        var creator: TextView = view.findViewById(R.id.food_creator)
         private var listener: IRecyclerItemClickListener? = null
         fun setListener(listener: IRecyclerItemClickListener) {
             this.listener = listener
@@ -75,23 +76,30 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        Glide.with(context).load(items[position].image).into(holder.foodImage)
-        holder.foodName.text = items[position].name
-        holder.foodDesc.text =
-            Html.fromHtml(items[position].description, Html.FROM_HTML_MODE_LEGACY)
+        val food = items[position]
+        Glide.with(context).load(food.image).into(holder.foodImage)
+        if (food.createdUserName.isNullOrEmpty()) {
+            holder.creator.visibility = View.GONE
+        } else {
+            holder.creator.visibility = View.VISIBLE
+            holder.creator.text =
+                StringBuilder("Створено користувачем: ").append(food.createdUserName)
+        }
+        holder.foodName.text = food.name
+        holder.foodDesc.text = Html.fromHtml(food.description, Html.FROM_HTML_MODE_LEGACY)
         holder.radioGroupSize.removeAllViews()
-        val ratingAverage = items[position].ratingSum.toFloat() / items[position].ratingCount
+        val ratingAverage = food.ratingSum.toFloat() / food.ratingCount
         holder.ratingBar.rating = ratingAverage
         holder.rating.text =
-            if (items[position].ratingCount == 0L) "0" else String.format("%.1f", ratingAverage)
-        for (sizeModel in items[position].size) {
+            if (food.ratingCount == 0L) "0" else String.format("%.1f", ratingAverage)
+        for (sizeModel in food.size) {
             val radioButton = RadioButton(context)
             radioButton.setOnCheckedChangeListener { compoundButton, b ->
                 if (b) {
-                    items[position].userSelectedSize = sizeModel
+                    food.userSelectedSize = sizeModel
                 }
-                var totalPrice = items[position].userSelectedSize?.price?.toDouble()
-                var displayPrice = Math.round(totalPrice!! * 100.0) / 100.0
+                val totalPrice = food.userSelectedSize?.price?.toDouble()
+                val displayPrice = Math.round(totalPrice!! * 100.0) / 100.0
                 holder.foodPrice.text =
                     StringBuilder("").append(Common.formatPrice(displayPrice)).toString()
             }
@@ -113,7 +121,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
         })
         // Перевірка, чи елемент вже є в обраному
         favoriteInterface.isFavorite(
-            items[position].id.toString(), Common.currentUser?.uid.toString()
+            food.id.toString(), Common.currentUser?.uid.toString()
         ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : SingleObserver<Int> {
                 override fun onSubscribe(d: Disposable) {
@@ -136,7 +144,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
         // Встановлення слухача кліків для іконки Favorite
         holder.favImage.setOnClickListener {
             favoriteInterface.isFavorite(
-                items[position].id.toString(), Common.currentUser?.uid.toString()
+                food.id.toString(), Common.currentUser?.uid.toString()
             ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : SingleObserver<Int> {
                     override fun onSubscribe(d: Disposable) {
@@ -151,13 +159,12 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                             // Видалення елемента з обраного
                             compositeDisposable.add(
                                 favoriteInterface.removeFromFavorites(
-                                    items[position].id.toString(),
-                                    Common.currentUser?.uid.toString()
+                                    food.id.toString(), Common.currentUser?.uid.toString()
                                 ).subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                         Toast.makeText(
                                             context,
-                                            items[position].name + " видалено з обраних",
+                                            food.name + " видалено з обраних",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                         holder.favImage.setImageResource(R.drawable.ic_favorite_border_24)
@@ -172,16 +179,16 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                         } else {
                             // Додавання елемента до обраного
                             val favorite = FavoriteItemDB()
-                            favorite.foodId = items[position].id.toString()
+                            favorite.foodId = food.id.toString()
                             favorite.uid = Common.currentUser?.uid.toString()
-                            favorite.categoryId = items[position].categoryId.toString()
+                            favorite.categoryId = food.categoryId.toString()
                             compositeDisposable.add(
                                 favoriteInterface.addToFavorites(favorite)
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                         Toast.makeText(
                                             context,
-                                            items[position].name + " додано до обраного",
+                                            food.name + " додано до обраного",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                         holder.favImage.setImageResource(R.drawable.ic_favorite_24)
@@ -203,12 +210,12 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
             val cartItem = CartItemDB()
             cartItem.uid = Common.currentUser?.uid.toString()
             cartItem.userEmail = Common.currentUser?.email
-            cartItem.foodId = items[position].id.toString()
+            cartItem.foodId = food.id.toString()
             cartItem.foodQuantity = 1
             //cartItem.foodExtraPrice = 0.0
             cartItem.foodAddon = ""
-            cartItem.foodSize = items[position].userSelectedSize?.name.toString()
-            cartItem.categoryId = items[position].categoryId.toString()
+            cartItem.foodSize = food.userSelectedSize?.name.toString()
+            cartItem.categoryId = food.categoryId.toString()
             cartInterface.getItemWithAllOptionsInCart(
                 cartItem.foodId, cartItem.uid, cartItem.foodSize, cartItem.foodAddon
             ).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
@@ -224,7 +231,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                                     .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                         Toast.makeText(
                                             context,
-                                            items[position].name + " додано до кошика",
+                                            food.name + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }, { t: Throwable? ->
@@ -265,7 +272,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                                     override fun onSuccess(t: Int) {
                                         Toast.makeText(
                                             context,
-                                            items[position].name + " додано до кошика",
+                                            food.name + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
@@ -278,7 +285,7 @@ class FoodAdapter(val items: List<FoodModel>, val context: Context) :
                                     .observeOn(AndroidSchedulers.mainThread()).subscribe({
                                         Toast.makeText(
                                             context,
-                                            items[position].name + " додано до кошика",
+                                            food.name + " додано до кошика",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }, { t: Throwable? ->

@@ -12,6 +12,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.messaging.FirebaseMessaging
 import com.sokol.pizzadream.Common.Common
 import com.sokol.pizzadream.Database.PizzaDatabase
 import com.sokol.pizzadream.Database.Repositories.CartInterface
@@ -65,6 +66,7 @@ class HomeActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
         checkOpenOrderFragment()
+        FirebaseMessaging.getInstance().subscribeToTopic(Common.getNewsTopic())
     }
     private fun checkOpenOrderFragment() {
         val  isOpenNewOrder = intent.extras!!.getBoolean(Common.IS_OPEN_ACTIVITY_ORDER, false)
