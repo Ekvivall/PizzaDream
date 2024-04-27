@@ -296,6 +296,7 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
                         else cartItem.foodAddon = ""
                         cartItem.foodSize = Common.foodSelected?.userSelectedSize?.name.toString()
                         cartItem.foodPrice = totalPrice
+                        cartItem.createdUserId = Common.foodSelected?.createdUserId
                         //Вставка
                         compositeDisposable.add(cart.insertOrReplaceAll(CartItemDB(cartItem))
                             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())

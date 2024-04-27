@@ -77,6 +77,7 @@ class FoodDetailFragment : Fragment() {
     private lateinit var favorite: FavoriteInterface
     private lateinit var rating: TextView
     private lateinit var btnCreateCustomerPizza: Button
+    private lateinit var creator: TextView
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -115,6 +116,12 @@ class FoodDetailFragment : Fragment() {
     private fun displayInfo(it: FoodModel) {
         //drawableList.add(it.image)
         //Glide.with(requireContext()).load(it.image).into(foodImg)
+        if (it.createdUserName.isNullOrEmpty()) {
+            creator.visibility = View.GONE
+        } else {
+            creator.visibility = View.VISIBLE
+            creator.text = StringBuilder("Створено користувачем: ").append(it.createdUserName)
+        }
         val foodImg = ImageView(requireContext())
         foodImg.id = View.generateViewId()
         foodImg.layoutParams = ViewGroup.LayoutParams(
@@ -148,6 +155,7 @@ class FoodDetailFragment : Fragment() {
     }
 
     private fun initView(root: View) {
+        creator = root.findViewById(R.id.food_creator)
         cart = CartRepository(PizzaDatabase.getInstance(requireContext()).getCartDAO())
         favorite = FavoriteRepository(PizzaDatabase.getInstance(requireContext()).getFavoriteDAO())
         categoryRecycler = root.findViewById(R.id.addon_category_recycler)

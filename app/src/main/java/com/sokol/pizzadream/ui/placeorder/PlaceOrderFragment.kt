@@ -18,6 +18,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.RadioButton
@@ -86,7 +87,6 @@ class PlaceOrderFragment : Fragment() {
     private lateinit var locationListener: LocationListener
     private lateinit var cart: CartInterface
     private var compositeDisposable: CompositeDisposable = CompositeDisposable()
-    private var totalPriceWithDelivery = ""
     lateinit var cloudFunctions: ICloudFunctions
     private var name = ""
     private var phone = ""
@@ -102,6 +102,11 @@ class PlaceOrderFragment : Fragment() {
     private val dateFormat = SimpleDateFormat("dd.MM.yyyy")
     private var calendar = Calendar.getInstance()
     private lateinit var ifcmService: IFCMService
+    private lateinit var cbUsePoints: CheckBox
+    private lateinit var availablePoints: TextView
+    private var startPrice: Double = 0.0
+    private var finalPrice: Double = 0.0
+    private var pointsToUse: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -173,13 +178,6 @@ class PlaceOrderFragment : Fragment() {
         calendar = addTime(rdiHome.isChecked)
         val formattedTime = checkTime(calendar)
         titleAsSoon.text = StringBuilder("Зверніть увагу! Доставка до ").append(formattedTime)
-        val regex = Regex("\\d+(?=,\\d{2})")
-        val price = Common.totalPrice.replace("\u00A0", "")
-        val finalPrice = regex.find(price)?.value
-        totalPriceWithDelivery =
-            StringBuilder("Всього: ").append(Common.formatPrice(finalPrice!!.toDouble() + 60))
-                .toString()
-        totalPrice.text = totalPriceWithDelivery
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             }
@@ -217,20 +215,35 @@ class PlaceOrderFragment : Fragment() {
         edtName.setText(Common.currentUser!!.firstName)
         edtEmail.setText(Common.currentUser!!.email)
         edtPhone.setText(Common.currentUser?.phone!!.replace(" ", ""))
+        val regex = Regex("\\d+(?=,\\d{2})")
+        val price = Common.totalPrice.replace("\u00A0", "")
+        startPrice = regex.find(price)?.value!!.toDouble()
+        cbUsePoints = root.findViewById(R.id.cb_use_points)
+        availablePoints = root.findViewById(R.id.tv_available_points)
+        if (Common.currentUser!!.points == 0) {
+            cbUsePoints.visibility = View.GONE
+            availablePoints.visibility = View.GONE
+        } else {
+            cbUsePoints.visibility = View.VISIBLE
+            availablePoints.visibility = View.VISIBLE
+        }
+        updateTotalPrice(isDelivery = true)
         rdiHome.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 edtAddress.visibility = View.VISIBLE
                 radioGroupAddresses.visibility = View.GONE
-                totalPrice.text = totalPriceWithDelivery
             } else {
                 edtAddress.visibility = View.GONE
                 radioGroupAddresses.visibility = View.VISIBLE
-                totalPrice.text = Common.totalPrice
             }
+            updateTotalPrice(isChecked, cbUsePoints.isChecked)
             updateTime(rdiAsSoon.isChecked)
         }
         rdiAsSoon.setOnCheckedChangeListener { _, isChecked ->
             updateTime(isChecked)
+        }
+        cbUsePoints.setOnCheckedChangeListener { _, isChecked ->
+            updateTotalPrice(rdiHome.isChecked, isChecked)
         }
         btnOrder.setOnClickListener {
             if (Common.isConnectedToInternet(requireContext())) {
@@ -346,6 +359,20 @@ class PlaceOrderFragment : Fragment() {
                 locationListener
             )
         }
+    }
+
+    private fun updateTotalPrice(isDelivery: Boolean = false, usePoints: Boolean = false) {
+        val priceWithDelivery = if (isDelivery) startPrice + 60 else startPrice
+        pointsToUse = minOf(Common.currentUser!!.points, (priceWithDelivery - 1).toInt())
+        finalPrice = if (usePoints) {
+            // Використання балів
+            priceWithDelivery - pointsToUse
+        } else {
+            priceWithDelivery
+        }
+        availablePoints.text = StringBuilder(pointsToUse.toString()).append(" Балів")
+        totalPrice.text =
+            StringBuilder("Всього: ").append(Common.formatPrice(finalPrice)).toString()
     }
 
     private fun checkTime(calendar: Calendar): String {
@@ -466,10 +493,7 @@ class PlaceOrderFragment : Fragment() {
                                         order.cartItems = tempList
                                         order.isDeliveryAddress = rdiHome.isChecked
                                         order.status = Common.STATUSES[0]
-                                        val price =
-                                            if (cartItems.isNotEmpty()) tempList.sumOf { x -> x.foodQuantity * x.foodPrice } else 0.0
-                                        order.totalPrice =
-                                            if (rdiHome.isChecked) price + 60 else price
+                                        order.totalPrice = finalPrice
                                         order.transactionId = "Оплата при отриманні"
                                         order.orderedTime = Calendar.getInstance().timeInMillis
                                         if (rdiForTime.isChecked) {
@@ -511,6 +535,11 @@ class PlaceOrderFragment : Fragment() {
             }.addOnCompleteListener { task ->
                 //Очищення кошика
                 if (task.isSuccessful) {
+                    // Списання балів, якщо виділений чекбокс
+                    if (cbUsePoints.isChecked) {
+                        Common.currentUser!!.points = Common.currentUser!!.points - pointsToUse
+                        updateUserPoints(Common.currentUser!!.uid!!, Common.currentUser!!.points)
+                    }
                     cart.cleanCart(Common.currentUser!!.uid!!).subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(object : SingleObserver<Int> {
@@ -550,7 +579,13 @@ class PlaceOrderFragment : Fragment() {
             }
 
     }
-
+    private fun updateUserPoints(userId: String, points: Int) {
+        FirebaseDatabase.getInstance()
+            .getReference(Common.USER_REFERENCE)
+            .child(userId)
+            .child("points")
+            .setValue(points)
+    }
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_BRAINTREE_CODE && resultCode == Activity.RESULT_OK) {
@@ -575,11 +610,6 @@ class PlaceOrderFragment : Fragment() {
                                             tempList.add(cartItem)
                                             counter++
                                             if (counter == cartItems.size) {
-
-                                                val price =
-                                                    if (cartItems.isNotEmpty()) tempList.sumOf { x -> x.foodQuantity * x.foodPrice } else 0.0
-                                                val finalPrice =
-                                                    if (rdiHome.isChecked) price + 60 else price
                                                 val headers = HashMap<String, String>()
                                                 headers.put(
                                                     "Authorization",
@@ -672,6 +702,7 @@ class PlaceOrderFragment : Fragment() {
         cartItem.userEmail = item.userEmail
         cartItem.uid = item.uid
         cartItem.id = item.id
+        cartItem.createdUserId = model.createdUserId
         return cartItem
     }
 }
