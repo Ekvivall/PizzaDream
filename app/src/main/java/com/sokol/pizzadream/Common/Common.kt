@@ -47,6 +47,7 @@ object Common {
     }
 
     val IS_OPEN_ACTIVITY_ORDER: String = "IsOpenActivityOrder"
+    val IS_OPEN_ACTIVITY_NEWS: String = "IsOpenActivityNews"
     val NOTIFICATION_CONTENT: String = "content"
     val NOTIFICATION_TITLE = "title"
     val TOKEN_REF: String = "Tokens"

@@ -127,11 +127,15 @@ class MainActivity : AppCompatActivity() {
                                                                     this@MainActivity, HomeActivity::class.java
                                                                 )
                                                                 var isOpenNewOrder = false
+                                                                var isOpenNews = false
                                                                 if (intent.extras != null) {
                                                                     isOpenNewOrder =
                                                                         intent.extras!!.getBoolean(Common.IS_OPEN_ACTIVITY_ORDER, false)
+                                                                    isOpenNews =
+                                                                        intent.extras!!.getBoolean(Common.IS_OPEN_ACTIVITY_NEWS, false)
                                                                 }
                                                                 myIntent.putExtra(Common.IS_OPEN_ACTIVITY_ORDER, isOpenNewOrder)
+                                                                myIntent.putExtra(Common.IS_OPEN_ACTIVITY_NEWS, isOpenNews)
                                                                 startActivity(myIntent)
                                                                 finish()
                                                             }

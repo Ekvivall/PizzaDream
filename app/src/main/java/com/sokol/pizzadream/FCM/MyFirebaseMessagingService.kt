@@ -32,6 +32,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 intent
             )
         } else if (dataRemoteMessage[Common.IMAGE_URL] != null) {
+            val intent = Intent(this, SplashScreenActivity::class.java)
+            intent.putExtra(Common.IS_OPEN_ACTIVITY_NEWS, true)
             Glide.with(this).asBitmap().load(dataRemoteMessage[Common.IMAGE_URL])
                 .into(object : CustomTarget<Bitmap>() {
                     override fun onResourceReady(
@@ -43,7 +45,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                             dataRemoteMessage[Common.NOTIFICATION_TITLE],
                             dataRemoteMessage[Common.NOTIFICATION_CONTENT],
                             resource,
-                            null
+                            intent
                         )
                     }
 

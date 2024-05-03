@@ -66,38 +66,49 @@ class HomeActivity : AppCompatActivity() {
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
         checkOpenOrderFragment()
+        checkOpenNewsFragment()
         FirebaseMessaging.getInstance().subscribeToTopic(Common.getNewsTopic())
     }
+
     private fun checkOpenOrderFragment() {
-        val  isOpenNewOrder = intent.extras!!.getBoolean(Common.IS_OPEN_ACTIVITY_ORDER, false)
-        if(isOpenNewOrder){
-            navController.popBackStack();
+        val isOpenNewOrder = intent.extras!!.getBoolean(Common.IS_OPEN_ACTIVITY_ORDER, false)
+        if (isOpenNewOrder) {
+            navController.popBackStack()
             navController.navigate(R.id.nav_view_orders)
         }
     }
-     private fun signOut() {
-         val builder = androidx.appcompat.app.AlertDialog.Builder(this, R.style.CustomAlertDialog)
-         builder.setTitle("Вихід")
-             .setMessage("Ви дійсно хочете вийти?")
-             .setNegativeButton("Відміна") { dialogInterface, _ -> dialogInterface.dismiss() }
-             .setPositiveButton("Так") { dialogInterface, _ ->
-                 Common.foodSelected = null
-                 Common.categorySelected = null
-                 Common.addonCategorySelected = null
-                 Common.currentUser = null
-                 FirebaseAuth.getInstance().signOut()
-                 val intent = Intent(this@HomeActivity, MainActivity::class.java)
-                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                 startActivity(intent)
-                 finish()
-             }
-         val dialog = builder.create()
-         dialog.show()
-         val positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
-         positiveButton.setTextColor(ContextCompat.getColor(this, R.color.red))
-         val negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
-         negativeButton.setTextColor(ContextCompat.getColor(this, R.color.black))
-     }
+
+    private fun checkOpenNewsFragment() {
+        val isOpenNews = intent.extras!!.getBoolean(Common.IS_OPEN_ACTIVITY_NEWS, false)
+        if (isOpenNews) {
+            navController.popBackStack()
+            navController.navigate(R.id.nav_news)
+        }
+    }
+
+    private fun signOut() {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this, R.style.CustomAlertDialog)
+        builder.setTitle("Вихід").setMessage("Ви дійсно хочете вийти?")
+            .setNegativeButton("Відміна") { dialogInterface, _ -> dialogInterface.dismiss() }
+            .setPositiveButton("Так") { dialogInterface, _ ->
+                Common.foodSelected = null
+                Common.categorySelected = null
+                Common.addonCategorySelected = null
+                Common.currentUser = null
+                FirebaseAuth.getInstance().signOut()
+                val intent = Intent(this@HomeActivity, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                finish()
+            }
+        val dialog = builder.create()
+        dialog.show()
+        val positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+        positiveButton.setTextColor(ContextCompat.getColor(this, R.color.red))
+        val negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+        negativeButton.setTextColor(ContextCompat.getColor(this, R.color.black))
+    }
+
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         return navController.navigateUp() || super.onSupportNavigateUp()
@@ -134,90 +145,105 @@ class HomeActivity : AppCompatActivity() {
             navController.navigate(R.id.nav_home)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onPlaceOrder(event: PlaceOrderClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_place_order)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onEditProfile(event: EditProfileClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_edit_profile)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onProfile(event: ProfileClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_profile)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onLogOut(event: LogOutClick) {
         if (event.isSuccess) {
             signOut()
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onNews(event: NewsClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_news)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onNewsSelected(event: NewsItemClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_news_detail)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onFavorites(event: FavoritesClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_favorites)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onVacancies(event: VacanciesClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_vacancies)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onVacancySelected(event: VacancyItemClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_vacancy_detail)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onReviewPizzeria(event: ReviewPizzeriaClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_add_review_pizzeria)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onViewOrders(event: ViewOrdersClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_view_orders)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onAddComment(event: ViewAddCommentClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_add_comment_food)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onOrderSelected(event: OrderDetailClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_order_detail)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onComments(event: CommentsClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_comments)
         }
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onCreateCustomerPizza(event: CreateCustomerPizzaClick) {
         if (event.isSuccess) {
