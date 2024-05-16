@@ -3,8 +3,11 @@ package com.sokol.pizzadream
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.marginBottom
+import androidx.fragment.app.FragmentContainerView
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -27,6 +30,7 @@ import com.sokol.pizzadream.EventBus.LogOutClick
 import com.sokol.pizzadream.EventBus.MenuClick
 import com.sokol.pizzadream.EventBus.NewsClick
 import com.sokol.pizzadream.EventBus.NewsItemClick
+import com.sokol.pizzadream.EventBus.NotificationClick
 import com.sokol.pizzadream.EventBus.OrderDetailClick
 import com.sokol.pizzadream.EventBus.PlaceOrderClick
 import com.sokol.pizzadream.EventBus.ProfileClick
@@ -65,6 +69,11 @@ class HomeActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        // Встановлення listener на зміну місця призначення
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            val isMenuDestination = appBarConfiguration.topLevelDestinations.contains(destination.id)
+            navView.visibility = if (isMenuDestination) View.VISIBLE else View.GONE
+        }
         checkOpenOrderFragment()
         checkOpenNewsFragment()
         FirebaseMessaging.getInstance().subscribeToTopic(Common.getNewsTopic())
@@ -248,6 +257,13 @@ class HomeActivity : AppCompatActivity() {
     fun onCreateCustomerPizza(event: CreateCustomerPizzaClick) {
         if (event.isSuccess) {
             navController.navigate(R.id.nav_create_customer_pizza)
+        }
+    }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onNotificationClick(event: NotificationClick) {
+        if (event.isSuccess) {
+            navController.navigate(R.id.nav_notification)
         }
     }
 }

@@ -9,4 +9,6 @@ class UserModel {
     var avatar:String = ""
     var role:String = ""
     var points:Int = 0
+    var receiveOrderUpdates: Boolean = true
+    var receiveNews: Boolean = true
 }

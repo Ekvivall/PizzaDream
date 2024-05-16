@@ -15,6 +15,7 @@ import com.sokol.pizzadream.EventBus.EditProfileClick
 import com.sokol.pizzadream.EventBus.FavoritesClick
 import com.sokol.pizzadream.EventBus.LogOutClick
 import com.sokol.pizzadream.EventBus.NewsClick
+import com.sokol.pizzadream.EventBus.NotificationClick
 import com.sokol.pizzadream.EventBus.ReviewPizzeriaClick
 import com.sokol.pizzadream.EventBus.VacanciesClick
 import com.sokol.pizzadream.EventBus.ViewOrdersClick
@@ -34,6 +35,7 @@ class ProfileFragment : Fragment() {
     private lateinit var vacancies: TextView
     private lateinit var leaveReview: TextView
     private lateinit var viewOrders: TextView
+    private lateinit var notification: TextView
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -122,6 +124,16 @@ class ProfileFragment : Fragment() {
         viewOrders.setOnClickListener {
             if (Common.isConnectedToInternet(requireContext())) {
                 EventBus.getDefault().postSticky(ViewOrdersClick(true))
+            } else {
+                Toast.makeText(
+                    requireContext(), "Будь ласка, перевірте своє з'єднання!", Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        notification = root.findViewById(R.id.notification)
+        notification.setOnClickListener {
+            if (Common.isConnectedToInternet(requireContext())) {
+                EventBus.getDefault().postSticky(NotificationClick(true))
             } else {
                 Toast.makeText(
                     requireContext(), "Будь ласка, перевірте своє з'єднання!", Toast.LENGTH_SHORT

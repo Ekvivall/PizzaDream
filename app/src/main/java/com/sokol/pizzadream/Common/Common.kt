@@ -128,7 +128,7 @@ object Common {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Створення каналу сповіщень, якщо працюємо на Android 8.0 або вище
             val notificationChannel = NotificationChannel(
-                notificationChannelId, "Pizza Dream", NotificationManager.IMPORTANCE_DEFAULT
+                notificationChannelId, "Pizza Dream", NotificationManager.IMPORTANCE_HIGH
             )
             notificationChannel.description = "Pizza Dream"
             notificationChannel.enableLights(true)
@@ -139,7 +139,7 @@ object Common {
         }
         val builder = NotificationCompat.Builder(context, notificationChannelId)
         builder.setContentTitle(title).setContentText(content).setAutoCancel(true)
-            .setSmallIcon(R.drawable.icon)
+            .setSmallIcon(R.drawable.ic_local_pizza_24)
         if (pendingIntent != null) {
             // Встановлення PendingIntent для сповіщення, яке виконується при натисканні на нього
             builder.setContentIntent(pendingIntent)
@@ -164,7 +164,7 @@ object Common {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             // Створення каналу сповіщень, якщо працюємо на Android 8.0 або вище
             val notificationChannel = NotificationChannel(
-                notificationChannelId, "Pizza Dream", NotificationManager.IMPORTANCE_DEFAULT
+                notificationChannelId, "Pizza Dream", NotificationManager.IMPORTANCE_HIGH
             )
             notificationChannel.description = "Pizza Dream"
             notificationChannel.enableLights(true)
@@ -175,7 +175,7 @@ object Common {
         }
         val builder = NotificationCompat.Builder(context, notificationChannelId)
         builder.setContentTitle(title).setContentText(content).setAutoCancel(true)
-            .setSmallIcon(R.drawable.icon).setLargeIcon(bitmap)
+            .setSmallIcon(R.drawable.ic_local_pizza_24).setLargeIcon(bitmap)
             .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bitmap))
         if (pendingIntent != null) {
             // Встановлення PendingIntent для сповіщення, яке виконується при натисканні на нього

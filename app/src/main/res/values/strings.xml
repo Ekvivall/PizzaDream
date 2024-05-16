@@ -111,6 +111,11 @@
     <string name="btnPlaceOrder">Перейти до оплати</string>
     <string name="tvPaymentInfo">Ви можете опублікувати свою піцу за 20 грн. Кожна покупка Вашої піци буде приносити Вам 5% від її вартості у вигляді бонусних балів.</string>
     <string name="use_points">Використати бали</string>
+    <string name="notification">Сповіщення</string>
+    <string name="setting_up_notifications">Налаштування сповіщень</string>
+    <string name="notification_from_order">Отримувати сповіщення про замовлення</string>
+    <string name="notification_from_news">Отримувати сповіщення про новини</string>
+    <string name="save_settings">Зберегти налаштування</string>
     <string-array name="sort_options">
         <item>популярні</item>
         <item>дешеві</item>

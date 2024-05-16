@@ -22,38 +22,42 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         super.onMessageReceived(message)
         val dataRemoteMessage = message.data
         if (dataRemoteMessage[Common.NOTIFICATION_TITLE] == "Ваше замовлення оновлено") {
-            val intent = Intent(this, SplashScreenActivity::class.java)
-            intent.putExtra(Common.IS_OPEN_ACTIVITY_ORDER, true)
-            Common.showNotification(
-                this,
-                Random.nextInt(),
-                dataRemoteMessage[Common.NOTIFICATION_TITLE],
-                dataRemoteMessage[Common.NOTIFICATION_CONTENT],
-                intent
-            )
+            if (Common.currentUser?.receiveOrderUpdates == true) {
+                val intent = Intent(this, SplashScreenActivity::class.java)
+                intent.putExtra(Common.IS_OPEN_ACTIVITY_ORDER, true)
+                Common.showNotification(
+                    this,
+                    Random.nextInt(),
+                    dataRemoteMessage[Common.NOTIFICATION_TITLE],
+                    dataRemoteMessage[Common.NOTIFICATION_CONTENT],
+                    intent
+                )
+            }
         } else if (dataRemoteMessage[Common.IMAGE_URL] != null) {
-            val intent = Intent(this, SplashScreenActivity::class.java)
-            intent.putExtra(Common.IS_OPEN_ACTIVITY_NEWS, true)
-            Glide.with(this).asBitmap().load(dataRemoteMessage[Common.IMAGE_URL])
-                .into(object : CustomTarget<Bitmap>() {
-                    override fun onResourceReady(
-                        resource: Bitmap, transition: Transition<in Bitmap>?
-                    ) {
-                        Common.showNotification(
-                            this@MyFirebaseMessagingService,
-                            Random.nextInt(),
-                            dataRemoteMessage[Common.NOTIFICATION_TITLE],
-                            dataRemoteMessage[Common.NOTIFICATION_CONTENT],
-                            resource,
-                            intent
-                        )
-                    }
+            if (Common.currentUser?.receiveNews == true) {
+                val intent = Intent(this, SplashScreenActivity::class.java)
+                intent.putExtra(Common.IS_OPEN_ACTIVITY_NEWS, true)
+                Glide.with(this).asBitmap().load(dataRemoteMessage[Common.IMAGE_URL])
+                    .into(object : CustomTarget<Bitmap>() {
+                        override fun onResourceReady(
+                            resource: Bitmap, transition: Transition<in Bitmap>?
+                        ) {
+                            Common.showNotification(
+                                this@MyFirebaseMessagingService,
+                                Random.nextInt(),
+                                dataRemoteMessage[Common.NOTIFICATION_TITLE],
+                                dataRemoteMessage[Common.NOTIFICATION_CONTENT],
+                                resource,
+                                intent
+                            )
+                        }
 
-                    override fun onLoadCleared(placeholder: Drawable?) {
+                        override fun onLoadCleared(placeholder: Drawable?) {
 
-                    }
+                        }
 
-                })
+                    })
+            }
         } else {
             Common.showNotification(
                 this,
