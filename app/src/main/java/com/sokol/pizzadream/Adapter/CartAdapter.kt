@@ -166,8 +166,8 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
             }
         }
         holder.foodRemove.setOnClickListener {
-            notifyItemRemoved(position)
-            items = items.filterIndexed { index, _ -> index != position }
+            notifyItemRemoved(items.indexOf(cartItem))
+            items = items.filter { x -> x != cartItem }
             EventBus.getDefault().postSticky(RemoveItemsInCart(cartItem, items.isEmpty()))
         }
         holder.setListener(object : IRecyclerItemClickListener {

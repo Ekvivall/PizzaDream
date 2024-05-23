@@ -135,15 +135,14 @@
                 android:textColor="@color/black"
                 android:textSize="18sp" />
         </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/send"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:height="27dp"
+            android:backgroundTint="@color/red"
+            android:text="@string/send"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
     </LinearLayout>
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/send"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:height="27dp"
-        android:backgroundTint="@color/red"
-        android:text="@string/send"
-        android:textColor="@color/white"
-        android:textSize="20sp" />
 </RelativeLayout>
