@@ -79,6 +79,7 @@
                 android:background="@drawable/background_button_red_white"
                 android:text="@string/place_order"
                 android:padding="6dp"
+                android:enabled="false"
                 android:textColor="@color/black"
                 app:rippleColor="@color/light_grey"
                 android:textSize="19sp" />

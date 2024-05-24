@@ -61,6 +61,7 @@ class CartViewModel : ViewModel() {
                                     cartItem.uid = item.uid
                                     cartItem.id = item.id
                                     cartItem.createdUserId = model.createdUserId
+                                    cartItem.createdUserName = model.createdUserName
                                     tempList.add(cartItem)
                                     counter++
                                     if (counter == cartItems.size) {

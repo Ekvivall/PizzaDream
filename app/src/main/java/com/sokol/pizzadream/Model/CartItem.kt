@@ -25,4 +25,5 @@ class CartItem {
 
     var uid: String = ""
     var createdUserId: String? = null
+    var createdUserName: String? = null
 }

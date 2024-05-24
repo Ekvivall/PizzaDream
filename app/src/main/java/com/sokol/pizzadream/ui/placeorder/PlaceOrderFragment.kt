@@ -378,13 +378,10 @@ class PlaceOrderFragment : Fragment() {
     private fun checkTime(calendar: Calendar): String {
 
         val currentTime = calendar.get(Calendar.HOUR_OF_DAY)
-        if (currentTime in 10..19) {
-            calendar.set(Calendar.HOUR_OF_DAY, currentTime)
-            calendar.set(Calendar.MINUTE, 0)
-        } else if (currentTime < 10) {
+        if (currentTime < 10) {
             calendar.set(Calendar.HOUR_OF_DAY, 10)
             calendar.set(Calendar.MINUTE, 30)
-        } else {
+        } else if (currentTime > 19) {
             calendar.add(Calendar.DATE, 1)
             calendar.set(Calendar.HOUR_OF_DAY, 10)
             calendar.set(Calendar.MINUTE, 30)
@@ -579,13 +576,12 @@ class PlaceOrderFragment : Fragment() {
             }
 
     }
+
     private fun updateUserPoints(userId: String, points: Int) {
-        FirebaseDatabase.getInstance()
-            .getReference(Common.USER_REFERENCE)
-            .child(userId)
-            .child("points")
-            .setValue(points)
+        FirebaseDatabase.getInstance().getReference(Common.USER_REFERENCE).child(userId)
+            .child("points").setValue(points)
     }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_BRAINTREE_CODE && resultCode == Activity.RESULT_OK) {
@@ -703,6 +699,7 @@ class PlaceOrderFragment : Fragment() {
         cartItem.uid = item.uid
         cartItem.id = item.id
         cartItem.createdUserId = model.createdUserId
+        cartItem.createdUserName = model.createdUserName
         return cartItem
     }
 }

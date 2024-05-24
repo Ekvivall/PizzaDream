@@ -137,6 +137,9 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
                 }
             }
         }
+        else if (cartItem.createdUserName != null){
+            res = StringBuilder("Створено користувачем: ").append(cartItem.createdUserName).toString()
+        }
         holder.foodAddon.text = res
         if (cartItem.foodAddon == "") {
             holder.foodAddonTitle.visibility = View.GONE
@@ -297,6 +300,7 @@ class CartAdapter(var items: List<CartItem>, val context: Context) :
                         cartItem.foodSize = Common.foodSelected?.userSelectedSize?.name.toString()
                         cartItem.foodPrice = totalPrice
                         cartItem.createdUserId = Common.foodSelected?.createdUserId
+                        cartItem.createdUserName = Common.foodSelected?.createdUserName
                         //Вставка
                         compositeDisposable.add(cart.insertOrReplaceAll(CartItemDB(cartItem))
                             .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
