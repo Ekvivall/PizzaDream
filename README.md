@@ -24,13 +24,11 @@ The app allows users to browse the menu, customize pizzas, place orders, and tra
 * **Network:** Retrofit, Google Maps API
 * **Async:** Coroutines, LiveData
 
-## Setup & Installation
+## 📸 Screenshots
 
-Please note that this project uses specific Gradle versions and Firebase configurations corresponding to the development period (2024).
-To run this project:
-1.  Clone the repository.
-2.  Add your own `google-services.json` file to the `app/` directory (Firebase setup required).
-3.  Sync Gradle (you may need to update Gradle plugin versions for newer Android Studio).
+| Menu | Builder (Step 1) | Builder (Step 2) | Cart | Profile |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="screenshots/home.png" height="450"> | <img src="screenshots/constructor_1.png" height="450"> | <img src="screenshots/constructor_2.png" height="450"> | <img src="screenshots/cart.png" height="450"> | <img src="screenshots/profile.png" height="450"> |
 
 ## Author
 
