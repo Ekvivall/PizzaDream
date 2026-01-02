@@ -1,7 +1,6 @@
 # PizzaDream (Client App)
 
-An Android application for ordering pizza, developed as a **Bachelor's Thesis project (2024)**.
-The app allows users to browse the menu, customize pizzas, place orders, and track their status in real-time.
+A comprehensive e-commerce application for ordering pizza. Part of the PizzaDream Ecosystem (Client + Admin). The app allows users to browse the menu, customize pizzas, place orders, and track their status in real-time.
 
 > **Note:** This is an academic project designed to demonstrate skills in Native Android Development (Kotlin) and Clean Architecture principles.
 
